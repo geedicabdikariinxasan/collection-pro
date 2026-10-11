@@ -45,11 +45,11 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
       {mobileOpen && (
         <div 
           onClick={() => setMobileOpen(false)} 
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden print:hidden"
         />
       )}
 
-      <aside className={`fixed left-0 top-0 h-screen w-[250px] bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed left-0 top-0 h-screen w-[250px] bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 print:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex flex-col h-full overflow-y-auto custom-scrollbar relative justify-between">
           
           <div>
@@ -108,7 +108,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
 
 function Header({ setMobileOpen }) {
   return (
-    <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-4 md:px-6 backdrop-blur shadow-xs">
+    <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-4 md:px-6 backdrop-blur shadow-xs print:hidden">
       <div className="flex items-center gap-2.5 w-full max-w-[350px]">
         <button 
           onClick={() => setMobileOpen(true)}
@@ -163,7 +163,7 @@ function InvoiceDetails({ invoice, onClose, onMakePayment, onReceipt }) {
   if (!invoice) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-start justify-end bg-black/40 backdrop-blur-xs sm:bg-transparent sm:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-start justify-end bg-black/40 backdrop-blur-xs sm:bg-transparent sm:backdrop-blur-none print:hidden">
       <aside className="w-full sm:w-[330px] h-[85vh] sm:h-[calc(100vh-70px)] sm:top-[70px] bg-white rounded-t-2xl sm:rounded-none overflow-y-auto border-l border-gray-100 custom-scrollbar shadow-2xl flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 bg-pink-50/50 sticky top-0 bg-white z-10">
@@ -226,7 +226,7 @@ function InvoiceDetails({ invoice, onClose, onMakePayment, onReceipt }) {
 
             <div className="flex justify-between font-bold text-sm text-gray-900 border-t pt-2">
               <span>Total Amount</span>
-              <span className="text-pink-600">${invoice.totalAmount.toFixed(2)}</span>
+              <span className="text-pink-600">${invoice.totalAmount?.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -250,7 +250,7 @@ function InvoiceDetails({ invoice, onClose, onMakePayment, onReceipt }) {
 function PaymentModal({ invoice, onClose, onConfirm }) {
   if (!invoice) return null;
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs print:hidden">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-bold">Make Payment</h2>
@@ -259,7 +259,7 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
         <div className="mb-4 rounded-xl bg-pink-50 p-3 text-xs">
           <p className="text-gray-500">Invoice: <strong className="text-gray-800">{invoice.id}</strong></p>
           <p className="text-gray-500 mt-1">Customer: <strong className="text-gray-800">{invoice.customerName}</strong></p>
-          <p className="mt-2 text-xl font-bold text-pink-600">${invoice.totalAmount.toFixed(2)}</p>
+          <p className="mt-2 text-xl font-bold text-pink-600">${invoice.totalAmount?.toFixed(2)}</p>
         </div>
         <button 
           onClick={() => onConfirm(invoice)} 
@@ -301,10 +301,10 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/70 p-2 sm:p-4 backdrop-blur-xs overflow-y-auto print:bg-white print:p-0 print:block">
+    <div className="fixed inset-0 z-[200] flex items-start justify-center bg-black/70 p-2 sm:p-4 backdrop-blur-xs overflow-y-auto print:static print:bg-white print:p-0 print:block">
       <div className="w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl border border-gray-300 relative text-gray-800 my-2 sm:my-4 print:shadow-none print:border-none print:w-full print:max-w-none print:m-0 print:p-0">
         
-        {/* Rasiidka Sare ku Dheggan */}
+        {/* WARQADDA RASIIDKA OO QURUX BADAN */}
         <div id="printable-receipt" className="space-y-4 bg-white p-0 m-0">
           <div className="flex justify-between items-start border-b-2 border-gray-900 pb-3 pt-0 mt-0">
             <div className="flex items-center gap-3">
@@ -312,7 +312,7 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
                 👗
               </div>
               <div>
-                <h2 className="font-serif text-lg font-extrabold tracking-wide">COLLECTION PRO</h2>
+                <h2 className="font-serif text-lg font-extrabold tracking-wide text-gray-900">COLLECTION PRO</h2>
                 <p className="text-[8px] tracking-[1.5px] text-gray-500 uppercase font-semibold">WOMEN'S FASHION & CLOTHING</p>
               </div>
             </div>
@@ -363,7 +363,7 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
             </table>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 pt-4 text-center text-xs">
+          <div className="grid grid-cols-2 gap-8 pt-6 text-center text-xs">
             <div>
               <div className="border-t border-gray-400 pt-1 w-32 mx-auto"></div>
               <p className="text-gray-500 font-semibold mt-0.5">Customer Signature</p>
@@ -375,6 +375,7 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
           </div>
         </div>
 
+        {/* BADHANNADA OON LA PRINT-GARAYNAYN */}
         <div className="mt-6 flex flex-wrap gap-2 print:hidden">
           <button onClick={handlePrint} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
             <Printer size={15} /> Print
@@ -415,14 +416,14 @@ export default function Invoice() {
     setInvoices(formattedInvoices);
   };
 
-  // 1. Marka "Payment Paid Successfully!" la riixo, Rasiidka ayaa toos u soo baxaya xogtana lagu wareejinayaa
+  // 1. Marka Payment Success la riixo, Rasiidku si toos ah ayuu u soo baxayaa
   const confirmPayment = (invoiceToPay) => {
     const updatedInvoice = { ...invoiceToPay, status: "Paid" };
     setPaymentInvoice(null);
     setReceiptInvoice(updatedInvoice);
   };
 
-  // 2. Marka Rasiidka Print, Download ama Close lagu dhufto kaliya ayaa xogtaas laga saarayaa localStorage
+  // 2. Marka rasiidka laga baxayo (Print, Download, ama Close), xogta waa la tirtirayaa
   const clearInvoiceAfterReceipt = () => {
     if (receiptInvoice && receiptInvoice.originalIndex !== undefined) {
       const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
@@ -452,10 +453,10 @@ export default function Invoice() {
     <div className="h-screen w-screen overflow-hidden bg-[#fffafd] flex">
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-      <div className="flex-1 flex flex-col h-screen overflow-hidden lg:ml-[250px]">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden lg:ml-[250px] print:ml-0 print:h-auto print:overflow-visible">
         <Header setMobileOpen={setMobileOpen} />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar">
+        <main className={`flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar ${receiptInvoice ? "print:hidden" : ""}`}>
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-pink-600 text-white shadow-md">
               <FileText size={22} />
@@ -511,7 +512,7 @@ export default function Invoice() {
                             <p className="text-[10px] text-gray-400">{invoice.customerPhone}</p>
                           </td>
                           <td className="px-4 py-2.5 font-semibold text-pink-600">#{invoice.orderId}</td>
-                          <td className="px-4 py-2.5 font-bold text-pink-600">${invoice.totalAmount.toFixed(2)}</td>
+                          <td className="px-4 py-2.5 font-bold text-pink-600">${invoice.totalAmount?.toFixed(2)}</td>
                           <td className="px-4 py-2.5"><Badge type={getStatusType(invoice.status)}>{invoice.status}</Badge></td>
                           <td className="px-4 py-2.5 text-right">
                             <button
@@ -562,7 +563,7 @@ function SummaryCard({ title, amount, icon }) {
     <div className="flex items-center justify-between rounded-xl border border-pink-100 bg-white p-4 shadow-xs">
       <div>
         <p className="text-xs text-gray-500">{title}</p>
-        <p className="mt-1 text-xl font-bold text-gray-900">${amount.toFixed(2)}</p>
+        <p className="mt-1 text-xl font-bold text-gray-900">${amount?.toFixed(2)}</p>
       </div>
       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-100 text-pink-600">
         {icon}
