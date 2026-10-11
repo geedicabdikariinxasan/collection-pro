@@ -45,11 +45,11 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
       {mobileOpen && (
         <div 
           onClick={() => setMobileOpen(false)} 
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden print:hidden"
         />
       )}
 
-      <aside className={`fixed left-0 top-0 h-screen w-[250px] bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed left-0 top-0 h-screen w-[250px] bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 print:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex flex-col h-full overflow-y-auto custom-scrollbar relative justify-between">
           <div>
             <button 
@@ -107,7 +107,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
 
 function Header({ setMobileOpen }) {
   return (
-    <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-4 md:px-6 backdrop-blur shadow-xs">
+    <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-4 md:px-6 backdrop-blur shadow-xs print:hidden">
       <div className="flex items-center gap-2.5 w-full max-w-[350px]">
         <button 
           onClick={() => setMobileOpen(true)}
@@ -162,7 +162,7 @@ function InvoiceDetails({ invoice, onClose, onMakePayment, onReceipt }) {
   if (!invoice) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-start justify-end bg-black/40 backdrop-blur-xs sm:bg-transparent sm:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-start justify-end bg-black/40 backdrop-blur-xs sm:bg-transparent sm:backdrop-blur-none print:hidden">
       <aside className="w-full sm:w-[330px] h-[85vh] sm:h-[calc(100vh-70px)] sm:top-[70px] bg-white rounded-t-2xl sm:rounded-none overflow-y-auto border-l border-gray-100 custom-scrollbar shadow-2xl flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 bg-pink-50/50 sticky top-0 bg-white z-10">
@@ -249,7 +249,7 @@ function InvoiceDetails({ invoice, onClose, onMakePayment, onReceipt }) {
 function PaymentModal({ invoice, onClose, onConfirm }) {
   if (!invoice) return null;
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs print:hidden">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-bold">Make Payment</h2>
@@ -274,36 +274,38 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
 function ReceiptModal({ invoice, onCloseAndClear }) {
   if (!invoice) return null;
 
-  // Function cusub oo furaysa daaqad go'an oo rasiidka oo kaliya leh marka Print la riixo
-  const handleMobilePrint = () => {
+  // Habka mobile iyo laptop-ba u daabacaya warqadda rasiidka oo keliya iyadoon khalkhal la gelin
+  const handleUniversalPrint = () => {
     const printContent = document.getElementById("printable-receipt-card").innerHTML;
-    const printWindow = window.open("", "", "width=800,height=900");
+    const printWindow = window.open("", "_blank", "width=800,height=900");
     
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Receipt - ${invoice.id}</title>
-          <script src="https://cdn.tailwindcss.com"></script>
-          <style>
-            body { font-family: sans-serif; padding: 20px; background: white; }
-            .no-print-area { display: none !important; }
-          </style>
-        </head>
-        <body>
-          <div style="max-width: 600px; margin: 0 auto;">
-            ${printContent}
-          </div>
-          <script>
-            setTimeout(() => {
-              window.print();
-              window.close();
-            }, 500);
-          </script>
-        </body>
-      </html>
-    `);
-    
-    printWindow.document.close();
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Receipt - ${invoice.id}</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+              body { font-family: ui-sans-serif, system-ui, sans-serif; padding: 20px; background: white; color: #111827; }
+              .no-print-area { display: none !important; }
+            </style>
+          </head>
+          <body>
+            <div style="max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb;">
+              ${printContent}
+            </div>
+            <script>
+              setTimeout(() => {
+                window.print();
+                window.close();
+              }, 500);
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
     onCloseAndClear();
   };
 
@@ -322,7 +324,7 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
         onCloseAndClear();
       });
     } else {
-      handleMobilePrint();
+      handleUniversalPrint();
     }
   };
 
@@ -401,7 +403,7 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
         </div>
 
         <div className="mt-6 flex flex-wrap gap-2 no-print-area">
-          <button onClick={handleMobilePrint} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
+          <button onClick={handleUniversalPrint} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
             <Printer size={15} /> Print
           </button>
           <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 font-bold text-white shadow-md hover:bg-green-700 cursor-pointer text-xs">
