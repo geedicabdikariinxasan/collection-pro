@@ -30,10 +30,11 @@ import {
   Wallet,
   Truck,
   LogOut,
+  Menu,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-function Sidebar() {
+function Sidebar({ mobileOpen, setMobileOpen }) {
   const navigate = useNavigate();
   const links = [
     { label: "Dashboard", icon: LayoutDashboard, path: "/admin-dashboard" },
@@ -49,65 +50,96 @@ function Sidebar() {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[250px] overflow-hidden bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-40 flex flex-col justify-between shadow-xl">
-      <div className="flex flex-col h-full overflow-hidden">
-        <div className="border-b border-white/10 px-5 py-4 text-center flex flex-col items-center justify-center">
-          <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-2xl shadow-md">👗</div>
-          <h1 className="font-serif text-lg font-bold tracking-wider whitespace-nowrap">COLLECTION PRO</h1>
-          <p className="text-[7px] tracking-[2px] text-pink-100 uppercase">WOMEN'S FASHION & CLOTHING</p>
-        </div>
+    <>
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div 
+          onClick={() => setMobileOpen(false)} 
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+        />
+      )}
 
-        <nav className="flex-1 px-3 py-2 space-y-1 overflow-hidden">
-          <p className="mb-1 px-3 text-[8px] font-semibold uppercase tracking-[2px] text-pink-200">Main Menu</p>
-          {links.map(({ label, icon: Icon, path, active }) => (
-            <button
-              key={label}
-              onClick={() => {
-                if (path !== "#") navigate(path);
-                else alert(`Bogga "${label}" dhawaan ayaa la dhisayaa!`);
-              }}
-              className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium transition cursor-pointer ${
-                active ? "bg-pink-500 font-semibold shadow-md text-white" : "hover:bg-white/10 text-pink-50"
-              }`}
-            >
-              <Icon size={16} />
-              <span>{label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="px-4 py-2.5 text-center border-t border-white/10 bg-black/10 flex flex-col gap-1.5">
-          <button onClick={() => navigate("/")} className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 py-1.5 text-xs font-semibold text-white hover:bg-red-600 transition cursor-pointer">
-            <LogOut size={15} />
-            <span>Logout</span>
+      {/* Sidebar Responsive */}
+      <aside className={`fixed left-0 top-0 h-screen w-[250px] overflow-hidden bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="flex flex-col h-full overflow-hidden relative">
+          
+          {/* Close Button for Mobile */}
+          <button 
+            onClick={() => setMobileOpen(false)}
+            className="absolute right-3 top-3 text-white lg:hidden p-1 cursor-pointer"
+          >
+            <X size={20} />
           </button>
-          <div>
-            <p className="font-serif text-[10px] italic text-pink-100">Style • Elegance • You</p>
-            <p className="text-[7px] text-pink-300">© 2026 COLLECTION PRO</p>
+
+          <div className="border-b border-white/10 px-5 py-4 text-center flex flex-col items-center justify-center">
+            <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-2xl shadow-md">👗</div>
+            <h1 className="font-serif text-lg font-bold tracking-wider whitespace-nowrap">COLLECTION PRO</h1>
+            <p className="text-[7px] tracking-[2px] text-pink-100 uppercase">WOMEN'S FASHION & CLOTHING</p>
+          </div>
+
+          <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar">
+            <p className="mb-1 px-3 text-[8px] font-semibold uppercase tracking-[2px] text-pink-200">Main Menu</p>
+            {links.map(({ label, icon: Icon, path, active }) => (
+              <button
+                key={label}
+                onClick={() => {
+                  setMobileOpen(false); // Xir menu-ga marka la gujiyo
+                  if (path !== "#") navigate(path);
+                  else alert(`Bogga "${label}" dhawaan ayaa la dhisayaa!`);
+                }}
+                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium transition cursor-pointer ${
+                  active ? "bg-pink-500 font-semibold shadow-md text-white" : "hover:bg-white/10 text-pink-50"
+                }`}
+              >
+                <Icon size={16} />
+                <span>{label}</span>
+              </button>
+            ))}
+          </nav>
+
+          <div className="px-4 py-2.5 text-center border-t border-white/10 bg-black/10 flex flex-col gap-1.5 mt-auto">
+            <button onClick={() => navigate("/")} className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 py-1.5 text-xs font-semibold text-white hover:bg-red-600 transition cursor-pointer">
+              <LogOut size={15} />
+              <span>Logout</span>
+            </button>
+            <div>
+              <p className="font-serif text-[10px] italic text-pink-100">Style • Elegance • You</p>
+              <p className="text-[7px] text-pink-300">© 2026 COLLECTION PRO</p>
+            </div>
           </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }
 
-function Header() {
+function Header({ setMobileOpen }) {
   return (
-    <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-6 backdrop-blur shadow-xs">
-      <div className="relative w-full max-w-[350px]">
-        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input placeholder="Search invoices..." className="w-full rounded-xl bg-gray-50 py-2 pl-10 pr-3 text-xs outline-none" />
+    <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-4 md:px-6 backdrop-blur shadow-xs">
+      <div className="flex items-center gap-2.5 w-full max-w-[350px]">
+        {/* Mobile Hamburger Button (3-da xariiqood) */}
+        <button 
+          onClick={() => setMobileOpen(true)}
+          className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-xl cursor-pointer"
+        >
+          <Menu size={22} />
+        </button>
+
+        <div className="relative w-full">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input placeholder="Search invoices..." className="w-full rounded-xl bg-gray-50 py-2 pl-10 pr-3 text-xs outline-none" />
+        </div>
       </div>
 
-      <div className="ml-4 flex items-center gap-3">
-        <button className="relative rounded-full p-2 text-gray-500 hover:bg-pink-50 cursor-pointer">
+      <div className="ml-2 flex items-center gap-3">
+        <button className="relative rounded-full p-2 text-gray-500 hover:bg-pink-50 cursor-pointer hidden sm:block">
           <Bell size={18} />
           <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-pink-600 text-[9px] font-bold text-white">3</span>
         </button>
-        <div className="h-6 w-px bg-gray-200" />
-        <div className="flex items-center gap-2.5">
+        <div className="h-6 w-px bg-gray-200 hidden sm:block" />
+        <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-100 text-pink-600 font-bold text-xs">A</div>
-          <div>
+          <div className="hidden md:block text-left">
             <p className="text-xs font-bold text-gray-800">Admin</p>
             <p className="text-[9px] text-gray-400">Administrator</p>
           </div>
@@ -139,7 +171,7 @@ function InvoiceDetails({ invoice, onClose, onMakePayment, onReceipt }) {
   if (!invoice) return null;
 
   return (
-    <aside className="fixed right-0 top-[70px] z-20 h-[calc(100vh-70px)] w-[330px] overflow-y-auto border-l border-gray-100 bg-white custom-scrollbar shadow-2xl flex flex-col justify-between">
+    <aside className="fixed right-0 top-[70px] z-20 h-[calc(100vh-70px)] w-full sm:w-[330px] overflow-y-auto border-l border-gray-100 bg-white custom-scrollbar shadow-2xl flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 bg-pink-50/50">
           <h2 className="text-sm font-bold text-gray-900">Invoice Details</h2>
@@ -354,6 +386,7 @@ function ReceiptModal({ invoice, onClose }) {
 }
 
 export default function Invoice() {
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [invoices, setInvoices] = useState([]);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [search, setSearch] = useState("");
@@ -404,12 +437,13 @@ export default function Invoice() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#fffafd] flex">
-      <Sidebar />
+      <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-      <div className="ml-[250px] flex-1 flex flex-col h-screen overflow-hidden">
-        <Header />
+      {/* lg:ml-[250px] waxay u dhigaysaa in desktop-ka uu boos banneeyo laakiin mobile-ka uu ka bilaabmo 0 */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden lg:ml-[250px]">
+        <Header setMobileOpen={setMobileOpen} />
 
-        <main className="flex-1 overflow-y-auto p-5 custom-scrollbar">
+        <main className="flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-pink-600 text-white shadow-md">
               <FileText size={22} />
