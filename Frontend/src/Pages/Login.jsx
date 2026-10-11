@@ -3,6 +3,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// 1. Qeex API URL-ka (Vercel Environment Variable ama Render Live URL)
+const API_URL = import.meta.env?.VITE_API_URL || process.env.NEXT_PUBLIC_API_URL || "https://collection-pro-backend.onrender.com";
+
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -18,8 +21,8 @@ export default function Login() {
     setMessage("");
 
     try {
-      // U dir xogta Login-ka Backend-ka
-      const response = await axios.post("http://localhost:5000/api/auth/login", {
+      // 2. Halkan waxaa la isticmaalay API_URL oo loo beddelay Render Backend
+      const response = await axios.post(`${API_URL}/api/auth/login`, {
         email,
         password,
         role,
@@ -28,7 +31,7 @@ export default function Login() {
       setIsError(false);
       setMessage(response.data.message + " 🎉 Waa la soo galay!");
 
-      // Keydi xogta user-ka localStorage (ikhtiyaari)
+      // Keydi xogta user-ka localStorage
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
       setTimeout(() => {
@@ -49,7 +52,7 @@ export default function Login() {
     <div
       className="h-screen w-screen bg-cover bg-center flex items-center justify-center p-3 overflow-hidden relative"
       style={{
-        backgroundImage: "url('/store-bg.jpeg')",
+        backgroundImage: "url('https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=2000&q=90')"
       }}
     >
       <div className="absolute inset-0 bg-black/10" />

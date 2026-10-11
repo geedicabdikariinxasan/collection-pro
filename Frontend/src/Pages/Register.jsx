@@ -3,6 +3,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// 1. Qeex API URL-ka (Vercel Environment Variable ama Render Live URL)
+const API_URL = import.meta.env?.VITE_API_URL || process.env.NEXT_PUBLIC_API_URL || "https://collection-pro-backend.onrender.com";
+
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
@@ -19,8 +22,8 @@ export default function Register() {
     setMessage("");
 
     try {
-      // U dir xogta Backend-ka
-      const response = await axios.post("http://localhost:5000/api/auth/register", {
+      // 2. Halkan waxaa la isticmaalay API_URL oo loo beddelay Render Backend
+      const response = await axios.post(`${API_URL}/api/auth/register`, {
         fullName,
         email,
         password,

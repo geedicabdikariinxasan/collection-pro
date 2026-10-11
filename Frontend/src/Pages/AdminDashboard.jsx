@@ -19,6 +19,9 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// 1. Qeex API URL-ka (Vercel Environment Variable ama Render Live URL)
+const API_URL = import.meta.env?.VITE_API_URL || process.env.NEXT_PUBLIC_API_URL || "https://collection-pro-backend.onrender.com";
+
 function Sidebar({ mobileOpen, setMobileOpen }) {
   const navigate = useNavigate();
 
@@ -188,8 +191,9 @@ export default function AdminDashboard() {
 
   const fetchLiveStats = async () => {
     try {
-      const prodRes = await axios.get("http://localhost:5000/api/products");
-      const custRes = await axios.get("http://localhost:5000/api/customers");
+      // 2. Halkan waxaa la isticmaalay API_URL
+      const prodRes = await axios.get(`${API_URL}/api/products`);
+      const custRes = await axios.get(`${API_URL}/api/customers`);
       const invoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
 
       setLiveStats({

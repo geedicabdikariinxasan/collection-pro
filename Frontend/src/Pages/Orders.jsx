@@ -29,6 +29,9 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// Qeex API URL-ka (Vercel Environment Variable ama Render Live URL)
+const API_URL = import.meta.env?.VITE_API_URL || process.env.NEXT_PUBLIC_API_URL || "https://collection-pro-backend.onrender.com";
+
 function Sidebar() {
   const navigate = useNavigate();
   const menu = [
@@ -138,10 +141,11 @@ export default function Orders() {
 
   const fetchData = async () => {
     try {
-      const prodRes = await axios.get("http://localhost:5000/api/products");
+      // Halkan waxaa la isticmaalay API_URL
+      const prodRes = await axios.get(`${API_URL}/api/products`);
       setStoreProducts(prodRes.data);
 
-      const custRes = await axios.get("http://localhost:5000/api/customers");
+      const custRes = await axios.get(`${API_URL}/api/customers`);
       setCustomers(custRes.data);
       if (custRes.data.length > 0 && !selectedCustomer) {
         setSelectedCustomer(custRes.data[0]);
@@ -181,7 +185,6 @@ export default function Orders() {
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-  // QODOBKA MUHIMKA AH: Halkan waxaa xogta loo dirayaa Invoices Page-ka si toos ah
   const handleSendPayment = () => {
     if (cartItems.length === 0) {
       alert("Fadlan ku dar wax badeecad ah Order-ka!");
@@ -207,7 +210,6 @@ export default function Orders() {
       items: cartItems
     };
 
-    // Ku kaydi localStorage si bogga Invoices uu uga dhex helo
     localStorage.setItem("storeInvoices", JSON.stringify([newInvoice, ...currentInvoices]));
 
     setInvoiceSent(true);
@@ -230,7 +232,6 @@ export default function Orders() {
 
         <main className="flex-1 overflow-y-auto p-5 custom-scrollbar">
           
-          {/* Page Heading */}
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-pink-600 text-white shadow-md">
@@ -242,7 +243,6 @@ export default function Orders() {
               </div>
             </div>
 
-            {/* Dooro Customer */}
             <div className="flex items-center gap-2 bg-white border border-gray-200 px-3 py-1.5 rounded-xl shadow-xs">
               <span className="text-xs font-bold text-gray-600">Customer:</span>
               <select
@@ -262,7 +262,6 @@ export default function Orders() {
             </div>
           </div>
 
-          {/* Filters Bar */}
           <div className="mb-4 rounded-xl border border-gray-100 bg-white p-3 shadow-xs">
             <div className="grid grid-cols-1 gap-2.5 md:grid-cols-4">
               <div className="relative">
@@ -305,10 +304,8 @@ export default function Orders() {
             </div>
           </div>
 
-          {/* Main Grid: Products Grid (Left) & Order Details (Right) */}
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
 
-            {/* Products Selection Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 content-start">
               {filteredProducts.length > 0 ? (
                 filteredProducts.map((prod) => (
@@ -350,7 +347,6 @@ export default function Orders() {
               )}
             </div>
 
-            {/* Order Details Panel */}
             <aside className="bg-white rounded-xl border border-gray-100 shadow-xs p-4 text-xs flex flex-col justify-between h-fit">
               <div>
                 <div className="flex items-center justify-between border-b pb-3 mb-3">
@@ -362,7 +358,6 @@ export default function Orders() {
                   Order #ORD-1001
                 </div>
 
-                {/* Xogta Customer-ka */}
                 {selectedCustomer ? (
                   <div className="mb-3 flex items-start gap-3 bg-pink-50/40 p-3 rounded-xl border border-pink-100">
                     <img 

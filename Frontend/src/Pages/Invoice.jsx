@@ -235,7 +235,7 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
           <p className="text-gray-500 mt-1">Customer: <strong className="text-gray-800">{invoice.customerName}</strong></p>
           <p className="mt-2 text-xl font-bold text-pink-600">${invoice.totalAmount.toFixed(2)}</p>
         </div>
-        <button onClick={() => onConfirm(invoice.id)} className="flex w-full items-center justify-center gap-2 rounded-xl bg-pink-600 py-2.5 font-bold text-white hover:bg-pink-700 cursor-pointer text-xs">
+        <button onClick={() => onConfirm(invoice.originalIndex)} className="flex w-full items-center justify-center gap-2 rounded-xl bg-pink-600 py-2.5 font-bold text-white hover:bg-pink-700 cursor-pointer text-xs">
           <CheckCircle size={16} /> Payment Paid Successfully! ✅
         </button>
       </div>
@@ -246,22 +246,20 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
 function ReceiptModal({ invoice, onClose }) {
   if (!invoice) return null;
 
-  // Qodobka: Download PDF dhab ah oo isticmaalaya html2pdf
   const handleDownloadPDF = () => {
     const element = document.getElementById("printable-receipt");
     const options = {
-      margin:       10,
-      filename:     `Receipt-${invoice.id}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
+      margin:      10,
+      filename:    `Receipt-${invoice.id}.pdf`,
+      image:       { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     
-    // Awoodda html2pdf ee la soo dejiyaa
     if (window.html2pdf) {
       window.html2pdf().from(element).set(options).save();
     } else {
-      window.print(); // Fallback haddii uusan shaqayn
+      window.print();
     }
   };
 
@@ -269,7 +267,6 @@ function ReceiptModal({ invoice, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs print:bg-white print:p-0">
       <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-2xl border border-gray-300 relative text-gray-800 print:shadow-none print:border-none print:w-full print:max-w-none">
         
-        {/* Printable Paper View */}
         <div id="printable-receipt" className="space-y-4 bg-white p-2">
           <div className="flex justify-between items-start border-b-2 border-gray-900 pb-4">
             <div className="flex items-center gap-3">
@@ -372,31 +369,21 @@ export default function Invoice() {
     
     const formattedInvoices = rawInvoices.map((inv, idx) => ({
       ...inv,
+      originalIndex: idx,
       id: `INV-${String(idx + 1).padStart(3, "0")}`
     }));
 
-    const unpaidInvoices = formattedInvoices.filter(inv => inv.status !== "Paid");
-    setInvoices(unpaidInvoices);
+    setInvoices(formattedInvoices);
   };
 
-  const confirmPayment = (invoiceId) => {
+  const confirmPayment = (originalIndex) => {
     const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
     
-    const updatedRaw = rawInvoices.map((inv, idx) => {
-      const generatedId = `INV-${String(idx + 1).padStart(3, "0")}`;
-      if (generatedId === invoiceId) {
-        return { ...inv, status: "Paid" };
-      }
-      return inv;
-    });
-
-    localStorage.setItem("storeInvoices", JSON.stringify(updatedRaw));
-    
-    const currentPaidInv = invoices.find(inv => inv.id === invoiceId);
-    if (currentPaidInv) {
-      setReceiptInvoice({ ...currentPaidInv, status: "Paid" });
+    if (rawInvoices[originalIndex]) {
+      rawInvoices[originalIndex].status = "Paid";
+      localStorage.setItem("storeInvoices", JSON.stringify(rawInvoices));
     }
-
+    
     loadInvoices();
     setPaymentInvoice(null);
     setSelectedInvoice(null);
@@ -412,7 +399,7 @@ export default function Invoice() {
   });
 
   const totalInvoiced = invoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
-  const totalPaid = 0;
+  const totalPaid = invoices.filter(inv => inv.status === "Paid").reduce((sum, inv) => sum + inv.totalAmount, 0);
   const totalUnpaid = invoices.filter(inv => inv.status !== "Paid").reduce((sum, inv) => sum + inv.totalAmount, 0);
 
   return (
@@ -494,7 +481,7 @@ export default function Invoice() {
                       <tr>
                         <td colSpan="7" className="py-14 text-center text-gray-400">
                           <FileText size={38} className="mx-auto mb-2 text-gray-300" />
-                          <p className="text-sm font-semibold">No unpaid invoices found</p>
+                          <p className="text-sm font-semibold">No invoices found</p>
                           <p className="text-xs text-gray-400 mt-0.5">Orders made in Orders page will show up here instantly.</p>
                         </td>
                       </tr>

@@ -22,6 +22,9 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// Qeex API URL-ka (Vercel Environment Variable ama Render Live URL)
+const API_URL = import.meta.env?.VITE_API_URL || process.env.NEXT_PUBLIC_API_URL || "https://collection-pro-backend.onrender.com";
+
 function Sidebar() {
   const navigate = useNavigate();
   const menu = [
@@ -272,7 +275,7 @@ export default function Products() {
 
   const fetchProducts = async () => {
     try {
-      let url = `http://localhost:5000/api/products?search=${search}`;
+      let url = `${API_URL}/api/products?search=${search}`;
       const res = await axios.get(url);
       let data = res.data;
       if (category !== "All Categories") {
@@ -287,9 +290,9 @@ export default function Products() {
   const handleSaveProduct = async (productData) => {
     try {
       if (editingProduct) {
-        await axios.put(`http://localhost:5000/api/products/${editingProduct._id}`, productData);
+        await axios.put(`${API_URL}/api/products/${editingProduct._id}`, productData);
       } else {
-        await axios.post("http://localhost:5000/api/products", productData);
+        await axios.post(`${API_URL}/api/products`, productData);
       }
       fetchProducts();
       setShowModal(false);
@@ -302,7 +305,7 @@ export default function Products() {
   const deleteProduct = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/products/${id}`);
+        await axios.delete(`${API_URL}/api/products/${id}`);
         fetchProducts();
       } catch (err) {
         console.error("Error deleting product:", err);

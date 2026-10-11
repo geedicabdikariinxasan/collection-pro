@@ -31,6 +31,9 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// Qeex API URL-ka (Vercel Environment Variable ama Render Live URL)
+const API_URL = import.meta.env?.VITE_API_URL || process.env.NEXT_PUBLIC_API_URL || "https://collection-pro-backend.onrender.com";
+
 function Sidebar() {
   const navigate = useNavigate();
   const menu = [
@@ -39,7 +42,7 @@ function Sidebar() {
     { name: "Customers", icon: Users, path: "/customers", active: true },
     { name: "Orders", icon: ShoppingCart, path: "/orders" },
     { name: "Sales", icon: BarChart3, path: "#" },
-    { name: "Invoices", icon: FileText, path: "/invoices" }, // <-- Halkan waa lagu xiray Invoices
+    { name: "Invoices", icon: FileText, path: "/invoices" },
     { name: "Inventory / Stock", icon: Boxes, path: "#" },
     { name: "Reports", icon: BarChart3, path: "#" },
     { name: "Users", icon: User, path: "#" },
@@ -64,7 +67,6 @@ function Sidebar() {
               <button
                 key={item.name}
                 onClick={() => {
-                  // Halkan ayuu Navigation-ku ka dhacayaa haddii path-gu sax yahay
                   if (item.path !== "#") {
                     navigate(item.path);
                   } else {
@@ -95,6 +97,7 @@ function Sidebar() {
     </aside>
   );
 }
+
 function Header() {
   return (
     <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-6 backdrop-blur shadow-xs">
@@ -120,7 +123,6 @@ function Header() {
   );
 }
 
-// Qodobka Cusub: Function lagu dhex calaamadiyo xarfaha la raadiyay midabka Cagaaran (Green Highlight)
 function HighlightText({ text, highlight }) {
   if (!highlight || !highlight.trim()) return text;
   const parts = text.split(new RegExp(`(${highlight})`, "gi"));
@@ -332,7 +334,8 @@ export default function Customers() {
 
   const fetchCustomers = async () => {
     try {
-      let url = `http://localhost:5000/api/customers?search=${search}&status=${statusFilter}`;
+      // Halkan waxaa la isticmaalay API_URL
+      let url = `${API_URL}/api/customers?search=${search}&status=${statusFilter}`;
       const res = await axios.get(url);
       setCustomers(res.data);
     } catch (err) {
@@ -343,9 +346,9 @@ export default function Customers() {
   const handleSaveCustomer = async (customerData) => {
     try {
       if (editingCustomer) {
-        await axios.put(`http://localhost:5000/api/customers/${editingCustomer._id}`, customerData);
+        await axios.put(`${API_URL}/api/customers/${editingCustomer._id}`, customerData);
       } else {
-        await axios.post("http://localhost:5000/api/customers", customerData);
+        await axios.post(`${API_URL}/api/customers`, customerData);
       }
       fetchCustomers();
       setShowModal(false);
@@ -359,7 +362,7 @@ export default function Customers() {
   const deleteCustomer = async (id) => {
     if (window.confirm("Are you sure you want to delete this customer?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/customers/${id}`);
+        await axios.delete(`${API_URL}/api/customers/${id}`);
         fetchCustomers();
         if (selectedCustomer?._id === id) setSelectedCustomer(null);
       } catch (err) {
