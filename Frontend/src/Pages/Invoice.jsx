@@ -271,29 +271,11 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
   );
 }
 
-function ReceiptModal({ invoice, onCloseAndClear }) {
+function ReceiptModal({ invoice, onClose }) {
   if (!invoice) return null;
 
-  // Direct Mobile-Friendly Print Execution
   const handlePrint = () => {
-    const receiptElement = document.getElementById("printable-receipt-card");
-    if (!receiptElement) return;
-
-    const originalBody = document.body.innerHTML;
-    const receiptHTML = receiptElement.outerHTML;
-
-    // Temporal Replacement Strategy (Guarantee 100% Mobile Print Compatibility)
-    document.body.innerHTML = `
-      <div style="background: white; padding: 20px; max-width: 600px; margin: 0 auto;">
-        ${receiptHTML}
-      </div>
-    `;
-
-    setTimeout(() => {
-      window.print();
-      document.body.innerHTML = originalBody;
-      window.location.reload(); // Reloads app state safely and removes paid invoice
-    }, 300);
+    window.print();
   };
 
   const handleDownloadPDF = () => {
@@ -307,11 +289,9 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
     };
     
     if (window.html2pdf) {
-      window.html2pdf().from(element).set(options).save().then(() => {
-        onCloseAndClear();
-      });
+      window.html2pdf().from(element).set(options).save();
     } else {
-      handlePrint();
+      window.print();
     }
   };
 
@@ -319,6 +299,7 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
     <div className="fixed inset-0 z-[300] flex items-start justify-center bg-black/70 p-2 sm:p-4 backdrop-blur-xs overflow-y-auto">
       <div id="printable-receipt-card" className="w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl border border-gray-300 relative text-gray-800 my-2 sm:my-4">
         
+        {/* WARQADDA RASIIDKA OON WAXBA KA BAXAYN */}
         <div className="space-y-4 bg-white p-0 m-0">
           <div className="flex justify-between items-start border-b-2 border-gray-900 pb-3 pt-0 mt-0">
             <div className="flex items-center gap-3">
@@ -396,7 +377,7 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
           <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 font-bold text-white shadow-md hover:bg-green-700 cursor-pointer text-xs">
             <Download size={15} /> Download PDF
           </button>
-          <button onClick={onCloseAndClear} className="rounded-xl border border-gray-300 px-5 py-2.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-xs">
+          <button onClick={onClose} className="rounded-xl border border-gray-300 px-5 py-2.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-xs">
             Close
           </button>
         </div>
@@ -429,21 +410,17 @@ export default function Invoice() {
     setInvoices(formattedInvoices);
   };
 
+  // Marka Payment la xaqiijiyo, Status-ka Invoice-ka waa loo beddelayaa "Paid" gudiha LocalStorage
   const confirmPayment = (invoiceToPay) => {
-    const updatedInvoice = { ...invoiceToPay, status: "Paid" };
-    setPaymentInvoice(null);
-    setReceiptInvoice(updatedInvoice);
-  };
-
-  const clearInvoiceAfterReceipt = () => {
-    if (receiptInvoice && receiptInvoice.originalIndex !== undefined) {
-      const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
-      rawInvoices.splice(receiptInvoice.originalIndex, 1);
+    const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
+    if (invoiceToPay.originalIndex !== undefined && rawInvoices[invoiceToPay.originalIndex]) {
+      rawInvoices[invoiceToPay.originalIndex].status = "Paid";
       localStorage.setItem("storeInvoices", JSON.stringify(rawInvoices));
     }
     
-    setReceiptInvoice(null);
-    setSelectedInvoice(null);
+    const updatedInvoice = { ...invoiceToPay, status: "Paid" };
+    setPaymentInvoice(null);
+    setReceiptInvoice(updatedInvoice);
     loadInvoices();
   };
 
@@ -564,7 +541,7 @@ export default function Invoice() {
       </div>
 
       <PaymentModal invoice={paymentInvoice} onClose={() => setPaymentInvoice(null)} onConfirm={confirmPayment} />
-      <ReceiptModal invoice={receiptInvoice} onCloseAndClear={clearInvoiceAfterReceipt} />
+      <ReceiptModal invoice={receiptInvoice} onClose={() => setReceiptInvoice(null)} />
     </div>
   );
 }
