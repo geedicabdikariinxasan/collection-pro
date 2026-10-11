@@ -280,7 +280,7 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
   };
 
   const handleDownloadPDF = () => {
-    const element = document.getElementById("printable-receipt");
+    const element = document.getElementById("printable-receipt-card");
     const options = {
       margin:      0,
       filename:    `Receipt-${invoice.id}.pdf`,
@@ -301,33 +301,35 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
 
   return (
     <>
-      {/* CSS-kan wuxuu qasbaynaa in mobile iyo desktop labadaba daabacaadu qabato RASIIDKA OO KALIYA */}
       <style>{`
         @media print {
           body * {
             visibility: hidden !important;
           }
-          #printable-receipt-modal, #printable-receipt-modal * {
+          #printable-receipt-card, #printable-receipt-card * {
             visibility: visible !important;
           }
-          #printable-receipt-modal {
+          #printable-receipt-card {
             position: absolute !important;
             left: 0 !important;
             top: 0 !important;
             width: 100% !important;
+            margin: 0 !important;
+            padding: 15px !important;
+            box-shadow: none !important;
+            border: none !important;
             background: #ffffff !important;
           }
-          .no-print-btn {
+          .no-print-area {
             display: none !important;
           }
         }
       `}</style>
 
-      <div id="printable-receipt-modal" className="fixed inset-0 z-[300] flex items-start justify-center bg-black/70 p-2 sm:p-4 backdrop-blur-xs overflow-y-auto">
-        <div className="w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl border border-gray-300 relative text-gray-800 my-2 sm:my-4">
+      <div className="fixed inset-0 z-[300] flex items-start justify-center bg-black/70 p-2 sm:p-4 backdrop-blur-xs overflow-y-auto print:p-0 print:bg-white">
+        <div id="printable-receipt-card" className="w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl border border-gray-300 relative text-gray-800 my-2 sm:my-4">
           
-          {/* WARQADDA RASIIDKA */}
-          <div id="printable-receipt" className="space-y-4 bg-white p-0 m-0">
+          <div className="space-y-4 bg-white p-0 m-0">
             <div className="flex justify-between items-start border-b-2 border-gray-900 pb-3 pt-0 mt-0">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-pink-100 text-pink-600 font-bold text-xl">
@@ -397,8 +399,7 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
             </div>
           </div>
 
-          {/* BADHANNADA OON LA PRINT-GARAYNAYN */}
-          <div className="mt-6 flex flex-wrap gap-2 no-print-btn">
+          <div className="mt-6 flex flex-wrap gap-2 no-print-area">
             <button onClick={handlePrint} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
               <Printer size={15} /> Print
             </button>
@@ -474,10 +475,10 @@ export default function Invoice() {
     <div className="h-screen w-screen overflow-hidden bg-[#fffafd] flex">
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-      <div className="flex-1 flex flex-col h-screen overflow-hidden lg:ml-[250px]">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden lg:ml-[250px] print:ml-0 print:h-auto print:overflow-visible">
         <Header setMobileOpen={setMobileOpen} />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar">
+        <main className="flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar print:hidden">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-pink-600 text-white shadow-md">
               <FileText size={22} />
