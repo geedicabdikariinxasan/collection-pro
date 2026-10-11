@@ -1,16 +1,16 @@
 const dns = require('node:dns');
-// Ku qasbi Node.js inuu isticmaalo Google DNS si uusan DNS-ka laptop-kaagu u diidin SRV-ka
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const authRoutes = require('./routes/authRoutes');
-const productRoutes = require('./routes/productRoutes'); // <-- Waxaa la soo geliyay Product Routes-ka
-const customerRoutes = require('./routes/customerRoutes');
-const orderRoutes = require('./routes/orderRoutes');
 
+// Waa inaan magacyadan la jaanqaadnaa faylashaada GitHub (Xaraf weyn hadduu yahay, xaraf weyn isticmaal)
+const authRoutes = require('./routes/authRoutes');
+const productRoutes = require('./routes/ProductRoutes'); // Faylkaaga GitHub P ayuu ku bilaabmaa
+const customerRoutes = require('./routes/customerRoutes'); // Faylkaaga GitHub c ayuu ku bilaabmaa
+const orderRoutes = require('./routes/orderRoutes');     // Faylkaaga GitHub o ayuu ku bilaabmaa
 
 dotenv.config();
 const app = express();
@@ -21,10 +21,11 @@ app.use(cors());
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes); // <-- Halkan waxaa lagu xiray API-ga Products-ka
+app.use('/api/products', productRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/orders', orderRoutes);
-// Database Connection & Server Running
+
+// Database Connection
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 
