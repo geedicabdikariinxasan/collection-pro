@@ -37,6 +37,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
     { label: "Reports", icon: BarChart3, path: "#" },
     { label: "Users", icon: User, path: "#" },
     { label: "Settings", icon: Settings, path: "#" },
+    { label: "Logout", icon: LogOut, path: "/", isLogout: true },
   ];
 
   return (
@@ -44,55 +45,59 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
       {mobileOpen && (
         <div 
           onClick={() => setMobileOpen(false)} 
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden print:hidden"
         />
       )}
 
-      <aside className={`fixed left-0 top-0 h-screen w-[250px] overflow-hidden bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex flex-col h-full overflow-hidden relative">
-          
-          <button 
-            onClick={() => setMobileOpen(false)}
-            className="absolute right-3 top-3 text-white lg:hidden p-1 cursor-pointer"
-          >
-            <X size={20} />
-          </button>
+      <aside className={`fixed left-0 top-0 h-screen w-[250px] bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 print:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="flex flex-col h-full overflow-y-auto custom-scrollbar relative justify-between">
+          <div>
+            <button 
+              onClick={() => setMobileOpen(false)}
+              className="absolute right-3 top-3 text-white lg:hidden p-1 cursor-pointer z-10"
+            >
+              <X size={20} />
+            </button>
 
-          <div className="border-b border-white/10 px-5 py-4 text-center flex flex-col items-center justify-center">
-            <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-2xl shadow-md">👗</div>
-            <h1 className="font-serif text-lg font-bold tracking-wider whitespace-nowrap">COLLECTION PRO</h1>
-            <p className="text-[7px] tracking-[2px] text-pink-100 uppercase">WOMEN'S FASHION & CLOTHING</p>
+            <div className="border-b border-white/10 px-5 py-4 text-center flex flex-col items-center justify-center">
+              <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-2xl shadow-md">👗</div>
+              <h1 className="font-serif text-lg font-bold tracking-wider whitespace-nowrap">COLLECTION PRO</h1>
+              <p className="text-[7px] tracking-[2px] text-pink-100 uppercase">WOMEN'S FASHION & CLOTHING</p>
+            </div>
+
+            <nav className="px-3 py-3 space-y-1">
+              <p className="mb-1 px-3 text-[8px] font-semibold uppercase tracking-[2px] text-pink-200">Main Menu</p>
+              {links.map(({ label, icon: Icon, path, active, isLogout }) => (
+                <button
+                  key={label}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    if (isLogout) {
+                      navigate("/");
+                    } else if (path !== "#") {
+                      navigate(path);
+                    } else {
+                      alert(`Bogga "${label}" dhawaan ayaa la dhisayaa!`);
+                    }
+                  }}
+                  className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium transition cursor-pointer ${
+                    isLogout
+                      ? "mt-3 bg-red-600/80 hover:bg-red-600 text-white font-bold shadow-sm"
+                      : active
+                      ? "bg-pink-500 font-semibold shadow-md text-white"
+                      : "hover:bg-white/10 text-pink-50"
+                  }`}
+                >
+                  <Icon size={16} />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </nav>
           </div>
 
-          <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar">
-            <p className="mb-1 px-3 text-[8px] font-semibold uppercase tracking-[2px] text-pink-200">Main Menu</p>
-            {links.map(({ label, icon: Icon, path, active }) => (
-              <button
-                key={label}
-                onClick={() => {
-                  setMobileOpen(false);
-                  if (path !== "#") navigate(path);
-                  else alert(`Bogga "${label}" dhawaan ayaa la dhisayaa!`);
-                }}
-                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium transition cursor-pointer ${
-                  active ? "bg-pink-500 font-semibold shadow-md text-white" : "hover:bg-white/10 text-pink-50"
-                }`}
-              >
-                <Icon size={16} />
-                <span>{label}</span>
-              </button>
-            ))}
-          </nav>
-
-          <div className="px-4 py-2.5 text-center border-t border-white/10 bg-black/10 flex flex-col gap-1.5 mt-auto">
-            <button onClick={() => navigate("/")} className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 py-1.5 text-xs font-semibold text-white hover:bg-red-600 transition cursor-pointer">
-              <LogOut size={15} />
-              <span>Logout</span>
-            </button>
-            <div>
-              <p className="font-serif text-[10px] italic text-pink-100">Style • Elegance • You</p>
-              <p className="text-[7px] text-pink-300">© 2026 COLLECTION PRO</p>
-            </div>
+          <div className="p-4 text-center border-t border-white/10 bg-black/10 shrink-0 mt-auto">
+            <p className="font-serif text-[10px] italic text-pink-100">Style • Elegance • You</p>
+            <p className="text-[7px] text-pink-300">© 2026 COLLECTION PRO</p>
           </div>
         </div>
       </aside>
@@ -102,7 +107,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
 
 function Header({ setMobileOpen }) {
   return (
-    <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-4 md:px-6 backdrop-blur shadow-xs">
+    <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-4 md:px-6 backdrop-blur shadow-xs print:hidden">
       <div className="flex items-center gap-2.5 w-full max-w-[350px]">
         <button 
           onClick={() => setMobileOpen(true)}
@@ -157,7 +162,7 @@ function InvoiceDetails({ invoice, onClose, onMakePayment, onReceipt }) {
   if (!invoice) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-start justify-end bg-black/40 backdrop-blur-xs sm:bg-transparent sm:backdrop-blur-none">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-start justify-end bg-black/40 backdrop-blur-xs sm:bg-transparent sm:backdrop-blur-none print:hidden">
       <aside className="w-full sm:w-[330px] h-[85vh] sm:h-[calc(100vh-70px)] sm:top-[70px] bg-white rounded-t-2xl sm:rounded-none overflow-y-auto border-l border-gray-100 custom-scrollbar shadow-2xl flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 bg-pink-50/50 sticky top-0 bg-white z-10">
@@ -220,7 +225,7 @@ function InvoiceDetails({ invoice, onClose, onMakePayment, onReceipt }) {
 
             <div className="flex justify-between font-bold text-sm text-gray-900 border-t pt-2">
               <span>Total Amount</span>
-              <span className="text-pink-600">${invoice.totalAmount.toFixed(2)}</span>
+              <span className="text-pink-600">${invoice.totalAmount?.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -244,7 +249,7 @@ function InvoiceDetails({ invoice, onClose, onMakePayment, onReceipt }) {
 function PaymentModal({ invoice, onClose, onConfirm }) {
   if (!invoice) return null;
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs print:hidden">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-bold">Make Payment</h2>
@@ -253,10 +258,10 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
         <div className="mb-4 rounded-xl bg-pink-50 p-3 text-xs">
           <p className="text-gray-500">Invoice: <strong className="text-gray-800">{invoice.id}</strong></p>
           <p className="text-gray-500 mt-1">Customer: <strong className="text-gray-800">{invoice.customerName}</strong></p>
-          <p className="mt-2 text-xl font-bold text-pink-600">${invoice.totalAmount.toFixed(2)}</p>
+          <p className="mt-2 text-xl font-bold text-pink-600">${invoice.totalAmount?.toFixed(2)}</p>
         </div>
         <button 
-          onClick={() => onConfirm(invoice.originalIndex)} 
+          onClick={() => onConfirm(invoice)} 
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-pink-600 py-3 font-bold text-white hover:bg-pink-700 cursor-pointer text-xs shadow-md"
         >
           <CheckCircle size={16} /> Payment Paid Successfully! ✅
@@ -266,13 +271,17 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
   );
 }
 
-function ReceiptModal({ invoice, onClose }) {
+function ReceiptModal({ invoice, onCloseAndClear }) {
   if (!invoice) return null;
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   const handleDownloadPDF = () => {
-    const element = document.getElementById("printable-receipt");
+    const element = document.getElementById("printable-receipt-card");
     const options = {
-      margin:      10,
+      margin:      5,
       filename:    `Receipt-${invoice.id}.pdf`,
       image:       { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true },
@@ -287,92 +296,119 @@ function ReceiptModal({ invoice, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs print:bg-white print:p-0">
-      <div className="w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl border border-gray-300 relative text-gray-800 print:shadow-none print:border-none print:w-full print:max-w-none max-h-[90vh] overflow-y-auto custom-scrollbar">
-        
-        <div id="printable-receipt" className="space-y-4 bg-white p-2">
-          <div className="flex justify-between items-start border-b-2 border-gray-900 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-pink-100 text-pink-600 font-bold text-xl">
-                👗
+    <>
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          #printable-receipt-card, #printable-receipt-card * {
+            visibility: visible !important;
+          }
+          #printable-receipt-card {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 10px !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: #ffffff !important;
+          }
+          .no-print-area {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 p-3 backdrop-blur-xs overflow-y-auto">
+        <div id="printable-receipt-card" className="w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl border border-gray-300 relative text-gray-800 my-auto">
+          
+          <div className="space-y-4 bg-white p-0 m-0">
+            <div className="flex justify-between items-start border-b-2 border-gray-900 pb-3 pt-0 mt-0">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-pink-100 text-pink-600 font-bold text-xl">
+                  👗
+                </div>
+                <div>
+                  <h2 className="font-serif text-lg font-extrabold tracking-wide text-gray-900">COLLECTION PRO</h2>
+                  <p className="text-[8px] tracking-[1.5px] text-gray-500 uppercase font-semibold">WOMEN'S FASHION & CLOTHING</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <h1 className="text-sm font-black uppercase tracking-wider text-gray-900">PAYMENT RECEIPT</h1>
+                <p className="text-[11px] text-gray-500">Receipt No: <strong>REC-{invoice.id}</strong></p>
+                <p className="text-[11px] text-gray-500">Date: <strong>{invoice.date}</strong></p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-bold text-gray-800 uppercase tracking-wider border-b border-gray-400 pb-1 mb-2">Customer Information</p>
+              <div className="grid grid-cols-2 gap-y-1 text-xs">
+                <p><span className="text-gray-500">Full Name:</span> <strong className="text-gray-900">{invoice.customerName}</strong></p>
+                <p><span className="text-gray-500">Phone:</span> <strong className="text-gray-900">{invoice.customerPhone || "N/A"}</strong></p>
+                <p><span className="text-gray-500">Email:</span> <strong className="text-gray-900">{invoice.customerEmail}</strong></p>
+                <p><span className="text-gray-500">Invoice No:</span> <strong className="text-gray-900">{invoice.id}</strong></p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-bold text-gray-800 uppercase tracking-wider border-b border-gray-400 pb-1 mb-2">Payment Details</p>
+              <table className="w-full text-xs border border-gray-300">
+                <tbody>
+                  <tr className="border-b border-gray-300">
+                    <td className="p-2 font-bold bg-gray-50 text-gray-700 w-1/3">Payment ID</td>
+                    <td className="p-2 font-semibold text-gray-900">PAY-{invoice.id}</td>
+                  </tr>
+                  <tr className="border-b border-gray-300">
+                    <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Date</td>
+                    <td className="p-2 text-gray-900">{invoice.date}</td>
+                  </tr>
+                  <tr className="border-b border-gray-300">
+                    <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Method</td>
+                    <td className="p-2 text-gray-900">Mobile Money / Cash</td>
+                  </tr>
+                  <tr className="border-b border-gray-300">
+                    <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Status</td>
+                    <td className="p-2">
+                      <span className="inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 font-bold text-[10px]">Paid</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="p-2 font-bold bg-gray-50 text-gray-700">Amount Paid</td>
+                    <td className="p-2 font-black text-pink-600 text-sm">${invoice.totalAmount?.toFixed(2)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="grid grid-cols-2 gap-8 pt-6 text-center text-xs">
+              <div>
+                <div className="border-t border-gray-400 pt-1 w-32 mx-auto"></div>
+                <p className="text-gray-500 font-semibold mt-0.5">Customer Signature</p>
               </div>
               <div>
-                <h2 className="font-serif text-lg font-extrabold tracking-wide">COLLECTION PRO</h2>
-                <p className="text-[8px] tracking-[1.5px] text-gray-500 uppercase font-semibold">WOMEN'S FASHION & CLOTHING</p>
+                <div className="border-t border-gray-400 pt-1 w-32 mx-auto"></div>
+                <p className="text-gray-500 font-semibold mt-1">Authorized Signature</p>
               </div>
             </div>
-            <div className="text-right">
-              <h1 className="text-sm font-black uppercase tracking-wider text-gray-900">PAYMENT RECEIPT</h1>
-              <p className="text-[11px] text-gray-500">Receipt No: <strong>REC-{invoice.id}</strong></p>
-              <p className="text-[11px] text-gray-500">Date: <strong>{invoice.date}</strong></p>
-            </div>
           </div>
 
-          <div>
-            <p className="text-xs font-bold text-gray-800 uppercase tracking-wider border-b border-gray-400 pb-1 mb-2">Customer Information</p>
-            <div className="grid grid-cols-2 gap-y-1 text-xs">
-              <p><span className="text-gray-500">Full Name:</span> <strong className="text-gray-900">{invoice.customerName}</strong></p>
-              <p><span className="text-gray-500">Phone:</span> <strong className="text-gray-900">{invoice.customerPhone || "N/A"}</strong></p>
-              <p><span className="text-gray-500">Email:</span> <strong className="text-gray-900">{invoice.customerEmail}</strong></p>
-              <p><span className="text-gray-500">Invoice No:</span> <strong className="text-gray-900">{invoice.id}</strong></p>
-            </div>
+          <div className="mt-6 flex flex-wrap gap-2 no-print-area">
+            <button onClick={handlePrint} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
+              <Printer size={15} /> Print
+            </button>
+            <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 font-bold text-white shadow-md hover:bg-green-700 cursor-pointer text-xs">
+              <Download size={15} /> Download PDF
+            </button>
+            <button onClick={onCloseAndClear} className="rounded-xl border border-gray-300 px-5 py-2.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-xs">
+              Close & Clear
+            </button>
           </div>
-
-          <div>
-            <p className="text-xs font-bold text-gray-800 uppercase tracking-wider border-b border-gray-400 pb-1 mb-2">Payment Details</p>
-            <table className="w-full text-xs border border-gray-300">
-              <tbody>
-                <tr className="border-b border-gray-300">
-                  <td className="p-2 font-bold bg-gray-50 text-gray-700 w-1/3">Payment ID</td>
-                  <td className="p-2 font-semibold text-gray-900">PAY-{invoice.id}</td>
-                </tr>
-                <tr className="border-b border-gray-300">
-                  <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Date</td>
-                  <td className="p-2 text-gray-900">{invoice.date}</td>
-                </tr>
-                <tr className="border-b border-gray-300">
-                  <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Method</td>
-                  <td className="p-2 text-gray-900">Mobile Money / Cash</td>
-                </tr>
-                <tr className="border-b border-gray-300">
-                  <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Status</td>
-                  <td className="p-2">
-                    <span className="inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 font-bold text-[10px]">Paid</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="p-2 font-bold bg-gray-50 text-gray-700">Amount Paid</td>
-                  <td className="p-2 font-black text-pink-600 text-sm">${invoice.totalAmount.toFixed(2)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="grid grid-cols-2 gap-8 pt-4 text-center text-xs">
-            <div>
-              <div className="border-t border-gray-400 pt-1 w-32 mx-auto"></div>
-              <p className="text-gray-500 font-semibold mt-0.5">Customer Signature</p>
-            </div>
-            <div>
-              <div className="border-t border-gray-400 pt-1 w-32 mx-auto"></div>
-              <p className="text-gray-500 font-semibold mt-1">Authorized Signature</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 flex flex-wrap gap-2 print:hidden">
-          <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
-            <Printer size={15} /> Print
-          </button>
-          <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 font-bold text-white shadow-md hover:bg-green-700 cursor-pointer text-xs">
-            <Download size={15} /> Download PDF
-          </button>
-          <button onClick={onClose} className="rounded-xl border border-gray-300 px-5 py-2.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-xs">
-            Close
-          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -400,18 +436,22 @@ export default function Invoice() {
     setInvoices(formattedInvoices);
   };
 
-  // Marka Payment-ka la dhameystiro, xogta iyo daaqadaha dhan waa ay baxayaan (sooma muuqanayaan)
-  const confirmPayment = (originalIndex) => {
-    const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
-    
-    if (rawInvoices[originalIndex] !== undefined) {
-      rawInvoices[originalIndex].status = "Paid";
+  const confirmPayment = (invoiceToPay) => {
+    const updatedInvoice = { ...invoiceToPay, status: "Paid" };
+    setPaymentInvoice(null);
+    setReceiptInvoice(updatedInvoice);
+  };
+
+  const clearInvoiceAfterReceipt = () => {
+    if (receiptInvoice && receiptInvoice.originalIndex !== undefined) {
+      const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
+      rawInvoices.splice(receiptInvoice.originalIndex, 1);
       localStorage.setItem("storeInvoices", JSON.stringify(rawInvoices));
     }
     
+    setReceiptInvoice(null);
+    setSelectedInvoice(null);
     loadInvoices();
-    setPaymentInvoice(null);
-    setSelectedInvoice(null); // Tani waxay tirtireysaa xogta oo daaqada (Modal) si toos ah ayay u xireysaa!
   };
 
   const filteredInvoices = invoices.filter((invoice) => {
@@ -490,7 +530,7 @@ export default function Invoice() {
                             <p className="text-[10px] text-gray-400">{invoice.customerPhone}</p>
                           </td>
                           <td className="px-4 py-2.5 font-semibold text-pink-600">#{invoice.orderId}</td>
-                          <td className="px-4 py-2.5 font-bold text-pink-600">${invoice.totalAmount.toFixed(2)}</td>
+                          <td className="px-4 py-2.5 font-bold text-pink-600">${invoice.totalAmount?.toFixed(2)}</td>
                           <td className="px-4 py-2.5"><Badge type={getStatusType(invoice.status)}>{invoice.status}</Badge></td>
                           <td className="px-4 py-2.5 text-right">
                             <button
@@ -531,7 +571,7 @@ export default function Invoice() {
       </div>
 
       <PaymentModal invoice={paymentInvoice} onClose={() => setPaymentInvoice(null)} onConfirm={confirmPayment} />
-      <ReceiptModal invoice={receiptInvoice} onClose={() => setReceiptInvoice(null)} />
+      <ReceiptModal invoice={receiptInvoice} onCloseAndClear={clearInvoiceAfterReceipt} />
     </div>
   );
 }
@@ -541,7 +581,7 @@ function SummaryCard({ title, amount, icon }) {
     <div className="flex items-center justify-between rounded-xl border border-pink-100 bg-white p-4 shadow-xs">
       <div>
         <p className="text-xs text-gray-500">{title}</p>
-        <p className="mt-1 text-xl font-bold text-gray-900">${amount.toFixed(2)}</p>
+        <p className="mt-1 text-xl font-bold text-gray-900">${amount?.toFixed(2)}</p>
       </div>
       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-100 text-pink-600">
         {icon}
