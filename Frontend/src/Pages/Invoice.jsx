@@ -290,7 +290,6 @@ function ReceiptModal({ invoice, onClose }) {
     <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/70 p-2 sm:p-4 backdrop-blur-xs overflow-y-auto print:bg-white print:p-0 print:block">
       <div className="w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl border border-gray-300 relative text-gray-800 my-2 sm:my-4 print:shadow-none print:border-none print:w-full print:max-w-none print:m-0 print:p-0">
         
-        {/* Qaybta Rasiidka ah oo si toos ah dusha sare ugu dheggan (Top Aligned for Printing) */}
         <div id="printable-receipt" className="space-y-4 bg-white p-0 m-0">
           <div className="flex justify-between items-start border-b-2 border-gray-900 pb-3 pt-0 mt-0">
             <div className="flex items-center gap-3">
@@ -401,13 +400,15 @@ export default function Invoice() {
     setInvoices(formattedInvoices);
   };
 
+  // Marka Payment-ka la xaqiijiyo, invoice-kan gebi ahaanba waxaa laga tirtirayaa localStorage
   const confirmPayment = (originalIndex) => {
     const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
     
-    if (rawInvoices[originalIndex] !== undefined) {
-      rawInvoices[originalIndex].status = "Paid";
-      localStorage.setItem("storeInvoices", JSON.stringify(rawInvoices));
-    }
+    // Tirtir invoice-kaas laga saar liiska
+    rawInvoices.splice(originalIndex, 1);
+    
+    // Dib u kaydi localStorage
+    localStorage.setItem("storeInvoices", JSON.stringify(rawInvoices));
     
     loadInvoices();
     setPaymentInvoice(null);

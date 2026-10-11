@@ -19,7 +19,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-// 1. Qeex API URL-ka (Vercel Environment Variable ama Render Live URL)
 const API_URL = import.meta.env?.VITE_API_URL || process.env.NEXT_PUBLIC_API_URL || "https://collection-pro-backend.onrender.com";
 
 function Sidebar({ mobileOpen, setMobileOpen }) {
@@ -48,74 +47,66 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
       )}
 
       <aside className={`fixed left-0 top-0 h-screen w-[260px] bg-gradient-to-b from-pink-700 via-pink-800 to-rose-950 text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex flex-col h-full relative">
+        <div className="flex flex-col h-full overflow-y-auto custom-scrollbar relative justify-between">
           
-          <button 
-            onClick={() => setMobileOpen(false)}
-            className="absolute right-3 top-3 text-white lg:hidden p-1 cursor-pointer z-10"
-          >
-            <X size={20} />
-          </button>
+          <div>
+            <button 
+              onClick={() => setMobileOpen(false)}
+              className="absolute right-3 top-3 text-white lg:hidden p-1 cursor-pointer z-10"
+            >
+              <X size={20} />
+            </button>
 
-          {/* Logo Section */}
-          <div className="border-b border-white/10 px-6 py-3.5 text-center flex flex-col items-center justify-center shrink-0">
-            <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-2xl shadow-md">
-              👗
+            <div className="border-b border-white/10 px-6 py-4 text-center flex flex-col items-center justify-center shrink-0">
+              <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-2xl shadow-md">
+                👗
+              </div>
+              <h1 className="text-base font-extrabold tracking-wider whitespace-nowrap">
+                COLLECTION <span className="text-pink-200">PRO</span>
+              </h1>
+              <p className="text-[7px] tracking-[2.5px] text-pink-100 uppercase font-semibold">
+                WOMEN'S FASHION & CLOTHING
+              </p>
             </div>
-            <h1 className="text-base font-extrabold tracking-wider whitespace-nowrap">
-              COLLECTION <span className="text-pink-200">PRO</span>
-            </h1>
-            <p className="text-[7px] tracking-[2.5px] text-pink-100 uppercase font-semibold">
-              WOMEN'S FASHION & CLOTHING
-            </p>
+
+            <nav className="px-3 py-2 space-y-1">
+              <p className="mb-1 px-3 text-[8px] font-semibold uppercase tracking-[2px] text-pink-200">
+                Main Menu
+              </p>
+              {menu.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => {
+                      setMobileOpen(false);
+                      if (item.name === "Products") navigate("/products");
+                      else if (item.name === "Customers") navigate("/customers");
+                      else if (item.name === "Dashboard") navigate("/admin-dashboard");
+                      else if (item.name === "Orders") navigate("/orders");
+                      else if (item.name === "Invoices") navigate("/invoices");
+                      else alert(`Bogga "${item.name}" dhawaan ayaa la dhisayaa!`);
+                    }}
+                    className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
+                      item.active
+                        ? "bg-pink-500 text-white shadow-md font-bold"
+                        : "text-pink-50 hover:bg-white/10"
+                    }`}
+                  >
+                    <Icon size={16} />
+                    <span>{item.name}</span>
+                  </button>
+                );
+              })}
+            </nav>
           </div>
 
-          {/* Navigation Menu (Waxaa la siiyay overflow-y-auto si uu u scroll-gareeyo haddii uu yar yahay screen-ka) */}
-          <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar">
-            <p className="mb-1 px-3 text-[8px] font-semibold uppercase tracking-[2px] text-pink-200">
-              Main Menu
-            </p>
-            {menu.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => {
-                    setMobileOpen(false);
-                    if (item.name === "Products") {
-                      navigate("/products");
-                    } else if (item.name === "Customers") {
-                      navigate("/customers");
-                    } else if (item.name === "Dashboard") {
-                      navigate("/admin-dashboard");
-                    } else if (item.name === "Orders") {
-                      navigate("/orders");
-                    } else if (item.name === "Invoices") {
-                      navigate("/invoices");
-                    } else {
-                      alert(`Bogga "${item.name}" dhawaan ayaa la dhisayaa!`);
-                    }
-                  }}
-                  className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
-                    item.active
-                      ? "bg-pink-500 text-white shadow-md shadow-pink-950/20 font-bold"
-                      : "text-pink-50 hover:bg-white/10"
-                  }`}
-                >
-                  <Icon size={16} />
-                  <span>{item.name}</span>
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Logout & Footer Section (Hadda wuxuu si fiican ugu jiraa xagga hoose ee muuqda) */}
-          <div className="px-4 py-2.5 text-center border-t border-white/10 bg-black/10 flex flex-col gap-1.5 shrink-0">
+          <div className="px-4 py-3 text-center border-t border-white/10 bg-black/20 flex flex-col gap-1.5 shrink-0 my-2">
             <button
               onClick={() => navigate("/")}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 py-2 text-xs font-semibold text-white hover:bg-red-600 transition cursor-pointer shadow-sm"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-pink-600 py-2.5 text-xs font-bold text-white hover:bg-red-600 transition cursor-pointer shadow-md"
             >
-              <LogOut size={15} />
+              <LogOut size={16} />
               <span>Logout</span>
             </button>
             <div>
