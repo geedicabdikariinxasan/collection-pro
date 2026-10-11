@@ -1,3 +1,14 @@
+const cors = require('cors');
+
+// Ku dar koodhkan intaanay routes-ku bilaabbin:
+app.use(cors({
+  origin: [
+    'https://magaca-frontend-kaaga.vercel.app', // Halkaan geli URL-ka saxda ah ee Vercel
+    'http://localhost:3000'                      // Localhost-ka tijaabada
+  ],
+  credentials: true
+}));
+
 const dns = require('node:dns');
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
