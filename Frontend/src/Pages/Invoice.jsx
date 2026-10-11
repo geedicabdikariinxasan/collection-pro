@@ -51,7 +51,6 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
 
   return (
     <>
-      {/* Mobile Overlay */}
       {mobileOpen && (
         <div 
           onClick={() => setMobileOpen(false)} 
@@ -59,11 +58,9 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
         />
       )}
 
-      {/* Sidebar Responsive */}
       <aside className={`fixed left-0 top-0 h-screen w-[250px] overflow-hidden bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex flex-col h-full overflow-hidden relative">
           
-          {/* Close Button for Mobile */}
           <button 
             onClick={() => setMobileOpen(false)}
             className="absolute right-3 top-3 text-white lg:hidden p-1 cursor-pointer"
@@ -83,7 +80,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
               <button
                 key={label}
                 onClick={() => {
-                  setMobileOpen(false); // Xir menu-ga marka la gujiyo
+                  setMobileOpen(false);
                   if (path !== "#") navigate(path);
                   else alert(`Bogga "${label}" dhawaan ayaa la dhisayaa!`);
                 }}
@@ -117,7 +114,6 @@ function Header({ setMobileOpen }) {
   return (
     <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-4 md:px-6 backdrop-blur shadow-xs">
       <div className="flex items-center gap-2.5 w-full max-w-[350px]">
-        {/* Mobile Hamburger Button (3-da xariiqood) */}
         <button 
           onClick={() => setMobileOpen(true)}
           className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-xl cursor-pointer"
@@ -171,85 +167,88 @@ function InvoiceDetails({ invoice, onClose, onMakePayment, onReceipt }) {
   if (!invoice) return null;
 
   return (
-    <aside className="fixed right-0 top-[70px] z-20 h-[calc(100vh-70px)] w-full sm:w-[330px] overflow-y-auto border-l border-gray-100 bg-white custom-scrollbar shadow-2xl flex flex-col justify-between">
-      <div>
-        <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 bg-pink-50/50">
-          <h2 className="text-sm font-bold text-gray-900">Invoice Details</h2>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-gray-400 hover:bg-pink-50 hover:text-pink-600 cursor-pointer">
-            <X size={17} />
-          </button>
-        </div>
-
-        <div className="border-b border-gray-100 p-4">
-          <div className="flex items-center gap-3">
-            <img 
-              src={invoice.customerImage || "https://i.pravatar.cc/150?img=47"} 
-              alt={invoice.customerName} 
-              className="h-12 w-12 rounded-full object-cover ring-2 ring-pink-300 shadow-sm"
-              onError={(e) => { e.target.src = "https://i.pravatar.cc/150?img=47"; }} 
-            />
-            <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-bold text-gray-900 truncate">{invoice.customerName}</h3>
-              <p className="text-[10px] text-gray-500 truncate">{invoice.customerEmail}</p>
-              <p className="text-[10px] text-gray-500">{invoice.customerPhone}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-4 space-y-3 text-xs">
-          <div className="flex items-center justify-between gap-2">
-            <span className="rounded-full bg-pink-100 px-2.5 py-1 font-bold text-pink-700 text-xs">{invoice.id}</span>
-            <Badge type={getStatusType(invoice.status)}>{invoice.status}</Badge>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-start justify-end bg-black/40 backdrop-blur-xs sm:bg-transparent sm:backdrop-blur-none">
+      <aside className="w-full sm:w-[330px] h-[85vh] sm:h-[calc(100vh-70px)] sm:top-[70px] bg-white rounded-t-2xl sm:rounded-none overflow-y-auto border-l border-gray-100 custom-scrollbar shadow-2xl flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 bg-pink-50/50 sticky top-0 bg-white z-10">
+            <h2 className="text-sm font-bold text-gray-900">Invoice Details</h2>
+            <button onClick={onClose} className="rounded-lg p-1.5 text-gray-400 hover:bg-pink-50 hover:text-pink-600 cursor-pointer">
+              <X size={17} />
+            </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-center">
-            <div className="rounded-lg border border-gray-100 p-2 bg-gray-50">
-              <span className="text-[9px] text-gray-400 block">Order Date</span>
-              <strong className="text-gray-800">{invoice.date}</strong>
-            </div>
-            <div className="rounded-lg border border-gray-100 p-2 bg-gray-50">
-              <span className="text-[9px] text-gray-400 block">Order ID</span>
-              <strong className="text-pink-600">#{invoice.orderId}</strong>
+          <div className="border-b border-gray-100 p-4">
+            <div className="flex items-center gap-3">
+              <img 
+                src={invoice.customerImage || "https://i.pravatar.cc/150?img=47"} 
+                alt={invoice.customerName} 
+                className="h-12 w-12 rounded-full object-cover ring-2 ring-pink-300 shadow-sm"
+                onError={(e) => { e.target.src = "https://i.pravatar.cc/150?img=47"; }} 
+              />
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-bold text-gray-900 truncate">{invoice.customerName}</h3>
+                <p className="text-[10px] text-gray-500 truncate">{invoice.customerEmail}</p>
+                <p className="text-[10px] text-gray-500">{invoice.customerPhone}</p>
+              </div>
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-gray-100">
-            <div className="bg-pink-50 px-3 py-2 font-bold text-gray-800 text-[11px]">Items in This Invoice</div>
-            <div className="max-h-[120px] overflow-y-auto custom-scrollbar">
-              {invoice.items?.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between border-t border-gray-50 p-2">
-                  <div className="flex items-center gap-2">
-                    <img src={item.image || "https://images.unsplash.com/photo-1595777457583-95e059d581b8"} alt="" className="h-7 w-7 rounded object-cover" />
-                    <div>
-                      <p className="font-semibold text-gray-800">{item.name}</p>
-                      <p className="text-[10px] text-gray-400">Qty: {item.qty} · ${item.price}</p>
+          <div className="p-4 space-y-3 text-xs">
+            <div className="flex items-center justify-between gap-2">
+              <span className="rounded-full bg-pink-100 px-2.5 py-1 font-bold text-pink-700 text-xs">{invoice.id}</span>
+              <Badge type={getStatusType(invoice.status)}>{invoice.status}</Badge>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-center">
+              <div className="rounded-lg border border-gray-100 p-2 bg-gray-50">
+                <span className="text-[9px] text-gray-400 block">Order Date</span>
+                <strong className="text-gray-800">{invoice.date}</strong>
+              </div>
+              <div className="rounded-lg border border-gray-100 p-2 bg-gray-50">
+                <span className="text-[9px] text-gray-400 block">Order ID</span>
+                <strong className="text-pink-600">#{invoice.orderId}</strong>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-xl border border-gray-100">
+              <div className="bg-pink-50 px-3 py-2 font-bold text-gray-800 text-[11px]">Items in This Invoice</div>
+              <div className="max-h-[120px] overflow-y-auto custom-scrollbar">
+                {invoice.items?.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between border-t border-gray-50 p-2">
+                    <div className="flex items-center gap-2">
+                      <img src={item.image || "https://images.unsplash.com/photo-1595777457583-95e059d581b8"} alt="" className="h-7 w-7 rounded object-cover" />
+                      <div>
+                        <p className="font-semibold text-gray-800">{item.name}</p>
+                        <p className="text-[10px] text-gray-400">Qty: {item.qty} · ${item.price}</p>
+                      </div>
                     </div>
+                    <span className="font-bold text-pink-600">${(item.price * item.qty).toFixed(2)}</span>
                   </div>
-                  <span className="font-bold text-pink-600">${(item.price * item.qty).toFixed(2)}</span>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-between font-bold text-sm text-gray-900 border-t pt-2">
+              <span>Total Amount</span>
+              <span className="text-pink-600">${invoice.totalAmount.toFixed(2)}</span>
             </div>
           </div>
-
-          <div className="flex justify-between font-bold text-sm text-gray-900 border-t pt-2">
-            <span>Total Amount</span>
-            <span className="text-pink-600">${invoice.totalAmount.toFixed(2)}</span>
-          </div>
         </div>
-      </div>
 
-      <div className="p-4 border-t space-y-1.5 bg-gray-50">
-        {invoice.status !== "Paid" ? (
-          <button onClick={() => onMakePayment(invoice)} className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white transition hover:bg-pink-700 cursor-pointer text-xs">
-            <Wallet size={15} /> Make Payment
-          </button>
-        ) : (
-          <button onClick={() => onReceipt(invoice)} className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 font-bold text-white transition hover:bg-green-700 cursor-pointer text-xs shadow-sm">
-            <Receipt size={15} /> View Receipt
-          </button>
-        )}
-      </div>
-    </aside>
+        {/* Badhanka oo si badbaado leh ugu yaalla hoosta */}
+        <div className="p-4 border-t space-y-1.5 bg-gray-50 sticky bottom-0 z-10">
+          {invoice.status !== "Paid" ? (
+            <button onClick={() => onMakePayment(invoice)} className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-3 font-bold text-white transition hover:bg-pink-700 cursor-pointer text-xs shadow-md">
+              <Wallet size={15} /> Make Payment
+            </button>
+          ) : (
+            <button onClick={() => onReceipt(invoice)} className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-green-600 py-3 font-bold text-white transition hover:bg-green-700 cursor-pointer text-xs shadow-md">
+              <Receipt size={15} /> View Receipt
+            </button>
+          )}
+        </div>
+      </aside>
+    </div>
   );
 }
 
@@ -439,7 +438,6 @@ export default function Invoice() {
     <div className="h-screen w-screen overflow-hidden bg-[#fffafd] flex">
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-      {/* lg:ml-[250px] waxay u dhigaysaa in desktop-ka uu boos banneeyo laakiin mobile-ka uu ka bilaabmo 0 */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden lg:ml-[250px]">
         <Header setMobileOpen={setMobileOpen} />
 
