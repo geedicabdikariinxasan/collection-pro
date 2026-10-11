@@ -22,15 +22,11 @@ import {
   LogOut,
   Plus,
   Trash2,
-  Grid,
-  List,
-  ChevronDown,
   Menu,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-// Qeex API URL-ka (Vercel Environment Variable ama Render Live URL)
 const API_URL = import.meta.env?.VITE_API_URL || process.env.NEXT_PUBLIC_API_URL || "https://collection-pro-backend.onrender.com";
 
 function Sidebar({ mobileOpen, setMobileOpen }) {
@@ -50,7 +46,6 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
 
   return (
     <>
-      {/* Mobile Overlay */}
       {mobileOpen && (
         <div 
           onClick={() => setMobileOpen(false)} 
@@ -58,11 +53,9 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
         />
       )}
 
-      {/* Sidebar Responsive */}
       <aside className={`fixed left-0 top-0 h-screen w-[250px] overflow-hidden bg-gradient-to-b from-pink-700 via-pink-800 to-rose-950 text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex flex-col h-full overflow-hidden relative">
           
-          {/* Close Button for Mobile */}
           <button 
             onClick={() => setMobileOpen(false)}
             className="absolute right-3 top-3 text-white lg:hidden p-1 cursor-pointer"
@@ -86,7 +79,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
                 <button
                   key={item.name}
                   onClick={() => {
-                    setMobileOpen(false); // Xir menu-ga marka la gujiyo
+                    setMobileOpen(false);
                     if (item.path !== "#") {
                       navigate(item.path);
                     } else {
@@ -123,7 +116,7 @@ function Header({ setMobileOpen }) {
   return (
     <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-4 md:px-6 backdrop-blur shadow-xs">
       <div className="flex items-center gap-2.5 w-full max-w-[350px]">
-        {/* Mobile Hamburger Button (3-da xariiqood) */}
+        {/* Badhanka 3-da xariiqood ee Menu-ga */}
         <button 
           onClick={() => setMobileOpen(true)}
           className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-xl cursor-pointer"
@@ -154,8 +147,6 @@ function Header({ setMobileOpen }) {
     </header>
   );
 }
-
-const money = (amount) => `$${Number(amount || 0).toFixed(2)}`;
 
 export default function Orders() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -260,8 +251,8 @@ export default function Orders() {
     <div className="h-screen w-screen overflow-hidden bg-[#f8f8fb] flex">
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-      {/* lg:ml-[250px] waxay u dhigaysaa in desktop-ka uu boos banneeyo laakiin mobile-ka uu ka bilaabmo 0 */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden lg:ml-[250px]">
+        {/* Header-ka sare oo leh Badhanka ☰ Menu */}
         <Header setMobileOpen={setMobileOpen} />
 
         <main className="flex-1 overflow-y-auto p-3 md:p-5 custom-scrollbar">
