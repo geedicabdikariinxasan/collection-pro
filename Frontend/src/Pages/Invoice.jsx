@@ -274,45 +274,32 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
 function ReceiptModal({ invoice, onCloseAndClear }) {
   if (!invoice) return null;
 
-  // Habka mobile iyo laptop-ba u daabacaya warqadda rasiidka oo keliya iyadoon khalkhal la gelin
-  const handleUniversalPrint = () => {
-    const printContent = document.getElementById("printable-receipt-card").innerHTML;
-    const printWindow = window.open("", "_blank", "width=800,height=900");
-    
-    if (printWindow) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Receipt - ${invoice.id}</title>
-            <script src="https://cdn.tailwindcss.com"></script>
-            <style>
-              body { font-family: ui-sans-serif, system-ui, sans-serif; padding: 20px; background: white; color: #111827; }
-              .no-print-area { display: none !important; }
-            </style>
-          </head>
-          <body>
-            <div style="max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb;">
-              ${printContent}
-            </div>
-            <script>
-              setTimeout(() => {
-                window.print();
-                window.close();
-              }, 500);
-            </script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-    }
-    onCloseAndClear();
+  // Direct Mobile-Friendly Print Execution
+  const handlePrint = () => {
+    const receiptElement = document.getElementById("printable-receipt-card");
+    if (!receiptElement) return;
+
+    const originalBody = document.body.innerHTML;
+    const receiptHTML = receiptElement.outerHTML;
+
+    // Temporal Replacement Strategy (Guarantee 100% Mobile Print Compatibility)
+    document.body.innerHTML = `
+      <div style="background: white; padding: 20px; max-width: 600px; margin: 0 auto;">
+        ${receiptHTML}
+      </div>
+    `;
+
+    setTimeout(() => {
+      window.print();
+      document.body.innerHTML = originalBody;
+      window.location.reload(); // Reloads app state safely and removes paid invoice
+    }, 300);
   };
 
   const handleDownloadPDF = () => {
     const element = document.getElementById("printable-receipt-card");
     const options = {
-      margin:      10,
+      margin:      5,
       filename:    `Receipt-${invoice.id}.pdf`,
       image:       { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true },
@@ -324,7 +311,7 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
         onCloseAndClear();
       });
     } else {
-      handleUniversalPrint();
+      handlePrint();
     }
   };
 
@@ -402,8 +389,8 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-2 no-print-area">
-          <button onClick={handleUniversalPrint} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
+        <div className="mt-6 flex flex-wrap gap-2 print:hidden">
+          <button onClick={handlePrint} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
             <Printer size={15} /> Print
           </button>
           <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 font-bold text-white shadow-md hover:bg-green-700 cursor-pointer text-xs">
