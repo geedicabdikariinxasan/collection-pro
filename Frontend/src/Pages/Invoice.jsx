@@ -274,158 +274,145 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
 function ReceiptModal({ invoice, onCloseAndClear }) {
   if (!invoice) return null;
 
-  // Habka cusub oo 100% u keenaya PDF/Print habboon oo aan lahayn page madhan
-  const handleMobileDownloadOrPrint = () => {
-    const cardElement = document.getElementById("receipt-card-content");
-    
-    // Haddii html2pdf uu shaqaynayo oo la helayo
-    if (window.html2pdf) {
-      const opt = {
-        margin:       [5, 5, 5, 5],
-        filename:     `Receipt-${invoice.id}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false, scrollY: 0 },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-      window.html2pdf().set(opt).from(cardElement).save();
-    } else {
-      // Direct iframe method for standard browser print without capturing background app
-      const printIframe = document.createElement('iframe');
-      printIframe.style.position = 'absolute';
-      printIframe.style.width = '0px';
-      printIframe.style.height = '0px';
-      printIframe.style.border = 'none';
-      document.body.appendChild(printIframe);
+  const handlePrint = () => {
+    window.print();
+    onCloseAndClear();
+  };
 
-      const frameDoc = printIframe.contentWindow.document;
-      frameDoc.open();
-      frameDoc.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Receipt - ${invoice.id}</title>
-            <script src="https://cdn.tailwindcss.com"></script>
-            <style>
-              body { font-family: ui-sans-serif, system-ui, sans-serif; padding: 10px; background: #ffffff; color: #111827; }
-            </style>
-          </head>
-          <body>
-            <div style="max-width: 550px; margin: 0 auto; background: white; padding: 15px;">
-              ${cardElement.innerHTML}
-            </div>
-            <script>
-              setTimeout(() => {
-                window.print();
-                setTimeout(() => {
-                  window.frameElement.remove();
-                }, 1000);
-              }, 500);
-            </script>
-          </body>
-        </html>
-      `);
-      frameDoc.close();
+  const handleDownloadPDF = () => {
+    const element = document.getElementById("printable-receipt-card");
+    const options = {
+      margin:      0,
+      filename:    `Receipt-${invoice.id}.pdf`,
+      image:       { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    if (window.html2pdf) {
+      window.html2pdf().from(element).set(options).save().then(() => {
+        onCloseAndClear();
+      });
+    } else {
+      window.print();
+      onCloseAndClear();
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 p-3 backdrop-blur-xs overflow-y-auto">
-      <div className="w-full max-w-lg rounded-2xl bg-white p-5 sm:p-8 shadow-2xl border border-gray-300 relative text-gray-800 my-auto">
-        
-        {/* Target Printable Area */}
-        <div id="receipt-card-content" className="space-y-4 bg-white p-2">
-          <div className="flex justify-between items-start border-b-2 border-gray-900 pb-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-pink-100 text-pink-600 font-bold text-xl">
-                👗
+    <>
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          #printable-receipt-card, #printable-receipt-card * {
+            visibility: visible !important;
+          }
+          #printable-receipt-card {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 15px !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: #ffffff !important;
+          }
+          .no-print-area {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      <div className="fixed inset-0 z-[300] flex items-start justify-center bg-black/70 p-2 sm:p-4 backdrop-blur-xs overflow-y-auto print:p-0 print:bg-white">
+        <div id="printable-receipt-card" className="w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl border border-gray-300 relative text-gray-800 my-2 sm:my-4">
+          
+          <div className="space-y-4 bg-white p-0 m-0">
+            <div className="flex justify-between items-start border-b-2 border-gray-900 pb-3 pt-0 mt-0">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-pink-100 text-pink-600 font-bold text-xl">
+                  👗
+                </div>
+                <div>
+                  <h2 className="font-serif text-lg font-extrabold tracking-wide text-gray-900">COLLECTION PRO</h2>
+                  <p className="text-[8px] tracking-[1.5px] text-gray-500 uppercase font-semibold">WOMEN'S FASHION & CLOTHING</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <h1 className="text-sm font-black uppercase tracking-wider text-gray-900">PAYMENT RECEIPT</h1>
+                <p className="text-[11px] text-gray-500">Receipt No: <strong>REC-{invoice.id}</strong></p>
+                <p className="text-[11px] text-gray-500">Date: <strong>{invoice.date}</strong></p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-bold text-gray-800 uppercase tracking-wider border-b border-gray-400 pb-1 mb-2">Customer Information</p>
+              <div className="grid grid-cols-2 gap-y-1 text-xs">
+                <p><span className="text-gray-500">Full Name:</span> <strong className="text-gray-900">{invoice.customerName}</strong></p>
+                <p><span className="text-gray-500">Phone:</span> <strong className="text-gray-900">{invoice.customerPhone || "N/A"}</strong></p>
+                <p><span className="text-gray-500">Email:</span> <strong className="text-gray-900">{invoice.customerEmail}</strong></p>
+                <p><span className="text-gray-500">Invoice No:</span> <strong className="text-gray-900">{invoice.id}</strong></p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-bold text-gray-800 uppercase tracking-wider border-b border-gray-400 pb-1 mb-2">Payment Details</p>
+              <table className="w-full text-xs border border-gray-300">
+                <tbody>
+                  <tr className="border-b border-gray-300">
+                    <td className="p-2 font-bold bg-gray-50 text-gray-700 w-1/3">Payment ID</td>
+                    <td className="p-2 font-semibold text-gray-900">PAY-{invoice.id}</td>
+                  </tr>
+                  <tr className="border-b border-gray-300">
+                    <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Date</td>
+                    <td className="p-2 text-gray-900">{invoice.date}</td>
+                  </tr>
+                  <tr className="border-b border-gray-300">
+                    <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Method</td>
+                    <td className="p-2 text-gray-900">Mobile Money / Cash</td>
+                  </tr>
+                  <tr className="border-b border-gray-300">
+                    <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Status</td>
+                    <td className="p-2">
+                      <span className="inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 font-bold text-[10px]">Paid</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="p-2 font-bold bg-gray-50 text-gray-700">Amount Paid</td>
+                    <td className="p-2 font-black text-pink-600 text-sm">${invoice.totalAmount?.toFixed(2)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="grid grid-cols-2 gap-8 pt-6 text-center text-xs">
+              <div>
+                <div className="border-t border-gray-400 pt-1 w-32 mx-auto"></div>
+                <p className="text-gray-500 font-semibold mt-0.5">Customer Signature</p>
               </div>
               <div>
-                <h2 className="font-serif text-lg font-extrabold tracking-wide text-gray-900">COLLECTION PRO</h2>
-                <p className="text-[8px] tracking-[1.5px] text-gray-500 uppercase font-semibold">WOMEN'S FASHION & CLOTHING</p>
+                <div className="border-t border-gray-400 pt-1 w-32 mx-auto"></div>
+                <p className="text-gray-500 font-semibold mt-1">Authorized Signature</p>
               </div>
             </div>
-            <div className="text-right">
-              <h1 className="text-sm font-black uppercase tracking-wider text-gray-900">PAYMENT RECEIPT</h1>
-              <p className="text-[11px] text-gray-500">Receipt No: <strong>REC-{invoice.id}</strong></p>
-              <p className="text-[11px] text-gray-500">Date: <strong>{invoice.date}</strong></p>
-            </div>
           </div>
 
-          <div>
-            <p className="text-xs font-bold text-gray-800 uppercase tracking-wider border-b border-gray-400 pb-1 mb-2">Customer Information</p>
-            <div className="grid grid-cols-2 gap-y-1 text-xs">
-              <p><span className="text-gray-500">Full Name:</span> <strong className="text-gray-900">{invoice.customerName}</strong></p>
-              <p><span className="text-gray-500">Phone:</span> <strong className="text-gray-900">{invoice.customerPhone || "N/A"}</strong></p>
-              <p><span className="text-gray-500">Email:</span> <strong className="text-gray-900">{invoice.customerEmail}</strong></p>
-              <p><span className="text-gray-500">Invoice No:</span> <strong className="text-gray-900">{invoice.id}</strong></p>
-            </div>
+          <div className="mt-6 flex flex-wrap gap-2 no-print-area">
+            <button onClick={handlePrint} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
+              <Printer size={15} /> Print
+            </button>
+            <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 font-bold text-white shadow-md hover:bg-green-700 cursor-pointer text-xs">
+              <Download size={15} /> Download PDF
+            </button>
+            <button onClick={onCloseAndClear} className="rounded-xl border border-gray-300 px-5 py-2.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-xs">
+              Close
+            </button>
           </div>
-
-          <div>
-            <p className="text-xs font-bold text-gray-800 uppercase tracking-wider border-b border-gray-400 pb-1 mb-2">Payment Details</p>
-            <table className="w-full text-xs border border-gray-300">
-              <tbody>
-                <tr className="border-b border-gray-300">
-                  <td className="p-2 font-bold bg-gray-50 text-gray-700 w-1/3">Payment ID</td>
-                  <td className="p-2 font-semibold text-gray-900">PAY-{invoice.id}</td>
-                </tr>
-                <tr className="border-b border-gray-300">
-                  <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Date</td>
-                  <td className="p-2 text-gray-900">{invoice.date}</td>
-                </tr>
-                <tr className="border-b border-gray-300">
-                  <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Method</td>
-                  <td className="p-2 text-gray-900">Mobile Money / Cash</td>
-                </tr>
-                <tr className="border-b border-gray-300">
-                  <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Status</td>
-                  <td className="p-2">
-                    <span className="inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 font-bold text-[10px]">Paid</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="p-2 font-bold bg-gray-50 text-gray-700">Amount Paid</td>
-                  <td className="p-2 font-black text-pink-600 text-sm">${invoice.totalAmount?.toFixed(2)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="grid grid-cols-2 gap-8 pt-4 text-center text-xs">
-            <div>
-              <div className="border-t border-gray-400 pt-1 w-32 mx-auto"></div>
-              <p className="text-gray-500 font-semibold mt-0.5">Customer Signature</p>
-            </div>
-            <div>
-              <div className="border-t border-gray-400 pt-1 w-32 mx-auto"></div>
-              <p className="text-gray-500 font-semibold mt-1">Authorized Signature</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Buttons */}
-        <div className="mt-5 flex flex-wrap gap-2">
-          <button 
-            onClick={handleMobileDownloadOrPrint} 
-            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs"
-          >
-            <Printer size={15} /> Print
-          </button>
-          <button 
-            onClick={handleMobileDownloadOrPrint} 
-            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 font-bold text-white shadow-md hover:bg-green-700 cursor-pointer text-xs"
-          >
-            <Download size={15} /> Download PDF
-          </button>
-          <button 
-            onClick={onCloseAndClear} 
-            className="rounded-xl border border-gray-300 px-5 py-2.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-xs"
-          >
-            Close & Clear
-          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -488,10 +475,10 @@ export default function Invoice() {
     <div className="h-screen w-screen overflow-hidden bg-[#fffafd] flex">
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-      <div className="flex-1 flex flex-col h-screen overflow-hidden lg:ml-[250px]">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden lg:ml-[250px] print:ml-0 print:h-auto print:overflow-visible">
         <Header setMobileOpen={setMobileOpen} />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar">
+        <main className="flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar print:hidden">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-pink-600 text-white shadow-md">
               <FileText size={22} />
