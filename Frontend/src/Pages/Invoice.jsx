@@ -48,50 +48,52 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
         />
       )}
 
-      <aside className={`fixed left-0 top-0 h-screen w-[250px] overflow-hidden bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex flex-col h-full overflow-hidden relative">
+      <aside className={`fixed left-0 top-0 h-screen w-[250px] bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="flex flex-col h-full overflow-y-auto custom-scrollbar relative justify-between">
           
-          <button 
-            onClick={() => setMobileOpen(false)}
-            className="absolute right-3 top-3 text-white lg:hidden p-1 cursor-pointer"
-          >
-            <X size={20} />
-          </button>
+          <div>
+            <button 
+              onClick={() => setMobileOpen(false)}
+              className="absolute right-3 top-3 text-white lg:hidden p-1 cursor-pointer z-10"
+            >
+              <X size={20} />
+            </button>
 
-          <div className="border-b border-white/10 px-5 py-4 text-center flex flex-col items-center justify-center">
-            <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-2xl shadow-md">👗</div>
-            <h1 className="font-serif text-lg font-bold tracking-wider whitespace-nowrap">COLLECTION PRO</h1>
-            <p className="text-[7px] tracking-[2px] text-pink-100 uppercase">WOMEN'S FASHION & CLOTHING</p>
+            <div className="border-b border-white/10 px-4 py-3 text-center flex flex-col items-center justify-center shrink-0">
+              <div className="mb-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-white text-xl shadow-md">👗</div>
+              <h1 className="font-serif text-sm font-bold tracking-wider whitespace-nowrap">COLLECTION PRO</h1>
+              <p className="text-[6px] tracking-[1.5px] text-pink-100 uppercase">WOMEN'S FASHION & CLOTHING</p>
+            </div>
+
+            <nav className="px-2 py-1 space-y-0.5">
+              <p className="mb-0.5 px-3 text-[7px] font-semibold uppercase tracking-[2px] text-pink-200">Main Menu</p>
+              {links.map(({ label, icon: Icon, path, active }) => (
+                <button
+                  key={label}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    if (path !== "#") navigate(path);
+                    else alert(`Bogga "${label}" dhawaan ayaa la dhisayaa!`);
+                  }}
+                  className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition cursor-pointer ${
+                    active ? "bg-pink-500 font-semibold shadow-md text-white" : "hover:bg-white/10 text-pink-50"
+                  }`}
+                >
+                  <Icon size={15} />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </nav>
           </div>
 
-          <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar">
-            <p className="mb-1 px-3 text-[8px] font-semibold uppercase tracking-[2px] text-pink-200">Main Menu</p>
-            {links.map(({ label, icon: Icon, path, active }) => (
-              <button
-                key={label}
-                onClick={() => {
-                  setMobileOpen(false);
-                  if (path !== "#") navigate(path);
-                  else alert(`Bogga "${label}" dhawaan ayaa la dhisayaa!`);
-                }}
-                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium transition cursor-pointer ${
-                  active ? "bg-pink-500 font-semibold shadow-md text-white" : "hover:bg-white/10 text-pink-50"
-                }`}
-              >
-                <Icon size={16} />
-                <span>{label}</span>
-              </button>
-            ))}
-          </nav>
-
-          <div className="px-4 py-2.5 text-center border-t border-white/10 bg-black/10 flex flex-col gap-1.5 mt-auto">
-            <button onClick={() => navigate("/")} className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 py-1.5 text-xs font-semibold text-white hover:bg-red-600 transition cursor-pointer">
+          <div className="px-3 py-2 text-center border-t border-white/10 bg-black/20 flex flex-col gap-1 shrink-0 my-1">
+            <button onClick={() => navigate("/")} className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2 text-xs font-bold text-white hover:bg-red-600 transition cursor-pointer shadow-md">
               <LogOut size={15} />
               <span>Logout</span>
             </button>
             <div>
-              <p className="font-serif text-[10px] italic text-pink-100">Style • Elegance • You</p>
-              <p className="text-[7px] text-pink-300">© 2026 COLLECTION PRO</p>
+              <p className="font-serif text-[9px] italic text-pink-100">Style • Elegance • You</p>
+              <p className="text-[6px] text-pink-300">© 2026 COLLECTION PRO</p>
             </div>
           </div>
         </div>
@@ -391,24 +393,27 @@ export default function Invoice() {
   const loadInvoices = () => {
     const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
     
-    const formattedInvoices = rawInvoices.map((inv, idx) => ({
+    // Kaliya soo bandhig Invoices-ka aan weli la bixin (Unpaid/Pending), ama kuwa aan tirtirmin.
+    // Haddii aad rabto in wixii Paid ah oo dhan ay meesha ka baxaan:
+    const activeInvoices = rawInvoices.filter(inv => inv.status !== "Paid");
+
+    const formattedInvoices = activeInvoices.map((inv, idx) => ({
       ...inv,
-      originalIndex: idx,
+      originalIndex: rawInvoices.indexOf(inv), // Kaydi index-ka saxda ah
       id: `INV-${String(idx + 1).padStart(3, "0")}`
     }));
 
     setInvoices(formattedInvoices);
   };
 
-  // Marka Payment-ka la xaqiijiyo, invoice-kan gebi ahaanba waxaa laga tirtirayaa localStorage
   const confirmPayment = (originalIndex) => {
     const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
     
-    // Tirtir invoice-kaas laga saar liiska
-    rawInvoices.splice(originalIndex, 1);
-    
-    // Dib u kaydi localStorage
-    localStorage.setItem("storeInvoices", JSON.stringify(rawInvoices));
+    if (rawInvoices[originalIndex] !== undefined) {
+      // Si loo tirtiro gebi ahaanba ama loo beddelo status-ka oo laga saaro liiska active-ka:
+      rawInvoices.splice(originalIndex, 1);
+      localStorage.setItem("storeInvoices", JSON.stringify(rawInvoices));
+    }
     
     loadInvoices();
     setPaymentInvoice(null);
@@ -425,8 +430,8 @@ export default function Invoice() {
   });
 
   const totalInvoiced = invoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
-  const totalPaid = invoices.filter(inv => inv.status === "Paid").reduce((sum, inv) => sum + inv.totalAmount, 0);
-  const totalUnpaid = invoices.filter(inv => inv.status !== "Paid").reduce((sum, inv) => sum + inv.totalAmount, 0);
+  const totalPaid = 0; // Maadaama kuwa paid-ka ah ay baxayaan
+  const totalUnpaid = totalInvoiced;
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#fffafd] flex">
