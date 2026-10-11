@@ -49,7 +49,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
       )}
 
       <aside className={`fixed left-0 top-0 h-screen w-[250px] bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex flex-col h-full overflow-y-auto custom-scrollbar relative justify-between">
+        <div className="flex flex-col h-full overflow-y-auto custom-scrollbar relative">
           
           <div>
             <button 
@@ -59,14 +59,25 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
               <X size={20} />
             </button>
 
-            <div className="border-b border-white/10 px-4 py-3 text-center flex flex-col items-center justify-center shrink-0">
+            <div className="border-b border-white/10 px-4 py-3 text-center flex flex-col items-center justify-center">
               <div className="mb-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-white text-xl shadow-md">👗</div>
               <h1 className="font-serif text-sm font-bold tracking-wider whitespace-nowrap">COLLECTION PRO</h1>
               <p className="text-[6px] tracking-[1.5px] text-pink-100 uppercase">WOMEN'S FASHION & CLOTHING</p>
             </div>
 
-            <nav className="px-2 py-1 space-y-0.5">
-              <p className="mb-0.5 px-3 text-[7px] font-semibold uppercase tracking-[2px] text-pink-200">Main Menu</p>
+            {/* Logout oo kor loo soo raray si uu mobile-ka ugu muuqdo */}
+            <div className="px-3 py-2 border-b border-white/10 bg-black/20">
+              <button 
+                onClick={() => navigate("/")} 
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-pink-600 py-2 text-xs font-bold text-white hover:bg-red-600 transition cursor-pointer shadow-md"
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
+            </div>
+
+            <nav className="px-2 py-2 space-y-0.5">
+              <p className="mb-1 px-3 text-[7px] font-semibold uppercase tracking-[2px] text-pink-200">Main Menu</p>
               {links.map(({ label, icon: Icon, path, active }) => (
                 <button
                   key={label}
@@ -86,15 +97,9 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
             </nav>
           </div>
 
-          <div className="px-3 py-2 text-center border-t border-white/10 bg-black/20 flex flex-col gap-1 shrink-0 my-1">
-            <button onClick={() => navigate("/")} className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2 text-xs font-bold text-white hover:bg-red-600 transition cursor-pointer shadow-md">
-              <LogOut size={15} />
-              <span>Logout</span>
-            </button>
-            <div>
-              <p className="font-serif text-[9px] italic text-pink-100">Style • Elegance • You</p>
-              <p className="text-[6px] text-pink-300">© 2026 COLLECTION PRO</p>
-            </div>
+          <div className="p-3 text-center border-t border-white/10 bg-black/10 mt-auto">
+            <p className="font-serif text-[9px] italic text-pink-100">Style • Elegance • You</p>
+            <p className="text-[6px] text-pink-300">© 2026 COLLECTION PRO</p>
           </div>
         </div>
       </aside>
@@ -258,7 +263,7 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
           <p className="mt-2 text-xl font-bold text-pink-600">${invoice.totalAmount.toFixed(2)}</p>
         </div>
         <button 
-          onClick={() => onConfirm(invoice.originalIndex)} 
+          onClick={() => onConfirm(invoice)} 
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-pink-600 py-3 font-bold text-white hover:bg-pink-700 cursor-pointer text-xs shadow-md"
         >
           <CheckCircle size={16} /> Payment Paid Successfully! ✅
@@ -268,8 +273,13 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
   );
 }
 
-function ReceiptModal({ invoice, onClose }) {
+function ReceiptModal({ invoice, onCloseAndClear }) {
   if (!invoice) return null;
+
+  const handlePrint = () => {
+    window.print();
+    onCloseAndClear();
+  };
 
   const handleDownloadPDF = () => {
     const element = document.getElementById("printable-receipt");
@@ -282,9 +292,12 @@ function ReceiptModal({ invoice, onClose }) {
     };
     
     if (window.html2pdf) {
-      window.html2pdf().from(element).set(options).save();
+      window.html2pdf().from(element).set(options).save().then(() => {
+        onCloseAndClear();
+      });
     } else {
       window.print();
+      onCloseAndClear();
     }
   };
 
@@ -292,6 +305,7 @@ function ReceiptModal({ invoice, onClose }) {
     <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/70 p-2 sm:p-4 backdrop-blur-xs overflow-y-auto print:bg-white print:p-0 print:block">
       <div className="w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl border border-gray-300 relative text-gray-800 my-2 sm:my-4 print:shadow-none print:border-none print:w-full print:max-w-none print:m-0 print:p-0">
         
+        {/* Rasiidka Top Aligned ah */}
         <div id="printable-receipt" className="space-y-4 bg-white p-0 m-0">
           <div className="flex justify-between items-start border-b-2 border-gray-900 pb-3 pt-0 mt-0">
             <div className="flex items-center gap-3">
@@ -344,7 +358,7 @@ function ReceiptModal({ invoice, onClose }) {
                 </tr>
                 <tr>
                   <td className="p-2 font-bold bg-gray-50 text-gray-700">Amount Paid</td>
-                  <td className="p-2 font-black text-pink-600 text-sm">${invoice.totalAmount.toFixed(2)}</td>
+                  <td className="p-2 font-black text-pink-600 text-sm">${invoice.totalAmount?.toFixed(2)}</td>
                 </tr>
               </tbody>
             </table>
@@ -363,13 +377,13 @@ function ReceiptModal({ invoice, onClose }) {
         </div>
 
         <div className="mt-6 flex flex-wrap gap-2 print:hidden">
-          <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
+          <button onClick={handlePrint} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
             <Printer size={15} /> Print
           </button>
           <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 font-bold text-white shadow-md hover:bg-green-700 cursor-pointer text-xs">
             <Download size={15} /> Download PDF
           </button>
-          <button onClick={onClose} className="rounded-xl border border-gray-300 px-5 py-2.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-xs">
+          <button onClick={onCloseAndClear} className="rounded-xl border border-gray-300 px-5 py-2.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-xs">
             Close
           </button>
         </div>
@@ -393,31 +407,33 @@ export default function Invoice() {
   const loadInvoices = () => {
     const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
     
-    // Kaliya soo bandhig Invoices-ka aan weli la bixin (Unpaid/Pending), ama kuwa aan tirtirmin.
-    // Haddii aad rabto in wixii Paid ah oo dhan ay meesha ka baxaan:
-    const activeInvoices = rawInvoices.filter(inv => inv.status !== "Paid");
-
-    const formattedInvoices = activeInvoices.map((inv, idx) => ({
+    const formattedInvoices = rawInvoices.map((inv, idx) => ({
       ...inv,
-      originalIndex: rawInvoices.indexOf(inv), // Kaydi index-ka saxda ah
+      originalIndex: idx,
       id: `INV-${String(idx + 1).padStart(3, "0")}`
     }));
 
     setInvoices(formattedInvoices);
   };
 
-  const confirmPayment = (originalIndex) => {
-    const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
-    
-    if (rawInvoices[originalIndex] !== undefined) {
-      // Si loo tirtiro gebi ahaanba ama loo beddelo status-ka oo laga saaro liiska active-ka:
-      rawInvoices.splice(originalIndex, 1);
+  // Marka xaqiijinta la riixo, si toos ah ayaan u furaynaa Receipt-ka
+  const confirmPayment = (invoiceToPay) => {
+    const updatedInvoice = { ...invoiceToPay, status: "Paid" };
+    setPaymentInvoice(null);
+    setReceiptInvoice(updatedInvoice); // Fur Rasiidka!
+  };
+
+  // Marka Rasiidka la Print-gareeyo, Download ama Xir lagu dhufto, markaasi ayaa laga tirtirayaa localStorage
+  const clearInvoiceAfterReceipt = () => {
+    if (receiptInvoice && receiptInvoice.originalIndex !== undefined) {
+      const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
+      rawInvoices.splice(receiptInvoice.originalIndex, 1);
       localStorage.setItem("storeInvoices", JSON.stringify(rawInvoices));
     }
     
-    loadInvoices();
-    setPaymentInvoice(null);
+    setReceiptInvoice(null);
     setSelectedInvoice(null);
+    loadInvoices();
   };
 
   const filteredInvoices = invoices.filter((invoice) => {
@@ -430,8 +446,8 @@ export default function Invoice() {
   });
 
   const totalInvoiced = invoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
-  const totalPaid = 0; // Maadaama kuwa paid-ka ah ay baxayaan
-  const totalUnpaid = totalInvoiced;
+  const totalPaid = invoices.filter(inv => inv.status === "Paid").reduce((sum, inv) => sum + inv.totalAmount, 0);
+  const totalUnpaid = invoices.filter(inv => inv.status !== "Paid").reduce((sum, inv) => sum + inv.totalAmount, 0);
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#fffafd] flex">
@@ -537,7 +553,7 @@ export default function Invoice() {
       </div>
 
       <PaymentModal invoice={paymentInvoice} onClose={() => setPaymentInvoice(null)} onConfirm={confirmPayment} />
-      <ReceiptModal invoice={receiptInvoice} onClose={() => setReceiptInvoice(null)} />
+      <ReceiptModal invoice={receiptInvoice} onCloseAndClear={clearInvoiceAfterReceipt} />
     </div>
   );
 }
