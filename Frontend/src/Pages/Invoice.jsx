@@ -37,6 +37,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
     { label: "Reports", icon: BarChart3, path: "#" },
     { label: "Users", icon: User, path: "#" },
     { label: "Settings", icon: Settings, path: "#" },
+    { label: "Logout", icon: LogOut, path: "/", isLogout: true },
   ];
 
   return (
@@ -49,7 +50,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
       )}
 
       <aside className={`fixed left-0 top-0 h-screen w-[250px] bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex flex-col h-full overflow-y-auto custom-scrollbar relative">
+        <div className="flex flex-col h-full overflow-y-auto custom-scrollbar relative justify-between">
           
           <div>
             <button 
@@ -59,47 +60,45 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
               <X size={20} />
             </button>
 
-            <div className="border-b border-white/10 px-4 py-3 text-center flex flex-col items-center justify-center">
-              <div className="mb-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-white text-xl shadow-md">👗</div>
-              <h1 className="font-serif text-sm font-bold tracking-wider whitespace-nowrap">COLLECTION PRO</h1>
-              <p className="text-[6px] tracking-[1.5px] text-pink-100 uppercase">WOMEN'S FASHION & CLOTHING</p>
+            <div className="border-b border-white/10 px-5 py-4 text-center flex flex-col items-center justify-center">
+              <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-2xl shadow-md">👗</div>
+              <h1 className="font-serif text-lg font-bold tracking-wider whitespace-nowrap">COLLECTION PRO</h1>
+              <p className="text-[7px] tracking-[2px] text-pink-100 uppercase">WOMEN'S FASHION & CLOTHING</p>
             </div>
 
-            {/* Logout oo kor loo soo raray si uu mobile-ka ugu muuqdo */}
-            <div className="px-3 py-2 border-b border-white/10 bg-black/20">
-              <button 
-                onClick={() => navigate("/")} 
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-pink-600 py-2 text-xs font-bold text-white hover:bg-red-600 transition cursor-pointer shadow-md"
-              >
-                <LogOut size={16} />
-                <span>Logout</span>
-              </button>
-            </div>
-
-            <nav className="px-2 py-2 space-y-0.5">
-              <p className="mb-1 px-3 text-[7px] font-semibold uppercase tracking-[2px] text-pink-200">Main Menu</p>
-              {links.map(({ label, icon: Icon, path, active }) => (
+            <nav className="px-3 py-3 space-y-1">
+              <p className="mb-1 px-3 text-[8px] font-semibold uppercase tracking-[2px] text-pink-200">Main Menu</p>
+              {links.map(({ label, icon: Icon, path, active, isLogout }) => (
                 <button
                   key={label}
                   onClick={() => {
                     setMobileOpen(false);
-                    if (path !== "#") navigate(path);
-                    else alert(`Bogga "${label}" dhawaan ayaa la dhisayaa!`);
+                    if (isLogout) {
+                      navigate("/");
+                    } else if (path !== "#") {
+                      navigate(path);
+                    } else {
+                      alert(`Bogga "${label}" dhawaan ayaa la dhisayaa!`);
+                    }
                   }}
-                  className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition cursor-pointer ${
-                    active ? "bg-pink-500 font-semibold shadow-md text-white" : "hover:bg-white/10 text-pink-50"
+                  className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium transition cursor-pointer ${
+                    isLogout
+                      ? "mt-3 bg-red-600/80 hover:bg-red-600 text-white font-bold shadow-sm"
+                      : active
+                      ? "bg-pink-500 font-semibold shadow-md text-white"
+                      : "hover:bg-white/10 text-pink-50"
                   }`}
                 >
-                  <Icon size={15} />
+                  <Icon size={16} />
                   <span>{label}</span>
                 </button>
               ))}
             </nav>
           </div>
 
-          <div className="p-3 text-center border-t border-white/10 bg-black/10 mt-auto">
-            <p className="font-serif text-[9px] italic text-pink-100">Style • Elegance • You</p>
-            <p className="text-[6px] text-pink-300">© 2026 COLLECTION PRO</p>
+          <div className="p-4 text-center border-t border-white/10 bg-black/10 shrink-0 mt-auto">
+            <p className="font-serif text-[10px] italic text-pink-100">Style • Elegance • You</p>
+            <p className="text-[7px] text-pink-300">© 2026 COLLECTION PRO</p>
           </div>
         </div>
       </aside>
@@ -305,7 +304,7 @@ function ReceiptModal({ invoice, onCloseAndClear }) {
     <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/70 p-2 sm:p-4 backdrop-blur-xs overflow-y-auto print:bg-white print:p-0 print:block">
       <div className="w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl border border-gray-300 relative text-gray-800 my-2 sm:my-4 print:shadow-none print:border-none print:w-full print:max-w-none print:m-0 print:p-0">
         
-        {/* Rasiidka Top Aligned ah */}
+        {/* Rasiidka Sare ku Dheggan */}
         <div id="printable-receipt" className="space-y-4 bg-white p-0 m-0">
           <div className="flex justify-between items-start border-b-2 border-gray-900 pb-3 pt-0 mt-0">
             <div className="flex items-center gap-3">
@@ -416,14 +415,14 @@ export default function Invoice() {
     setInvoices(formattedInvoices);
   };
 
-  // Marka xaqiijinta la riixo, si toos ah ayaan u furaynaa Receipt-ka
+  // 1. Marka "Payment Paid Successfully!" la riixo, Rasiidka ayaa toos u soo baxaya xogtana lagu wareejinayaa
   const confirmPayment = (invoiceToPay) => {
     const updatedInvoice = { ...invoiceToPay, status: "Paid" };
     setPaymentInvoice(null);
-    setReceiptInvoice(updatedInvoice); // Fur Rasiidka!
+    setReceiptInvoice(updatedInvoice);
   };
 
-  // Marka Rasiidka la Print-gareeyo, Download ama Xir lagu dhufto, markaasi ayaa laga tirtirayaa localStorage
+  // 2. Marka Rasiidka Print, Download ama Close lagu dhufto kaliya ayaa xogtaas laga saarayaa localStorage
   const clearInvoiceAfterReceipt = () => {
     if (receiptInvoice && receiptInvoice.originalIndex !== undefined) {
       const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
