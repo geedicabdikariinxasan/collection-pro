@@ -2,9 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Search,
   Bell,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   FileText,
   LayoutDashboard,
   Package,
@@ -16,19 +13,12 @@ import {
   User,
   Eye,
   X,
-  MapPin,
-  Phone,
-  Mail,
-  CalendarDays,
-  CreditCard,
   Printer,
   Download,
-  Send,
   CheckCircle,
   Clock,
   Receipt,
   Wallet,
-  Truck,
   LogOut,
   Menu,
 } from "lucide-react";
@@ -41,7 +31,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
     { label: "Products", icon: Package, path: "/products" },
     { label: "Customers", icon: Users, path: "/customers" },
     { label: "Orders", icon: ShoppingCart, path: "/orders" },
-    { label: "Sales", icon: BarChart3, path: "Sales" },
+    { label: "Sales", icon: BarChart3, path: "#" },
     { label: "Invoices", icon: FileText, path: "/invoices", active: true },
     { label: "Inventory / Stock", icon: Boxes, path: "#" },
     { label: "Reports", icon: BarChart3, path: "#" },
@@ -235,7 +225,6 @@ function InvoiceDetails({ invoice, onClose, onMakePayment, onReceipt }) {
           </div>
         </div>
 
-        {/* Badhanka oo si badbaado leh ugu yaalla hoosta */}
         <div className="p-4 border-t space-y-1.5 bg-gray-50 sticky bottom-0 z-10">
           {invoice.status !== "Paid" ? (
             <button onClick={() => onMakePayment(invoice)} className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-3 font-bold text-white transition hover:bg-pink-700 cursor-pointer text-xs shadow-md">
@@ -255,7 +244,7 @@ function InvoiceDetails({ invoice, onClose, onMakePayment, onReceipt }) {
 function PaymentModal({ invoice, onClose, onConfirm }) {
   if (!invoice) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-bold">Make Payment</h2>
@@ -266,7 +255,10 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
           <p className="text-gray-500 mt-1">Customer: <strong className="text-gray-800">{invoice.customerName}</strong></p>
           <p className="mt-2 text-xl font-bold text-pink-600">${invoice.totalAmount.toFixed(2)}</p>
         </div>
-        <button onClick={() => onConfirm(invoice.originalIndex)} className="flex w-full items-center justify-center gap-2 rounded-xl bg-pink-600 py-2.5 font-bold text-white hover:bg-pink-700 cursor-pointer text-xs">
+        <button 
+          onClick={() => onConfirm(invoice.originalIndex)} 
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-pink-600 py-3 font-bold text-white hover:bg-pink-700 cursor-pointer text-xs shadow-md"
+        >
           <CheckCircle size={16} /> Payment Paid Successfully! ✅
         </button>
       </div>
@@ -280,7 +272,7 @@ function ReceiptModal({ invoice, onClose }) {
   const handleDownloadPDF = () => {
     const element = document.getElementById("printable-receipt");
     const options = {
-      margin:      10,
+      margin:      0,
       filename:    `Receipt-${invoice.id}.pdf`,
       image:       { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true },
@@ -295,11 +287,12 @@ function ReceiptModal({ invoice, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs print:bg-white print:p-0">
-      <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-2xl border border-gray-300 relative text-gray-800 print:shadow-none print:border-none print:w-full print:max-w-none">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/70 p-2 sm:p-4 backdrop-blur-xs overflow-y-auto print:bg-white print:p-0 print:block">
+      <div className="w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl border border-gray-300 relative text-gray-800 my-2 sm:my-4 print:shadow-none print:border-none print:w-full print:max-w-none print:m-0 print:p-0">
         
-        <div id="printable-receipt" className="space-y-4 bg-white p-2">
-          <div className="flex justify-between items-start border-b-2 border-gray-900 pb-4">
+        {/* Qaybta Rasiidka ah oo si toos ah dusha sare ugu dheggan (Top Aligned for Printing) */}
+        <div id="printable-receipt" className="space-y-4 bg-white p-0 m-0">
+          <div className="flex justify-between items-start border-b-2 border-gray-900 pb-3 pt-0 mt-0">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-pink-100 text-pink-600 font-bold text-xl">
                 👗
@@ -368,7 +361,7 @@ function ReceiptModal({ invoice, onClose }) {
           </div>
         </div>
 
-        <div className="mt-6 flex gap-3 print:hidden">
+        <div className="mt-6 flex flex-wrap gap-2 print:hidden">
           <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
             <Printer size={15} /> Print
           </button>
@@ -411,7 +404,7 @@ export default function Invoice() {
   const confirmPayment = (originalIndex) => {
     const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
     
-    if (rawInvoices[originalIndex]) {
+    if (rawInvoices[originalIndex] !== undefined) {
       rawInvoices[originalIndex].status = "Paid";
       localStorage.setItem("storeInvoices", JSON.stringify(rawInvoices));
     }
