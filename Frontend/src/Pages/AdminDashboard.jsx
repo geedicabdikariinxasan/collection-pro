@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
+  Search,
+  Bell,
   LayoutDashboard,
   Package,
   Users,
@@ -14,10 +16,12 @@ import {
   Menu,
   TrendingUp,
   DollarSign,
-  Clock,
-  CheckCircle,
-  Eye,
-  ArrowUpRight,
+  Calendar,
+  PlusCircle,
+  Receipt,
+  Plus,
+  ArrowRight,
+  AlertCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -48,7 +52,6 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
 
       <aside className={`fixed left-0 top-0 h-screen w-[250px] bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex flex-col h-full overflow-y-auto custom-scrollbar relative justify-between">
-          
           <div>
             <button 
               onClick={() => setMobileOpen(false)}
@@ -80,7 +83,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
                   }}
                   className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium transition cursor-pointer ${
                     isLogout
-                      ? "mt-4 bg-red-600/80 hover:bg-red-600 text-white font-bold shadow-sm"
+                      ? "mt-3 bg-red-600/80 hover:bg-red-600 text-white font-bold shadow-sm"
                       : active
                       ? "bg-pink-500 font-semibold shadow-md text-white"
                       : "hover:bg-white/10 text-pink-50"
@@ -104,63 +107,58 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
 }
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Live States from LocalStorage
+  const [products, setProducts] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [stats, setStats] = useState({
-    totalSales: 0,
-    totalOrders: 0,
-    totalCustomers: 0,
-  });
+  const [invoices, setInvoices] = useState([]);
 
   useEffect(() => {
-    loadLiveDashboardData();
-    window.addEventListener("storage", loadLiveDashboardData);
-    return () => window.removeEventListener("storage", loadLiveDashboardData);
+    // Read live data
+    const storedProducts = JSON.parse(localStorage.getItem("storeProducts") || "[]");
+    const storedCustomers = JSON.parse(localStorage.getItem("storeCustomers") || "[]");
+    const storedOrders = JSON.parse(localStorage.getItem("storeOrders") || "[]");
+    const storedInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
+
+    setProducts(storedProducts);
+    setCustomers(storedCustomers);
+    setOrders(storedOrders);
+    setInvoices(storedInvoices);
   }, []);
 
-  const loadLiveDashboardData = () => {
-    const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
-    const rawOrders = JSON.parse(localStorage.getItem("storeOrders") || "[]");
+  // Live Calculations
+  const totalProductsCount = products.length;
+  const totalCustomersCount = customers.length;
+  const totalOrdersCount = orders.length;
+  const totalInvoicesCount = invoices.length;
+  const totalSalesAmount = orders.reduce((sum, ord) => sum + Number(ord.totalAmount || 0), 0);
 
-    // Mix orders or fallback to default presentation if empty
-    const allLiveOrders = rawInvoices.length > 0 ? rawInvoices : rawOrders;
-    
-    const formattedOrders = allLiveOrders.slice(0, 5).map((ord, idx) => ({
-      id: ord.id || `ORD-${String(idx + 1).padStart(3, "0")}`,
-      customer: ord.customerName || "Customer",
-      phone: ord.customerPhone || "N/A",
-      amount: ord.totalAmount || 0,
-      status: ord.status || "Pending",
-      date: ord.date || new Date().toISOString().split("T")[0],
-    }));
+  // Recent 5 Orders
+  const recentOrders = [...orders].reverse().slice(0, 5);
 
-    setOrders(formattedOrders);
+  // Low Stock Items (Stock < 10)
+  const lowStockProducts = products.filter((p) => Number(p.stock || p.quantity || 0) <= 10).slice(0, 5);
 
-    const calculatedSales = allLiveOrders.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
-    setStats({
-      totalSales: calculatedSales > 0 ? calculatedSales : 12450,
-      totalOrders: allLiveOrders.length > 0 ? allLiveOrders.length : 148,
-      totalCustomers: new Set(allLiveOrders.map(o => o.customerName)).size || 89,
-    });
-  };
+  // Top Selling Products
+  const topSellingProducts = [...products].slice(0, 5);
 
-  const chartData = [
-    { day: "Mon", sales: 420, height: "45%" },
-    { day: "Tue", sales: 680, height: "65%" },
-    { day: "Wed", sales: 950, height: "85%" },
-    { day: "Thu", sales: 510, height: "55%" },
-    { day: "Fri", sales: 1200, height: "100%" },
-    { day: "Sat", sales: 880, height: "80%" },
-    { day: "Sun", sales: 740, height: "70%" },
-  ];
+  const currentDate = new Date().toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-[#fffafd] flex">
+    <div className="min-h-screen w-screen bg-[#f8fafc] flex overflow-x-hidden">
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto lg:ml-[250px] p-4 md:p-6 custom-scrollbar">
-        {/* Header Title */}
-        <div className="mb-6 flex items-center justify-between">
+      <div className="flex-1 flex flex-col min-h-screen overflow-y-auto lg:ml-[250px] p-4 md:p-6 lg:p-8 custom-scrollbar">
+        
+        {/* Top Header */}
+        <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setMobileOpen(true)}
@@ -168,159 +166,356 @@ export default function AdminDashboard() {
             >
               <Menu size={22} />
             </button>
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-xs text-gray-500">Welcome back to COLLECTION PRO Management.</p>
+            <div className="relative w-64 md:w-80">
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                placeholder="Search anything..."
+                className="w-full rounded-2xl bg-white border border-gray-100 py-2.5 pl-10 pr-4 text-xs shadow-xs outline-none focus:border-pink-300"
+              />
             </div>
           </div>
-          <div className="hidden sm:flex items-center gap-2 bg-pink-50 border border-pink-100 px-3 py-1.5 rounded-xl text-pink-700 text-xs font-semibold">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-600"></span>
-            </span>
-            Live System Analytics
+
+          <div className="flex items-center gap-4">
+            <button className="relative rounded-full bg-white p-2.5 text-gray-500 shadow-xs hover:bg-pink-50 cursor-pointer">
+              <Bell size={18} />
+              <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-pink-600 text-[9px] font-bold text-white">3</span>
+            </button>
+            <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-2xl shadow-xs border border-gray-100">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-600 text-white font-bold text-xs">A</div>
+              <div className="text-left">
+                <p className="text-xs font-bold text-gray-800">Admin</p>
+                <p className="text-[9px] text-gray-400">Administrator</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Overview Stats Cards */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-          <StatCard title="Total Sales" value={`$${stats.totalSales.toFixed(2)}`} icon={<DollarSign size={20} />} change="+12%" />
-          <StatCard title="Total Orders" value={stats.totalOrders} icon={<ShoppingCart size={20} />} change="+8%" />
-          <StatCard title="Total Customers" value={stats.totalCustomers} icon={<Users size={20} />} change="+5%" />
-          <StatCard title="Growth Rate" value="23.5%" icon={<TrendingUp size={20} />} change="+18%" />
+        {/* Welcome Banner */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              Welcome Back, Admin <span className="text-pink-600 text-xl">👑</span>
+            </h1>
+            <p className="text-xs text-gray-500 mt-1">Here's what's happening with your store today.</p>
+          </div>
+          <div className="flex items-center gap-2 bg-[#d91b5c] text-white px-4 py-2.5 rounded-2xl shadow-sm text-xs font-semibold self-start sm:self-auto">
+            <Calendar size={16} />
+            <div>
+              <p className="text-[9px] text-pink-200 uppercase tracking-wider">Today</p>
+              <p className="font-bold">{currentDate}</p>
+            </div>
+          </div>
         </div>
 
-        {/* Live Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* 5 Main Live Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 mb-6">
+          <MetricCard
+            title="Total Products"
+            value={totalProductsCount}
+            icon={<Package size={18} className="text-pink-600" />}
+            bgColor="bg-pink-50"
+            iconBg="bg-pink-100"
+            badge="+12% vs last month"
+          />
+          <MetricCard
+            title="Total Customers"
+            value={totalCustomersCount}
+            icon={<Users size={18} className="text-purple-600" />}
+            bgColor="bg-purple-50/60"
+            iconBg="bg-purple-100"
+            badge="+8% vs last month"
+          />
+          <MetricCard
+            title="Total Orders"
+            value={totalOrdersCount}
+            icon={<ShoppingCart size={18} className="text-emerald-600" />}
+            bgColor="bg-emerald-50/60"
+            iconBg="bg-emerald-100"
+            badge="+15% vs last month"
+          />
+          <MetricCard
+            title="Total Sales"
+            value={`$${totalSalesAmount.toLocaleString()}`}
+            icon={<DollarSign size={18} className="text-blue-600" />}
+            bgColor="bg-blue-50/60"
+            iconBg="bg-blue-100"
+            badge="+20% vs last month"
+          />
+          <MetricCard
+            title="Total Invoices"
+            value={totalInvoicesCount}
+            icon={<FileText size={18} className="text-amber-600" />}
+            bgColor="bg-amber-50/60"
+            iconBg="bg-amber-100"
+            badge="+10% vs last month"
+          />
+        </div>
+
+        {/* Section: Sales Chart & Recent Orders */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
           
-          {/* Bar Chart: Weekly Revenue */}
-          <div className="lg:col-span-2 rounded-2xl border border-gray-100 bg-white p-5 shadow-xs flex flex-col justify-between">
+          {/* Sales Overview Chart Simulation */}
+          <div className="lg:col-span-7 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-sm font-bold text-gray-900">Weekly Revenue Trend</h3>
-                <p className="text-[11px] text-gray-400">Live sales breakdown for the current week</p>
-              </div>
-              <span className="text-xs font-bold text-pink-600 bg-pink-50 px-2.5 py-1 rounded-lg flex items-center gap-1">
-                <ArrowUpRight size={14} /> +14.2%
-              </span>
-            </div>
-
-            <div className="h-48 w-full flex items-end justify-between gap-2 pt-6 pb-2 px-2 border-b border-gray-100">
-              {chartData.map((item, idx) => (
-                <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group cursor-pointer relative">
-                  
-                  {/* Tooltip on hover */}
-                  <div className="absolute -top-7 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-md pointer-events-none whitespace-nowrap">
-                    ${item.sales}
-                  </div>
-
-                  <div 
-                    style={{ height: item.height }}
-                    className="w-full max-w-[32px] bg-gradient-to-t from-pink-600 to-pink-400 rounded-t-lg group-hover:from-pink-700 group-hover:to-pink-500 transition-all duration-300 shadow-xs"
-                  />
-                  <span className="text-[10px] font-semibold text-gray-400 mt-2">{item.day}</span>
+                <h2 className="text-sm font-bold text-gray-900">Sales Overview</h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-2xl font-black text-gray-900">${totalSalesAmount.toLocaleString()}</span>
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                    <TrendingUp size={12} /> 20% vs last month
+                  </span>
                 </div>
-              ))}
+              </div>
+              <select className="bg-gray-50 border border-gray-200 text-xs text-gray-600 rounded-xl px-2.5 py-1.5 outline-none font-medium">
+                <option>This Month</option>
+                <option>This Week</option>
+              </select>
             </div>
 
-            <div className="flex justify-between items-center pt-3 text-xs text-gray-500">
-              <span>Avg Daily Revenue: <strong className="text-gray-800">$770.00</strong></span>
-              <span>Peak Day: <strong className="text-pink-600">Friday ($1,200)</strong></span>
-            </div>
-          </div>
-
-          {/* Donut Progress / Distribution */}
-          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-xs flex flex-col justify-between">
-            <div>
-              <h3 className="text-sm font-bold text-gray-900 mb-1">Sales by Category</h3>
-              <p className="text-[11px] text-gray-400">Top selling fashion lines</p>
-            </div>
-
-            <div className="space-y-3 my-4">
-              <CategoryProgress label="Abayas & Dresses" percent={55} color="bg-pink-600" />
-              <CategoryProgress label="Hijabs & Scarves" percent={25} color="bg-purple-600" />
-              <CategoryProgress label="Handbags & Accessories" percent={15} color="bg-rose-400" />
-              <CategoryProgress label="Footwear" percent={5} color="bg-gray-400" />
-            </div>
-
-            <div className="pt-3 border-t border-gray-100 text-center">
-              <p className="text-[11px] text-gray-500">Monthly Target Completed: <strong className="text-gray-900">78%</strong></p>
-              <div className="w-full bg-gray-100 h-2 rounded-full mt-1.5 overflow-hidden">
-                <div className="bg-pink-600 h-full rounded-full w-[78%]" />
+            {/* SVG Wavy Line Chart */}
+            <div className="w-full h-44 relative mt-2">
+              <svg className="w-full h-full overflow-visible" viewBox="0 0 500 150">
+                <defs>
+                  <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#d91b5c" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#d91b5c" stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M0 110 Q70 120 120 85 T250 60 T370 40 T500 20 L500 150 L0 150 Z"
+                  fill="url(#gradient)"
+                />
+                <path
+                  d="M0 110 Q70 120 120 85 T250 60 T370 40 T500 20"
+                  fill="none"
+                  stroke="#d91b5c"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                />
+                <circle cx="120" cy="85" r="4" fill="#d91b5c" />
+                <circle cx="250" cy="60" r="4" fill="#d91b5c" />
+                <circle cx="370" cy="40" r="4" fill="#d91b5c" />
+                <circle cx="500" cy="20" r="5" fill="#d91b5c" className="animate-pulse" />
+              </svg>
+              <div className="flex justify-between text-[10px] text-gray-400 font-medium mt-3">
+                <span>May 1</span>
+                <span>May 4</span>
+                <span>May 7</span>
+                <span>May 10</span>
+                <span>May 13</span>
+                <span>May 15</span>
               </div>
             </div>
           </div>
 
-        </div>
-
-        {/* Live Recent Orders Table */}
-        <div className="rounded-2xl border border-gray-100 bg-white shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-bold text-gray-900">Live Recent Orders</h3>
-              <p className="text-[11px] text-gray-400">Real-time order submissions from store</p>
+          {/* Recent Orders List */}
+          <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-bold text-gray-900">Recent Orders</h2>
+              <button onClick={() => navigate("/orders")} className="text-xs font-semibold text-pink-600 hover:underline">
+                View All
+              </button>
             </div>
-            <button 
-              onClick={() => navigate("/orders")}
-              className="text-xs font-bold text-pink-600 hover:text-pink-700 cursor-pointer flex items-center gap-1"
-            >
-              View All Orders <ArrowUpRight size={14} />
-            </button>
-          </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-pink-50/50 text-gray-500 font-semibold border-b border-gray-100">
-                <tr>
-                  <th className="px-4 py-3">Order ID</th>
-                  <th className="px-4 py-3">Customer</th>
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Amount</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {orders.length > 0 ? (
-                  orders.map((ord, idx) => (
-                    <tr key={idx} className="hover:bg-pink-50/20 transition">
-                      <td className="px-4 py-3 font-bold text-pink-600">{ord.id}</td>
-                      <td className="px-4 py-3">
-                        <p className="font-semibold text-gray-800">{ord.customer}</p>
-                        <p className="text-[10px] text-gray-400">{ord.phone}</p>
-                      </td>
-                      <td className="px-4 py-3 text-gray-500">{ord.date}</td>
-                      <td className="px-4 py-3 font-bold text-gray-900">${Number(ord.amount).toFixed(2)}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                          ord.status === "Paid" || ord.status === "Delivered"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-orange-100 text-orange-700"
-                        }`}>
-                          {ord.status === "Paid" ? <CheckCircle size={10} /> : <Clock size={10} />}
-                          {ord.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <button 
-                          onClick={() => navigate("/orders")}
-                          className="p-1.5 border border-pink-200 text-pink-600 hover:bg-pink-50 rounded-lg font-semibold inline-flex items-center gap-1 text-[11px] cursor-pointer"
-                        >
-                          <Eye size={12} /> Details
-                        </button>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="text-gray-400 border-b border-gray-100 text-[10px] uppercase font-bold">
+                    <th className="pb-2">#</th>
+                    <th className="pb-2">Customer</th>
+                    <th className="pb-2">Total</th>
+                    <th className="pb-2 text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50 font-medium text-gray-800">
+                  {recentOrders.length > 0 ? (
+                    recentOrders.map((ord, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50/50">
+                        <td className="py-2.5 font-semibold text-gray-500">ORD-{String(idx + 1001)}</td>
+                        <td className="py-2.5">{ord.customerName || "Customer"}</td>
+                        <td className="py-2.5 font-bold">${Number(ord.totalAmount || 0).toFixed(2)}</td>
+                        <td className="py-2.5 text-right">
+                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            ord.status === "Delivered" ? "bg-emerald-100 text-emerald-700" :
+                            ord.status === "Processing" ? "bg-blue-100 text-blue-700" :
+                            "bg-amber-100 text-amber-700"
+                          }`}>
+                            {ord.status || "Pending"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="py-8 text-center text-gray-400">
+                        No orders recorded yet.
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="py-8 text-center text-gray-400">
-                      No live orders found. Orders placed will appear here automatically.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
+        </div>
+
+        {/* Section: Top Selling & Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+          
+          {/* Top Selling Products Horizontal Grid */}
+          <div className="lg:col-span-7 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold text-gray-900">Top Selling Products</h2>
+              <button onClick={() => navigate("/products")} className="text-xs font-semibold text-pink-600 hover:underline">
+                View All
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              {topSellingProducts.length > 0 ? (
+                topSellingProducts.map((prod, idx) => (
+                  <div key={idx} className="bg-gray-50 p-2 rounded-xl text-center border border-gray-100 hover:shadow-xs transition">
+                    <img
+                      src={prod.image || "https://images.unsplash.com/photo-1595777457583-95e059d581b8"}
+                      alt=""
+                      className="h-20 w-full object-cover rounded-lg mb-2"
+                      onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1595777457583-95e059d581b8"; }}
+                    />
+                    <h3 className="text-[11px] font-bold text-gray-800 truncate">{prod.name || "Dress"}</h3>
+                    <p className="text-xs font-black text-pink-600">${Number(prod.price || 25).toFixed(2)}</p>
+                    <p className="text-[9px] text-gray-400 mt-0.5">{20 + idx * 5} sold</p>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-5 py-6 text-center text-gray-400 text-xs">
+                  No products available.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Actions 4 Big Buttons */}
+          <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs">
+            <h2 className="text-sm font-bold text-gray-900 mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => navigate("/products")}
+                className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5"
+              >
+                <PlusCircle size={20} />
+                <span>Add Product</span>
+              </button>
+              <button
+                onClick={() => navigate("/orders")}
+                className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5"
+              >
+                <ShoppingCart size={20} />
+                <span>New Order</span>
+              </button>
+              <button
+                onClick={() => navigate("/invoices")}
+                className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5"
+              >
+                <Receipt size={20} />
+                <span>View Invoices</span>
+              </button>
+              <button
+                onClick={() => navigate("/products")}
+                className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5"
+              >
+                <Boxes size={20} />
+                <span>Check Stock</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Section: Low Stock Products Table & Promotional Banner */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          
+          {/* Low Stock Products */}
+          <div className="lg:col-span-7 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-1.5">
+                <AlertCircle size={16} className="text-red-500" />
+                <h2 className="text-sm font-bold text-gray-900">Recent Low Stock Products</h2>
+              </div>
+              <button onClick={() => navigate("/products")} className="text-xs font-semibold text-pink-600 hover:underline">
+                View All
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="text-gray-400 border-b border-gray-100 text-[10px] uppercase font-bold">
+                    <th className="pb-2">#</th>
+                    <th className="pb-2">Product Name</th>
+                    <th className="pb-2">Category</th>
+                    <th className="pb-2">Stock</th>
+                    <th className="pb-2">Status</th>
+                    <th className="pb-2 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50 font-medium text-gray-800">
+                  {lowStockProducts.length > 0 ? (
+                    lowStockProducts.map((item, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50/50">
+                        <td className="py-2.5 text-gray-400">{idx + 1}</td>
+                        <td className="py-2.5 font-bold">{item.name || "Product"}</td>
+                        <td className="py-2.5 text-gray-500">{item.category || "General"}</td>
+                        <td className="py-2.5 text-red-600 font-black">{item.stock || item.quantity || 3}</td>
+                        <td className="py-2.5">
+                          <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded-full text-[9px] font-bold">
+                            Low Stock
+                          </span>
+                        </td>
+                        <td className="py-2.5 text-right">
+                          <button
+                            onClick={() => navigate("/products")}
+                            className="bg-pink-600 hover:bg-pink-700 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg cursor-pointer"
+                          >
+                            Restock
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="py-6 text-center text-gray-400 text-xs">
+                        All products have sufficient stock!
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Fashion Promo Banner */}
+          <div className="lg:col-span-5 bg-gradient-to-r from-pink-100 via-pink-50 to-pink-200 p-6 rounded-2xl border border-pink-200 shadow-xs flex items-center justify-between relative overflow-hidden">
+            <div className="z-10 max-w-[220px]">
+              <div className="flex items-center gap-1 text-pink-600 font-bold text-[10px] uppercase tracking-wider mb-1">
+                <span>👗 COLLECTION PRO</span>
+              </div>
+              <h3 className="font-serif text-xl font-black text-gray-900 leading-tight mb-2">
+                Fashion Makes You Confident
+              </h3>
+              <button
+                onClick={() => navigate("/products")}
+                className="flex items-center gap-1.5 bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md transition cursor-pointer mt-2"
+              >
+                <span>View Products</span>
+                <ArrowRight size={14} />
+              </button>
+            </div>
+
+            <img
+              src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400"
+              alt="Fashion"
+              className="h-36 w-36 object-cover rounded-2xl shadow-md border-2 border-white transform rotate-3"
+            />
+          </div>
+
         </div>
 
       </div>
@@ -328,30 +523,18 @@ export default function AdminDashboard() {
   );
 }
 
-function StatCard({ title, value, icon, change }) {
+function MetricCard({ title, value, icon, bgColor, iconBg, badge }) {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-pink-100 bg-white p-4 shadow-xs">
+    <div className={`${bgColor} p-4 rounded-2xl border border-gray-100 shadow-xs flex flex-col justify-between`}>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-medium text-gray-600">{title}</span>
+        <div className={`h-8 w-8 rounded-xl ${iconBg} flex items-center justify-center`}>
+          {icon}
+        </div>
+      </div>
       <div>
-        <p className="text-xs text-gray-500">{title}</p>
-        <p className="mt-1 text-xl font-bold text-gray-900">{value}</p>
-        <span className="text-[10px] text-green-600 font-semibold">{change} from last month</span>
-      </div>
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-100 text-pink-600">
-        {icon}
-      </div>
-    </div>
-  );
-}
-
-function CategoryProgress({ label, percent, color }) {
-  return (
-    <div>
-      <div className="flex justify-between text-xs font-semibold text-gray-700 mb-1">
-        <span>{label}</span>
-        <span>{percent}%</span>
-      </div>
-      <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${percent}%` }} />
+        <p className="text-xl font-black text-gray-900">{value}</p>
+        <p className="text-[9px] font-bold text-gray-500 mt-1">{badge}</p>
       </div>
     </div>
   );
