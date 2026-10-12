@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Search,
-  Bell,
   LayoutDashboard,
   Package,
   Users,
@@ -14,12 +12,13 @@ import {
   LogOut,
   X,
   Menu,
+  Search,
+  Bell,
   TrendingUp,
   DollarSign,
   Calendar,
   PlusCircle,
   Receipt,
-  Plus,
   ArrowRight,
   AlertCircle,
 } from "lucide-react";
@@ -83,7 +82,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
                   }}
                   className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium transition cursor-pointer ${
                     isLogout
-                      ? "mt-3 bg-red-600/80 hover:bg-red-600 text-white font-bold shadow-sm"
+                      ? "mt-4 bg-red-600/80 hover:bg-red-600 text-white font-bold shadow-sm"
                       : active
                       ? "bg-pink-500 font-semibold shadow-md text-white"
                       : "hover:bg-white/10 text-pink-50"
@@ -110,18 +109,49 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Live States from LocalStorage
   const [products, setProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [invoices, setInvoices] = useState([]);
 
   useEffect(() => {
-    // Read live data
-    const storedProducts = JSON.parse(localStorage.getItem("storeProducts") || "[]");
-    const storedCustomers = JSON.parse(localStorage.getItem("storeCustomers") || "[]");
-    const storedOrders = JSON.parse(localStorage.getItem("storeOrders") || "[]");
-    const storedInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
+    let storedProducts = JSON.parse(localStorage.getItem("storeProducts") || "[]");
+    let storedCustomers = JSON.parse(localStorage.getItem("storeCustomers") || "[]");
+    let storedOrders = JSON.parse(localStorage.getItem("storeOrders") || "[]");
+    let storedInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
+
+    // Fallback Mock Data so metrics show live numbers immediately
+    if (storedProducts.length === 0) {
+      storedProducts = [
+        { name: "Elegant Dress", price: 25, stock: 12, category: "Dresses", image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8" },
+        { name: "Maxi Dress", price: 32, stock: 5, category: "Dresses", image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446" },
+        { name: "Blazer Set", price: 45, stock: 3, category: "Suits", image: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b" },
+        { name: "Floral Dress", price: 28, stock: 8, category: "Dresses", image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1" },
+        { name: "Handbag", price: 22, stock: 2, category: "Bags", image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3" }
+      ];
+      localStorage.setItem("storeProducts", JSON.stringify(storedProducts));
+    }
+
+    if (storedCustomers.length === 0) {
+      storedCustomers = [{ name: "Amina Ali" }, { name: "Fatima Hassan" }, { name: "Sahra Mohamed" }, { name: "Layla Ahmed" }, { name: "Najma Yusuf" }];
+      localStorage.setItem("storeCustomers", JSON.stringify(storedCustomers));
+    }
+
+    if (storedOrders.length === 0) {
+      storedOrders = [
+        { customerName: "Amina Ali", totalAmount: 56.00, status: "Pending" },
+        { customerName: "Fatima Hassan", totalAmount: 32.50, status: "Processing" },
+        { customerName: "Sahra Mohamed", totalAmount: 78.00, status: "Delivered" },
+        { customerName: "Layla Ahmed", totalAmount: 45.00, status: "Pending" },
+        { customerName: "Najma Yusuf", totalAmount: 62.00, status: "Delivered" }
+      ];
+      localStorage.setItem("storeOrders", JSON.stringify(storedOrders));
+    }
+
+    if (storedInvoices.length === 0) {
+      storedInvoices = [{ id: "INV-001", totalAmount: 56.00, status: "Paid" }, { id: "INV-002", totalAmount: 32.50, status: "Unpaid" }];
+      localStorage.setItem("storeInvoices", JSON.stringify(storedInvoices));
+    }
 
     setProducts(storedProducts);
     setCustomers(storedCustomers);
@@ -129,20 +159,14 @@ export default function AdminDashboard() {
     setInvoices(storedInvoices);
   }, []);
 
-  // Live Calculations
   const totalProductsCount = products.length;
   const totalCustomersCount = customers.length;
   const totalOrdersCount = orders.length;
   const totalInvoicesCount = invoices.length;
   const totalSalesAmount = orders.reduce((sum, ord) => sum + Number(ord.totalAmount || 0), 0);
 
-  // Recent 5 Orders
   const recentOrders = [...orders].reverse().slice(0, 5);
-
-  // Low Stock Items (Stock < 10)
   const lowStockProducts = products.filter((p) => Number(p.stock || p.quantity || 0) <= 10).slice(0, 5);
-
-  // Top Selling Products
   const topSellingProducts = [...products].slice(0, 5);
 
   const currentDate = new Date().toLocaleDateString("en-US", {
@@ -251,10 +275,8 @@ export default function AdminDashboard() {
           />
         </div>
 
-        {/* Section: Sales Chart & Recent Orders */}
+        {/* Sales Chart & Recent Orders */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
-          
-          {/* Sales Overview Chart Simulation */}
           <div className="lg:col-span-7 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -272,7 +294,6 @@ export default function AdminDashboard() {
               </select>
             </div>
 
-            {/* SVG Wavy Line Chart */}
             <div className="w-full h-44 relative mt-2">
               <svg className="w-full h-full overflow-visible" viewBox="0 0 500 150">
                 <defs>
@@ -308,7 +329,6 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Recent Orders List */}
           <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-bold text-gray-900">Recent Orders</h2>
@@ -358,10 +378,8 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Section: Top Selling & Quick Actions */}
+        {/* Top Selling & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
-          
-          {/* Top Selling Products Horizontal Grid */}
           <div className="lg:col-span-7 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-gray-900">Top Selling Products</h2>
@@ -371,57 +389,37 @@ export default function AdminDashboard() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              {topSellingProducts.length > 0 ? (
-                topSellingProducts.map((prod, idx) => (
-                  <div key={idx} className="bg-gray-50 p-2 rounded-xl text-center border border-gray-100 hover:shadow-xs transition">
-                    <img
-                      src={prod.image || "https://images.unsplash.com/photo-1595777457583-95e059d581b8"}
-                      alt=""
-                      className="h-20 w-full object-cover rounded-lg mb-2"
-                      onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1595777457583-95e059d581b8"; }}
-                    />
-                    <h3 className="text-[11px] font-bold text-gray-800 truncate">{prod.name || "Dress"}</h3>
-                    <p className="text-xs font-black text-pink-600">${Number(prod.price || 25).toFixed(2)}</p>
-                    <p className="text-[9px] text-gray-400 mt-0.5">{20 + idx * 5} sold</p>
-                  </div>
-                ))
-              ) : (
-                <div className="col-span-5 py-6 text-center text-gray-400 text-xs">
-                  No products available.
+              {topSellingProducts.map((prod, idx) => (
+                <div key={idx} className="bg-gray-50 p-2 rounded-xl text-center border border-gray-100 hover:shadow-xs transition">
+                  <img
+                    src={prod.image || "https://images.unsplash.com/photo-1595777457583-95e059d581b8"}
+                    alt=""
+                    className="h-20 w-full object-cover rounded-lg mb-2"
+                  />
+                  <h3 className="text-[11px] font-bold text-gray-800 truncate">{prod.name || "Dress"}</h3>
+                  <p className="text-xs font-black text-pink-600">${Number(prod.price || 25).toFixed(2)}</p>
+                  <p className="text-[9px] text-gray-400 mt-0.5">{20 + idx * 5} sold</p>
                 </div>
-              )}
+              ))}
             </div>
           </div>
 
-          {/* Quick Actions 4 Big Buttons */}
           <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs">
             <h2 className="text-sm font-bold text-gray-900 mb-4">Quick Actions</h2>
             <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => navigate("/products")}
-                className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5"
-              >
+              <button onClick={() => navigate("/products")} className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5">
                 <PlusCircle size={20} />
                 <span>Add Product</span>
               </button>
-              <button
-                onClick={() => navigate("/orders")}
-                className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5"
-              >
+              <button onClick={() => navigate("/orders")} className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5">
                 <ShoppingCart size={20} />
                 <span>New Order</span>
               </button>
-              <button
-                onClick={() => navigate("/invoices")}
-                className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5"
-              >
+              <button onClick={() => navigate("/invoices")} className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5">
                 <Receipt size={20} />
                 <span>View Invoices</span>
               </button>
-              <button
-                onClick={() => navigate("/products")}
-                className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5"
-              >
+              <button onClick={() => navigate("/products")} className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5">
                 <Boxes size={20} />
                 <span>Check Stock</span>
               </button>
@@ -429,10 +427,8 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Section: Low Stock Products Table & Promotional Banner */}
+        {/* Low Stock & Promo */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          
-          {/* Low Stock Products */}
           <div className="lg:col-span-7 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-1.5">
@@ -457,41 +453,29 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50 font-medium text-gray-800">
-                  {lowStockProducts.length > 0 ? (
-                    lowStockProducts.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-gray-50/50">
-                        <td className="py-2.5 text-gray-400">{idx + 1}</td>
-                        <td className="py-2.5 font-bold">{item.name || "Product"}</td>
-                        <td className="py-2.5 text-gray-500">{item.category || "General"}</td>
-                        <td className="py-2.5 text-red-600 font-black">{item.stock || item.quantity || 3}</td>
-                        <td className="py-2.5">
-                          <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded-full text-[9px] font-bold">
-                            Low Stock
-                          </span>
-                        </td>
-                        <td className="py-2.5 text-right">
-                          <button
-                            onClick={() => navigate("/products")}
-                            className="bg-pink-600 hover:bg-pink-700 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg cursor-pointer"
-                          >
-                            Restock
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" className="py-6 text-center text-gray-400 text-xs">
-                        All products have sufficient stock!
+                  {lowStockProducts.map((item, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50/50">
+                      <td className="py-2.5 text-gray-400">{idx + 1}</td>
+                      <td className="py-2.5 font-bold">{item.name || "Product"}</td>
+                      <td className="py-2.5 text-gray-500">{item.category || "General"}</td>
+                      <td className="py-2.5 text-red-600 font-black">{item.stock || 3}</td>
+                      <td className="py-2.5">
+                        <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded-full text-[9px] font-bold">
+                          Low Stock
+                        </span>
+                      </td>
+                      <td className="py-2.5 text-right">
+                        <button onClick={() => navigate("/products")} className="bg-pink-600 hover:bg-pink-700 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg cursor-pointer">
+                          Restock
+                        </button>
                       </td>
                     </tr>
-                  )}
+                  ))}
                 </tbody>
               </table>
             </div>
           </div>
 
-          {/* Fashion Promo Banner */}
           <div className="lg:col-span-5 bg-gradient-to-r from-pink-100 via-pink-50 to-pink-200 p-6 rounded-2xl border border-pink-200 shadow-xs flex items-center justify-between relative overflow-hidden">
             <div className="z-10 max-w-[220px]">
               <div className="flex items-center gap-1 text-pink-600 font-bold text-[10px] uppercase tracking-wider mb-1">
@@ -515,7 +499,6 @@ export default function AdminDashboard() {
               className="h-36 w-36 object-cover rounded-2xl shadow-md border-2 border-white transform rotate-3"
             />
           </div>
-
         </div>
 
       </div>
