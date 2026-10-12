@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   LayoutDashboard,
   Package,
@@ -27,17 +27,17 @@ import { useNavigate } from "react-router-dom";
 function Sidebar({ mobileOpen, setMobileOpen }) {
   const navigate = useNavigate();
   const links = [
-    { label: "Dashboard", icon: LayoutDashboard, path: "/admin-dashboard", active: true },
+    { label: "Dashboard", icon: LayoutDashboard, path: "/admin-dashboard" },
     { label: "Products", icon: Package, path: "/products" },
     { label: "Customers", icon: Users, path: "/customers" },
     { label: "Orders", icon: ShoppingCart, path: "/orders" },
     { label: "Sales", icon: BarChart3, path: "#" },
-    { label: "Invoices", icon: FileText, path: "/invoices" },
+    { label: "Invoices", icon: FileText, path: "/invoices", active: true },
     { label: "Inventory / Stock", icon: Boxes, path: "#" },
     { label: "Reports", icon: BarChart3, path: "#" },
     { label: "Users", icon: User, path: "#" },
     { label: "Settings", icon: Settings, path: "#" },
-    { label: "Logout", icon: LogOut, path: "/", isLogout: true },
+    { label: "Logout", icon: LogOut, path: "/", isLogout: true }, // Waxaa lagu dhex daray Menu-ga hoostiisa
   ];
 
   return (
@@ -51,6 +51,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
 
       <aside className={`fixed left-0 top-0 h-screen w-[250px] bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex flex-col h-full overflow-y-auto custom-scrollbar relative justify-between">
+          
           <div>
             <button 
               onClick={() => setMobileOpen(false)}
@@ -109,72 +110,6 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const [products, setProducts] = useState([]);
-  const [customers, setCustomers] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [invoices, setInvoices] = useState([]);
-
-  useEffect(() => {
-    let storedProducts = JSON.parse(localStorage.getItem("storeProducts") || "[]");
-    let storedCustomers = JSON.parse(localStorage.getItem("storeCustomers") || "[]");
-    let storedOrders = JSON.parse(localStorage.getItem("storeOrders") || "[]");
-    let storedInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
-
-    // Fallback Mock Data so metrics show live numbers immediately
-    if (storedProducts.length === 0) {
-      storedProducts = [
-        { name: "Elegant Dress", price: 25, stock: 12, category: "Dresses", image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8" },
-        { name: "Maxi Dress", price: 32, stock: 5, category: "Dresses", image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446" },
-        { name: "Blazer Set", price: 45, stock: 3, category: "Suits", image: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b" },
-        { name: "Floral Dress", price: 28, stock: 8, category: "Dresses", image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1" },
-        { name: "Handbag", price: 22, stock: 2, category: "Bags", image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3" }
-      ];
-      localStorage.setItem("storeProducts", JSON.stringify(storedProducts));
-    }
-
-    if (storedCustomers.length === 0) {
-      storedCustomers = [{ name: "Amina Ali" }, { name: "Fatima Hassan" }, { name: "Sahra Mohamed" }, { name: "Layla Ahmed" }, { name: "Najma Yusuf" }];
-      localStorage.setItem("storeCustomers", JSON.stringify(storedCustomers));
-    }
-
-    if (storedOrders.length === 0) {
-      storedOrders = [
-        { customerName: "Amina Ali", totalAmount: 56.00, status: "Pending" },
-        { customerName: "Fatima Hassan", totalAmount: 32.50, status: "Processing" },
-        { customerName: "Sahra Mohamed", totalAmount: 78.00, status: "Delivered" },
-        { customerName: "Layla Ahmed", totalAmount: 45.00, status: "Pending" },
-        { customerName: "Najma Yusuf", totalAmount: 62.00, status: "Delivered" }
-      ];
-      localStorage.setItem("storeOrders", JSON.stringify(storedOrders));
-    }
-
-    if (storedInvoices.length === 0) {
-      storedInvoices = [{ id: "INV-001", totalAmount: 56.00, status: "Paid" }, { id: "INV-002", totalAmount: 32.50, status: "Unpaid" }];
-      localStorage.setItem("storeInvoices", JSON.stringify(storedInvoices));
-    }
-
-    setProducts(storedProducts);
-    setCustomers(storedCustomers);
-    setOrders(storedOrders);
-    setInvoices(storedInvoices);
-  }, []);
-
-  const totalProductsCount = products.length;
-  const totalCustomersCount = customers.length;
-  const totalOrdersCount = orders.length;
-  const totalInvoicesCount = invoices.length;
-  const totalSalesAmount = orders.reduce((sum, ord) => sum + Number(ord.totalAmount || 0), 0);
-
-  const recentOrders = [...orders].reverse().slice(0, 5);
-  const lowStockProducts = products.filter((p) => Number(p.stock || p.quantity || 0) <= 10).slice(0, 5);
-  const topSellingProducts = [...products].slice(0, 5);
-
-  const currentDate = new Date().toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-
   return (
     <div className="min-h-screen w-screen bg-[#f8fafc] flex overflow-x-hidden">
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
@@ -226,279 +161,26 @@ export default function AdminDashboard() {
             <Calendar size={16} />
             <div>
               <p className="text-[9px] text-pink-200 uppercase tracking-wider">Today</p>
-              <p className="font-bold">{currentDate}</p>
+              <p className="font-bold">May 15, 2026</p>
             </div>
           </div>
         </div>
 
-        {/* 5 Main Live Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 mb-6">
-          <MetricCard
-            title="Total Products"
-            value={totalProductsCount}
-            icon={<Package size={18} className="text-pink-600" />}
-            bgColor="bg-pink-50"
-            iconBg="bg-pink-100"
-            badge="+12% vs last month"
-          />
-          <MetricCard
-            title="Total Customers"
-            value={totalCustomersCount}
-            icon={<Users size={18} className="text-purple-600" />}
-            bgColor="bg-purple-50/60"
-            iconBg="bg-purple-100"
-            badge="+8% vs last month"
-          />
-          <MetricCard
-            title="Total Orders"
-            value={totalOrdersCount}
-            icon={<ShoppingCart size={18} className="text-emerald-600" />}
-            bgColor="bg-emerald-50/60"
-            iconBg="bg-emerald-100"
-            badge="+15% vs last month"
-          />
-          <MetricCard
-            title="Total Sales"
-            value={`$${totalSalesAmount.toLocaleString()}`}
-            icon={<DollarSign size={18} className="text-blue-600" />}
-            bgColor="bg-blue-50/60"
-            iconBg="bg-blue-100"
-            badge="+20% vs last month"
-          />
-          <MetricCard
-            title="Total Invoices"
-            value={totalInvoicesCount}
-            icon={<FileText size={18} className="text-amber-600" />}
-            bgColor="bg-amber-50/60"
-            iconBg="bg-amber-100"
-            badge="+10% vs last month"
-          />
+        {/* Overview Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <StatCard title="Total Sales" value="$12,450.00" icon={<DollarSign size={20} />} change="+12%" />
+          <StatCard title="Total Orders" value="148" icon={<ShoppingCart size={20} />} change="+8%" />
+          <StatCard title="Total Customers" value="89" icon={<Users size={20} />} change="+5%" />
+          <StatCard title="Growth Rate" value="23.5%" icon={<TrendingUp size={20} />} change="+18%" />
         </div>
 
-        {/* Sales Chart & Recent Orders */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
-          <div className="lg:col-span-7 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-sm font-bold text-gray-900">Sales Overview</h2>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-2xl font-black text-gray-900">${totalSalesAmount.toLocaleString()}</span>
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                    <TrendingUp size={12} /> 20% vs last month
-                  </span>
-                </div>
-              </div>
-              <select className="bg-gray-50 border border-gray-200 text-xs text-gray-600 rounded-xl px-2.5 py-1.5 outline-none font-medium">
-                <option>This Month</option>
-                <option>This Week</option>
-              </select>
-            </div>
-
-            <div className="w-full h-44 relative mt-2">
-              <svg className="w-full h-full overflow-visible" viewBox="0 0 500 150">
-                <defs>
-                  <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#d91b5c" stopOpacity="0.25" />
-                    <stop offset="100%" stopColor="#d91b5c" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M0 110 Q70 120 120 85 T250 60 T370 40 T500 20 L500 150 L0 150 Z"
-                  fill="url(#gradient)"
-                />
-                <path
-                  d="M0 110 Q70 120 120 85 T250 60 T370 40 T500 20"
-                  fill="none"
-                  stroke="#d91b5c"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                />
-                <circle cx="120" cy="85" r="4" fill="#d91b5c" />
-                <circle cx="250" cy="60" r="4" fill="#d91b5c" />
-                <circle cx="370" cy="40" r="4" fill="#d91b5c" />
-                <circle cx="500" cy="20" r="5" fill="#d91b5c" className="animate-pulse" />
-              </svg>
-              <div className="flex justify-between text-[10px] text-gray-400 font-medium mt-3">
-                <span>May 1</span>
-                <span>May 4</span>
-                <span>May 7</span>
-                <span>May 10</span>
-                <span>May 13</span>
-                <span>May 15</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold text-gray-900">Recent Orders</h2>
-              <button onClick={() => navigate("/orders")} className="text-xs font-semibold text-pink-600 hover:underline">
-                View All
-              </button>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="text-gray-400 border-b border-gray-100 text-[10px] uppercase font-bold">
-                    <th className="pb-2">#</th>
-                    <th className="pb-2">Customer</th>
-                    <th className="pb-2">Total</th>
-                    <th className="pb-2 text-right">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50 font-medium text-gray-800">
-                  {recentOrders.length > 0 ? (
-                    recentOrders.map((ord, idx) => (
-                      <tr key={idx} className="hover:bg-gray-50/50">
-                        <td className="py-2.5 font-semibold text-gray-500">ORD-{String(idx + 1001)}</td>
-                        <td className="py-2.5">{ord.customerName || "Customer"}</td>
-                        <td className="py-2.5 font-bold">${Number(ord.totalAmount || 0).toFixed(2)}</td>
-                        <td className="py-2.5 text-right">
-                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                            ord.status === "Delivered" ? "bg-emerald-100 text-emerald-700" :
-                            ord.status === "Processing" ? "bg-blue-100 text-blue-700" :
-                            "bg-amber-100 text-amber-700"
-                          }`}>
-                            {ord.status || "Pending"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="4" className="py-8 text-center text-gray-400">
-                        No orders recorded yet.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        {/* Top Selling & Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
-          <div className="lg:col-span-7 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-gray-900">Top Selling Products</h2>
-              <button onClick={() => navigate("/products")} className="text-xs font-semibold text-pink-600 hover:underline">
-                View All
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              {topSellingProducts.map((prod, idx) => (
-                <div key={idx} className="bg-gray-50 p-2 rounded-xl text-center border border-gray-100 hover:shadow-xs transition">
-                  <img
-                    src={prod.image || "https://images.unsplash.com/photo-1595777457583-95e059d581b8"}
-                    alt=""
-                    className="h-20 w-full object-cover rounded-lg mb-2"
-                  />
-                  <h3 className="text-[11px] font-bold text-gray-800 truncate">{prod.name || "Dress"}</h3>
-                  <p className="text-xs font-black text-pink-600">${Number(prod.price || 25).toFixed(2)}</p>
-                  <p className="text-[9px] text-gray-400 mt-0.5">{20 + idx * 5} sold</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs">
-            <h2 className="text-sm font-bold text-gray-900 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => navigate("/products")} className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5">
-                <PlusCircle size={20} />
-                <span>Add Product</span>
-              </button>
-              <button onClick={() => navigate("/orders")} className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5">
-                <ShoppingCart size={20} />
-                <span>New Order</span>
-              </button>
-              <button onClick={() => navigate("/invoices")} className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5">
-                <Receipt size={20} />
-                <span>View Invoices</span>
-              </button>
-              <button onClick={() => navigate("/products")} className="flex flex-col items-center justify-center p-4 rounded-xl border border-pink-100 bg-pink-50/50 hover:bg-pink-100/60 transition cursor-pointer text-pink-700 font-bold text-xs gap-1.5">
-                <Boxes size={20} />
-                <span>Check Stock</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Low Stock & Promo */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          <div className="lg:col-span-7 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-1.5">
-                <AlertCircle size={16} className="text-red-500" />
-                <h2 className="text-sm font-bold text-gray-900">Recent Low Stock Products</h2>
-              </div>
-              <button onClick={() => navigate("/products")} className="text-xs font-semibold text-pink-600 hover:underline">
-                View All
-              </button>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="text-gray-400 border-b border-gray-100 text-[10px] uppercase font-bold">
-                    <th className="pb-2">#</th>
-                    <th className="pb-2">Product Name</th>
-                    <th className="pb-2">Category</th>
-                    <th className="pb-2">Stock</th>
-                    <th className="pb-2">Status</th>
-                    <th className="pb-2 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50 font-medium text-gray-800">
-                  {lowStockProducts.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50/50">
-                      <td className="py-2.5 text-gray-400">{idx + 1}</td>
-                      <td className="py-2.5 font-bold">{item.name || "Product"}</td>
-                      <td className="py-2.5 text-gray-500">{item.category || "General"}</td>
-                      <td className="py-2.5 text-red-600 font-black">{item.stock || 3}</td>
-                      <td className="py-2.5">
-                        <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded-full text-[9px] font-bold">
-                          Low Stock
-                        </span>
-                      </td>
-                      <td className="py-2.5 text-right">
-                        <button onClick={() => navigate("/products")} className="bg-pink-600 hover:bg-pink-700 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg cursor-pointer">
-                          Restock
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div className="lg:col-span-5 bg-gradient-to-r from-pink-100 via-pink-50 to-pink-200 p-6 rounded-2xl border border-pink-200 shadow-xs flex items-center justify-between relative overflow-hidden">
-            <div className="z-10 max-w-[220px]">
-              <div className="flex items-center gap-1 text-pink-600 font-bold text-[10px] uppercase tracking-wider mb-1">
-                <span>👗 COLLECTION PRO</span>
-              </div>
-              <h3 className="font-serif text-xl font-black text-gray-900 leading-tight mb-2">
-                Fashion Makes You Confident
-              </h3>
-              <button
-                onClick={() => navigate("/products")}
-                className="flex items-center gap-1.5 bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md transition cursor-pointer mt-2"
-              >
-                <span>View Products</span>
-                <ArrowRight size={14} />
-              </button>
-            </div>
-
-            <img
-              src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400"
-              alt="Fashion"
-              className="h-36 w-36 object-cover rounded-2xl shadow-md border-2 border-white transform rotate-3"
-            />
-          </div>
+        {/* Central Card */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-xs text-center py-16">
+          <LayoutDashboard size={48} className="mx-auto text-pink-400 mb-3" />
+          <h2 className="text-lg font-bold text-gray-800">Dashboard Overview</h2>
+          <p className="text-xs text-gray-500 max-w-sm mx-auto mt-1">
+            System is fully active. Navigate through the menu to manage orders, products, and invoices.
+          </p>
         </div>
 
       </div>
@@ -506,18 +188,16 @@ export default function AdminDashboard() {
   );
 }
 
-function MetricCard({ title, value, icon, bgColor, iconBg, badge }) {
+function StatCard({ title, value, icon, change }) {
   return (
-    <div className={`${bgColor} p-4 rounded-2xl border border-gray-100 shadow-xs flex flex-col justify-between`}>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-gray-600">{title}</span>
-        <div className={`h-8 w-8 rounded-xl ${iconBg} flex items-center justify-center`}>
-          {icon}
-        </div>
-      </div>
+    <div className="flex items-center justify-between rounded-xl border border-pink-100 bg-white p-4 shadow-xs">
       <div>
-        <p className="text-xl font-black text-gray-900">{value}</p>
-        <p className="text-[9px] font-bold text-gray-500 mt-1">{badge}</p>
+        <p className="text-xs text-gray-500">{title}</p>
+        <p className="mt-1 text-xl font-bold text-gray-900">{value}</p>
+        <span className="text-[10px] text-green-600 font-semibold">{change} from last month</span>
+      </div>
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-100 text-pink-600">
+        {icon}
       </div>
     </div>
   );
