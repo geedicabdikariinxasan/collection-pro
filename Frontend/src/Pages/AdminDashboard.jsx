@@ -79,3 +79,6 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
     </>
   );
 }
+export default function AdminDashboard() {
+  // ...
+}
