@@ -27,12 +27,12 @@ import { useNavigate } from "react-router-dom";
 function Sidebar({ mobileOpen, setMobileOpen }) {
   const navigate = useNavigate();
   const links = [
-    { label: "Dashboard", icon: LayoutDashboard, path: "/admin-dashboard" },
+    { label: "Dashboard", icon: LayoutDashboard, path: "/admin-dashboard", active: true },
     { label: "Products", icon: Package, path: "/products" },
     { label: "Customers", icon: Users, path: "/customers" },
     { label: "Orders", icon: ShoppingCart, path: "/orders" },
     { label: "Sales", icon: BarChart3, path: "#" },
-    { label: "Invoices", icon: FileText, path: "/invoices", active: true },
+    { label: "Invoices", icon: FileText, path: "/invoices" },
     { label: "Inventory / Stock", icon: Boxes, path: "#" },
     { label: "Reports", icon: BarChart3, path: "#" },
     { label: "Users", icon: User, path: "#" },
@@ -109,53 +109,45 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // States for Live Backend Data
   const [products, setProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [invoices, setInvoices] = useState([]);
 
-  // Fetching data from Backend API / LocalStorage
-  const fetchLiveData = async () => {
+  // Fetch strictly from MongoDB Atlas via Render
+  const fetchLiveMongoData = async () => {
     try {
-      // Hadii aad leedahay Render API URL, halkan ka bedel (tusaale: "https://backend-app.onrender.com/api")
-      const backendUrl = "https://backend-app.onrender.com/api";
+      // Halka xigta ka beddel Render API-gaaga saxda ah
+      const BASE_URL = "YOUR_RENDER_BACKEND_URL"; 
 
       const [prodRes, custRes, ordRes, invRes] = await Promise.all([
-        fetch(`${backendUrl}/products`).catch(() => null),
-        fetch(`${backendUrl}/customers`).catch(() => null),
-        fetch(`${backendUrl}/orders`).catch(() => null),
-        fetch(`${backendUrl}/invoices`).catch(() => null),
+        fetch(`${BASE_URL}/products`),
+        fetch(`${BASE_URL}/customers`),
+        fetch(`${BASE_URL}/orders`),
+        fetch(`${BASE_URL}/invoices`),
       ]);
 
-      if (prodRes && prodRes.ok) setProducts(await prodRes.json());
-      else setProducts(JSON.parse(localStorage.getItem("storeProducts") || "[]"));
+      const prodData = await prodRes.json();
+      const custData = await custRes.json();
+      const ordData = await ordRes.json();
+      const invData = await invRes.json();
 
-      if (custRes && custRes.ok) setCustomers(await custRes.json());
-      else setCustomers(JSON.parse(localStorage.getItem("storeCustomers") || "[]"));
-
-      if (ordRes && ordRes.ok) setOrders(await ordRes.json());
-      else setOrders(JSON.parse(localStorage.getItem("storeOrders") || "[]"));
-
-      if (invRes && invRes.ok) setInvoices(await invRes.json());
-      else setInvoices(JSON.parse(localStorage.getItem("storeInvoices") || "[]"));
+      setProducts(Array.isArray(prodData) ? prodData : prodData.products || prodData.data || []);
+      setCustomers(Array.isArray(custData) ? custData : custData.customers || custData.data || []);
+      setOrders(Array.isArray(ordData) ? ordData : ordData.orders || ordData.data || []);
+      setInvoices(Array.isArray(invData) ? invData : invData.invoices || invData.data || []);
 
     } catch (err) {
-      console.log("Fetching fallback to LocalStorage", err);
-      setProducts(JSON.parse(localStorage.getItem("storeProducts") || "[]"));
-      setCustomers(JSON.parse(localStorage.getItem("storeCustomers") || "[]"));
-      setOrders(JSON.parse(localStorage.getItem("storeOrders") || "[]"));
-      setInvoices(JSON.parse(localStorage.getItem("storeInvoices") || "[]"));
+      console.error("MongoDB Fetch Error:", err);
     }
   };
 
   useEffect(() => {
-    fetchLiveData();
-    const interval = setInterval(fetchLiveData, 4000); // Live sync every 4s
+    fetchLiveMongoData();
+    const interval = setInterval(fetchLiveMongoData, 3000); // Auto-refresh live data
     return () => clearInterval(interval);
   }, []);
 
-  // Strict Live Calculations
   const totalProductsCount = products.length;
   const totalCustomersCount = customers.length;
   const totalOrdersCount = orders.length;
@@ -228,7 +220,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* 5 Live Cards */}
+        {/* 5 Live Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 mb-6">
           <MetricCard
             title="Total Products"
@@ -236,7 +228,7 @@ export default function AdminDashboard() {
             icon={<Package size={18} className="text-pink-600" />}
             bgColor="bg-pink-50"
             iconBg="bg-pink-100"
-            badge="Live Data"
+            badge="Live Sync"
           />
           <MetricCard
             title="Total Customers"
@@ -244,7 +236,7 @@ export default function AdminDashboard() {
             icon={<Users size={18} className="text-purple-600" />}
             bgColor="bg-purple-50/60"
             iconBg="bg-purple-100"
-            badge="Live Data"
+            badge="Live Sync"
           />
           <MetricCard
             title="Total Orders"
@@ -252,7 +244,7 @@ export default function AdminDashboard() {
             icon={<ShoppingCart size={18} className="text-emerald-600" />}
             bgColor="bg-emerald-50/60"
             iconBg="bg-emerald-100"
-            badge="Live Data"
+            badge="Live Sync"
           />
           <MetricCard
             title="Total Sales"
@@ -260,7 +252,7 @@ export default function AdminDashboard() {
             icon={<DollarSign size={18} className="text-blue-600" />}
             bgColor="bg-blue-50/60"
             iconBg="bg-blue-100"
-            badge="Live Data"
+            badge="Live Sync"
           />
           <MetricCard
             title="Total Invoices"
@@ -268,14 +260,13 @@ export default function AdminDashboard() {
             icon={<FileText size={18} className="text-amber-600" />}
             bgColor="bg-amber-50/60"
             iconBg="bg-amber-100"
-            badge="Live Data"
+            badge="Live Sync"
           />
         </div>
 
         {/* Sales Chart & Recent Orders Section */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
           
-          {/* Sales Chart */}
           <div className="lg:col-span-7 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -328,7 +319,6 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Recent Orders Table */}
           <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-bold text-gray-900">Recent Orders</h2>
@@ -433,7 +423,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Low Stock Table & Banner */}
+        {/* Low Stock Table & Promo Banner */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           <div className="lg:col-span-7 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs">
             <div className="flex items-center justify-between mb-3">
