@@ -114,12 +114,11 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState([]);
   const [invoices, setInvoices] = useState([]);
 
-  // Fetch strictly from MongoDB Atlas via Render
+  // Render Backend Base URL
+  const BASE_URL = "https://collection-pro-backend.onrender.com/api";
+
   const fetchLiveMongoData = async () => {
     try {
-      // Halka xigta ka beddel Render API-gaaga saxda ah
-      const BASE_URL = "YOUR_RENDER_BACKEND_URL"; 
-
       const [prodRes, custRes, ordRes, invRes] = await Promise.all([
         fetch(`${BASE_URL}/products`),
         fetch(`${BASE_URL}/customers`),
@@ -127,15 +126,26 @@ export default function AdminDashboard() {
         fetch(`${BASE_URL}/invoices`),
       ]);
 
-      const prodData = await prodRes.json();
-      const custData = await custRes.json();
-      const ordData = await ordRes.json();
-      const invData = await invRes.json();
+      const prodJson = prodRes.ok ? await prodRes.json() : [];
+      const custJson = custRes.ok ? await custRes.json() : [];
+      const ordJson = ordRes.ok ? await ordRes.json() : [];
+      const invJson = invRes.ok ? await invRes.json() : [];
 
-      setProducts(Array.isArray(prodData) ? prodData : prodData.products || prodData.data || []);
-      setCustomers(Array.isArray(custData) ? custData : custData.customers || custData.data || []);
-      setOrders(Array.isArray(ordData) ? ordData : ordData.orders || ordData.data || []);
-      setInvoices(Array.isArray(invData) ? invData : invData.invoices || invData.data || []);
+      // Helper function to extract array regardless of object wrapping
+      const extractArray = (resData) => {
+        if (Array.isArray(resData)) return resData;
+        if (resData && Array.isArray(resData.data)) return resData.data;
+        if (resData && Array.isArray(resData.products)) return resData.products;
+        if (resData && Array.isArray(resData.orders)) return resData.orders;
+        if (resData && Array.isArray(resData.customers)) return resData.customers;
+        if (resData && Array.isArray(resData.invoices)) return resData.invoices;
+        return [];
+      };
+
+      setProducts(extractArray(prodJson));
+      setCustomers(extractArray(custJson));
+      setOrders(extractArray(ordJson));
+      setInvoices(extractArray(invJson));
 
     } catch (err) {
       console.error("MongoDB Fetch Error:", err);
@@ -144,7 +154,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchLiveMongoData();
-    const interval = setInterval(fetchLiveMongoData, 3000); // Auto-refresh live data
+    const interval = setInterval(fetchLiveMongoData, 4000); // Polling every 4 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -220,7 +230,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* 5 Live Metric Cards */}
+        {/* 5 Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 mb-6">
           <MetricCard
             title="Total Products"
@@ -228,7 +238,7 @@ export default function AdminDashboard() {
             icon={<Package size={18} className="text-pink-600" />}
             bgColor="bg-pink-50"
             iconBg="bg-pink-100"
-            badge="Live Sync"
+            badge="MongoDB Live"
           />
           <MetricCard
             title="Total Customers"
@@ -236,7 +246,7 @@ export default function AdminDashboard() {
             icon={<Users size={18} className="text-purple-600" />}
             bgColor="bg-purple-50/60"
             iconBg="bg-purple-100"
-            badge="Live Sync"
+            badge="MongoDB Live"
           />
           <MetricCard
             title="Total Orders"
@@ -244,7 +254,7 @@ export default function AdminDashboard() {
             icon={<ShoppingCart size={18} className="text-emerald-600" />}
             bgColor="bg-emerald-50/60"
             iconBg="bg-emerald-100"
-            badge="Live Sync"
+            badge="MongoDB Live"
           />
           <MetricCard
             title="Total Sales"
@@ -252,7 +262,7 @@ export default function AdminDashboard() {
             icon={<DollarSign size={18} className="text-blue-600" />}
             bgColor="bg-blue-50/60"
             iconBg="bg-blue-100"
-            badge="Live Sync"
+            badge="MongoDB Live"
           />
           <MetricCard
             title="Total Invoices"
@@ -260,11 +270,11 @@ export default function AdminDashboard() {
             icon={<FileText size={18} className="text-amber-600" />}
             bgColor="bg-amber-50/60"
             iconBg="bg-amber-100"
-            badge="Live Sync"
+            badge="MongoDB Live"
           />
         </div>
 
-        {/* Sales Chart & Recent Orders Section */}
+        {/* Sales Chart & Recent Orders */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
           
           <div className="lg:col-span-7 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs flex flex-col justify-between">
@@ -342,7 +352,7 @@ export default function AdminDashboard() {
                     recentOrders.map((ord, idx) => (
                       <tr key={idx} className="hover:bg-gray-50/20">
                         <td className="py-2.5 font-semibold text-gray-500">ORD-{String(idx + 1001)}</td>
-                        <td className="py-2.5">{ord.customerName || ord.customer || "Customer"}</td>
+                        <td className="py-2.5">{ord.customerName || ord.customer || ord.name || "Customer"}</td>
                         <td className="py-2.5 font-bold">${Number(ord.totalAmount || ord.total || 0).toFixed(2)}</td>
                         <td className="py-2.5 text-right">
                           <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
@@ -358,7 +368,7 @@ export default function AdminDashboard() {
                   ) : (
                     <tr>
                       <td colSpan="4" className="py-8 text-center text-gray-400">
-                        No recent orders.
+                        No recent orders found.
                       </td>
                     </tr>
                   )}
@@ -368,7 +378,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Top Selling Products & Quick Actions */}
+        {/* Top Selling & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
           <div className="lg:col-span-7 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs">
             <div className="flex items-center justify-between mb-4">
@@ -383,18 +393,18 @@ export default function AdminDashboard() {
                 topSellingProducts.map((prod, idx) => (
                   <div key={idx} className="bg-gray-50 p-2 rounded-xl text-center border border-gray-100 hover:shadow-xs transition">
                     <img
-                      src={prod.image || "https://images.unsplash.com/photo-1595777457583-95e059d581b8"}
+                      src={prod.image || prod.imageUrl || "https://images.unsplash.com/photo-1595777457583-95e059d581b8"}
                       alt=""
                       className="h-20 w-full object-cover rounded-lg mb-2"
                       onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1595777457583-95e059d581b8"; }}
                     />
-                    <h3 className="text-[11px] font-bold text-gray-800 truncate">{prod.name || "Product"}</h3>
+                    <h3 className="text-[11px] font-bold text-gray-800 truncate">{prod.name || prod.title || "Product"}</h3>
                     <p className="text-xs font-black text-pink-600">${Number(prod.price || 0).toFixed(2)}</p>
                   </div>
                 ))
               ) : (
                 <div className="col-span-5 py-6 text-center text-gray-400 text-xs">
-                  No products available.
+                  No products found.
                 </div>
               )}
             </div>
@@ -423,7 +433,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Low Stock Table & Promo Banner */}
+        {/* Low Stock Table & Promo */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           <div className="lg:col-span-7 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs">
             <div className="flex items-center justify-between mb-3">
