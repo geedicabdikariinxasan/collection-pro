@@ -277,7 +277,7 @@ function ReceiptLetterModal({ invoice, onClose }) {
   const handleDownloadPDF = () => {
     const element = document.getElementById("receipt-letter-card");
     const options = {
-      margin:       5,
+      margin:       2,
       filename:     `Receipt-${invoice.id}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true },
@@ -292,29 +292,31 @@ function ReceiptLetterModal({ invoice, onClose }) {
   };
 
   return (
-    <div className="min-h-screen w-full bg-white flex flex-col items-center justify-center p-3 sm:p-6 overflow-y-auto">
-      <div className="w-full max-w-xl bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-200 text-gray-800 my-auto" id="receipt-letter-card">
+    <div className="min-h-screen w-full bg-white flex flex-col items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      <div className="w-full max-w-xl bg-white p-4 sm:p-6 rounded-2xl shadow-xl border border-gray-200 text-gray-800 my-auto" id="receipt-letter-card">
         
-        <div className="flex justify-between items-start border-b-2 border-gray-900 pb-4 mb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pink-100 text-pink-600 font-bold text-2xl shadow-sm">
+        {/* Header - Compact */}
+        <div className="flex justify-between items-start border-b-2 border-gray-900 pb-2 mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-100 text-pink-600 font-bold text-xl shadow-sm">
               👗
             </div>
             <div>
-              <h2 className="font-serif text-lg font-extrabold tracking-wide text-gray-900">COLLECTION PRO</h2>
-              <p className="text-[8px] tracking-[1.5px] text-gray-500 uppercase font-semibold">WOMEN'S FASHION & CLOTHING</p>
+              <h2 className="font-serif text-base font-extrabold tracking-wide text-gray-900">COLLECTION PRO</h2>
+              <p className="text-[7px] tracking-[1.5px] text-gray-500 uppercase font-semibold">WOMEN'S FASHION & CLOTHING</p>
             </div>
           </div>
           <div className="text-right">
-            <h1 className="text-sm font-black uppercase tracking-wider text-gray-900">PAYMENT RECEIPT</h1>
-            <p className="text-[11px] text-gray-500">Receipt No: <strong>REC-{invoice.id}</strong></p>
-            <p className="text-[11px] text-gray-500">Date: <strong>{invoice.date}</strong></p>
+            <h1 className="text-xs font-black uppercase tracking-wider text-gray-900">PAYMENT RECEIPT</h1>
+            <p className="text-[10px] text-gray-500">Receipt No: <strong>REC-{invoice.id}</strong></p>
+            <p className="text-[10px] text-gray-500">Date: <strong>{invoice.date}</strong></p>
           </div>
         </div>
 
-        <div className="mb-4">
-          <p className="text-xs font-bold text-gray-800 uppercase tracking-wider border-b border-gray-300 pb-1 mb-2">Customer Information</p>
-          <div className="grid grid-cols-2 gap-y-1.5 text-xs">
+        {/* Customer Info - Compact */}
+        <div className="mb-3">
+          <p className="text-[11px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-300 pb-0.5 mb-1.5">Customer Information</p>
+          <div className="grid grid-cols-2 gap-y-1 text-xs">
             <p><span className="text-gray-500">Full Name:</span> <strong className="text-gray-900">{invoice.customerName}</strong></p>
             <p><span className="text-gray-500">Phone:</span> <strong className="text-gray-900">{invoice.customerPhone || "N/A"}</strong></p>
             <p><span className="text-gray-500">Email:</span> <strong className="text-gray-900">{invoice.customerEmail}</strong></p>
@@ -322,56 +324,59 @@ function ReceiptLetterModal({ invoice, onClose }) {
           </div>
         </div>
 
-        <div className="mb-6">
-          <p className="text-xs font-bold text-gray-800 uppercase tracking-wider border-b border-gray-300 pb-1 mb-2">Payment Details</p>
+        {/* Payment Details Table - Compact */}
+        <div className="mb-4">
+          <p className="text-[11px] font-bold text-gray-800 uppercase tracking-wider border-b border-gray-300 pb-0.5 mb-1.5">Payment Details</p>
           <table className="w-full text-xs border border-gray-300 rounded-lg overflow-hidden">
             <tbody>
               <tr className="border-b border-gray-300">
-                <td className="p-2 font-bold bg-gray-50 text-gray-700 w-1/3">Payment ID</td>
-                <td className="p-2 font-semibold text-gray-900">PAY-{invoice.id}</td>
+                <td className="p-1.5 font-bold bg-gray-50 text-gray-700 w-1/3">Payment ID</td>
+                <td className="p-1.5 font-semibold text-gray-900">PAY-{invoice.id}</td>
               </tr>
               <tr className="border-b border-gray-300">
-                <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Date</td>
-                <td className="p-2 text-gray-900">{invoice.date}</td>
+                <td className="p-1.5 font-bold bg-gray-50 text-gray-700">Payment Date</td>
+                <td className="p-1.5 text-gray-900">{invoice.date}</td>
               </tr>
               <tr className="border-b border-gray-300">
-                <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Method</td>
-                <td className="p-2 text-gray-900">Mobile Money / Cash</td>
+                <td className="p-1.5 font-bold bg-gray-50 text-gray-700">Payment Method</td>
+                <td className="p-1.5 text-gray-900">Mobile Money / Cash</td>
               </tr>
               <tr className="border-b border-gray-300">
-                <td className="p-2 font-bold bg-gray-50 text-gray-700">Payment Status</td>
-                <td className="p-2">
+                <td className="p-1.5 font-bold bg-gray-50 text-gray-700">Payment Status</td>
+                <td className="p-1.5">
                   <span className="inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 font-bold text-[10px]">Paid</span>
                 </td>
               </tr>
               <tr>
-                <td className="p-2 font-bold bg-gray-50 text-gray-700">Amount Paid</td>
-                <td className="p-2 font-black text-pink-600 text-sm">${invoice.totalAmount?.toFixed(2)}</td>
+                <td className="p-1.5 font-bold bg-gray-50 text-gray-700">Amount Paid</td>
+                <td className="p-1.5 font-black text-pink-600 text-xs">${invoice.totalAmount?.toFixed(2)}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <div className="grid grid-cols-2 gap-8 pt-6 text-center text-xs mb-2">
+        {/* Signatures - Fits snugly on Page 1 */}
+        <div className="grid grid-cols-2 gap-8 pt-3 text-center text-xs">
           <div>
-            <div className="border-t border-gray-400 pt-1 w-32 mx-auto"></div>
-            <p className="text-gray-500 font-semibold mt-0.5">Customer Signature</p>
+            <div className="border-t border-gray-400 pt-1 w-28 mx-auto"></div>
+            <p className="text-gray-500 font-semibold text-[11px] mt-0.5">Customer Signature</p>
           </div>
           <div>
-            <div className="border-t border-gray-400 pt-1 w-32 mx-auto"></div>
-            <p className="text-gray-500 font-semibold mt-1">Authorized Signature</p>
+            <div className="border-t border-gray-400 pt-1 w-28 mx-auto"></div>
+            <p className="text-gray-500 font-semibold text-[11px] mt-0.5">Authorized Signature</p>
           </div>
         </div>
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-3 w-full max-w-xl print:hidden">
-        <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-3 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
-          <Printer size={16} /> Print Receipt
+      {/* Action Buttons */}
+      <div className="mt-4 flex flex-wrap gap-3 w-full max-w-xl print:hidden">
+        <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
+          <Printer size={15} /> Print Receipt
         </button>
-        <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-green-600 py-3 font-bold text-white shadow-md hover:bg-green-700 cursor-pointer text-xs">
-          <Download size={16} /> Download PDF
+        <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 font-bold text-white shadow-md hover:bg-green-700 cursor-pointer text-xs">
+          <Download size={15} /> Download PDF
         </button>
-        <button onClick={onClose} className="rounded-xl border border-gray-300 px-6 py-3 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-xs bg-white shadow-sm">
+        <button onClick={onClose} className="rounded-xl border border-gray-300 px-5 py-2.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-xs bg-white shadow-sm">
           Close & Clear
         </button>
       </div>
