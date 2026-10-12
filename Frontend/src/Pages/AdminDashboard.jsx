@@ -105,6 +105,16 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
   );
 }
 
+// Helper function to safely render any value and avoid React Error #31
+function renderSafeText(val, fallback = "") {
+  if (val === null || val === undefined) return fallback;
+  if (typeof val === "string" || typeof val === "number") return val;
+  if (typeof val === "object") {
+    return val.name || val.title || val.customerName || val.email || val._id || fallback;
+  }
+  return String(val);
+}
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -114,24 +124,29 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState([]);
   const [invoices, setInvoices] = useState([]);
 
-  // Render Backend Base URL
   const BASE_URL = "https://collection-pro-backend.onrender.com/api";
 
   const fetchLiveMongoData = async () => {
     try {
       const [prodRes, custRes, ordRes, invRes] = await Promise.all([
-        fetch(`${BASE_URL}/products`),
-        fetch(`${BASE_URL}/customers`),
-        fetch(`${BASE_URL}/orders`),
-        fetch(`${BASE_URL}/invoices`),
+        fetch(`${BASE_URL}/products`).catch(() => null),
+        fetch(`${BASE_URL}/customers`).catch(() => null),
+        fetch(`${BASE_URL}/orders`).catch(() => null),
+        fetch(`${BASE_URL}/invoices`).catch(() => null),
       ]);
 
-      const prodJson = prodRes.ok ? await prodRes.json() : [];
-      const custJson = custRes.ok ? await custRes.json() : [];
-      const ordJson = ordRes.ok ? await ordRes.json() : [];
-      const invJson = invRes.ok ? await invRes.json() : [];
+      const prodJson = prodRes && prodRes.ok ? await prodRes.json().catch(() => []) : [];
+      const custJson = custRes && custRes.ok ? await custRes.json().catch(() => []) : [];
+      const ordJson = ordRes && ordRes.ok ? await ordRes.json().catch(() => []) : [];
+      
+      // Fallback for Invoices from LocalStorage if /api/invoices returns 404
+      let invJson = [];
+      if (invRes && invRes.ok) {
+        invJson = await invRes.json().catch(() => []);
+      } else {
+        invJson = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
+      }
 
-      // Helper function to extract array regardless of object wrapping
       const extractArray = (resData) => {
         if (Array.isArray(resData)) return resData;
         if (resData && Array.isArray(resData.data)) return resData.data;
@@ -154,7 +169,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchLiveMongoData();
-    const interval = setInterval(fetchLiveMongoData, 4000); // Polling every 4 seconds
+    const interval = setInterval(fetchLiveMongoData, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -352,15 +367,15 @@ export default function AdminDashboard() {
                     recentOrders.map((ord, idx) => (
                       <tr key={idx} className="hover:bg-gray-50/20">
                         <td className="py-2.5 font-semibold text-gray-500">ORD-{String(idx + 1001)}</td>
-                        <td className="py-2.5">{ord.customerName || ord.customer || ord.name || "Customer"}</td>
+                        <td className="py-2.5">{renderSafeText(ord.customerName || ord.customer || ord.name, "Customer")}</td>
                         <td className="py-2.5 font-bold">${Number(ord.totalAmount || ord.total || 0).toFixed(2)}</td>
                         <td className="py-2.5 text-right">
                           <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                            ord.status === "Delivered" ? "bg-emerald-100 text-emerald-700" :
-                            ord.status === "Processing" ? "bg-blue-100 text-blue-700" :
+                            renderSafeText(ord.status) === "Delivered" ? "bg-emerald-100 text-emerald-700" :
+                            renderSafeText(ord.status) === "Processing" ? "bg-blue-100 text-blue-700" :
                             "bg-amber-100 text-amber-700"
                           }`}>
-                            {ord.status || "Pending"}
+                            {renderSafeText(ord.status, "Pending")}
                           </span>
                         </td>
                       </tr>
@@ -368,7 +383,7 @@ export default function AdminDashboard() {
                   ) : (
                     <tr>
                       <td colSpan="4" className="py-8 text-center text-gray-400">
-                        No recent orders found.
+                        No recent orders.
                       </td>
                     </tr>
                   )}
@@ -398,7 +413,7 @@ export default function AdminDashboard() {
                       className="h-20 w-full object-cover rounded-lg mb-2"
                       onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1595777457583-95e059d581b8"; }}
                     />
-                    <h3 className="text-[11px] font-bold text-gray-800 truncate">{prod.name || prod.title || "Product"}</h3>
+                    <h3 className="text-[11px] font-bold text-gray-800 truncate">{renderSafeText(prod.name || prod.title, "Product")}</h3>
                     <p className="text-xs font-black text-pink-600">${Number(prod.price || 0).toFixed(2)}</p>
                   </div>
                 ))
@@ -463,8 +478,8 @@ export default function AdminDashboard() {
                     lowStockProducts.map((item, idx) => (
                       <tr key={idx} className="hover:bg-gray-50/50">
                         <td className="py-2.5 text-gray-400">{idx + 1}</td>
-                        <td className="py-2.5 font-bold">{item.name || "Product"}</td>
-                        <td className="py-2.5 text-gray-500">{item.category || "General"}</td>
+                        <td className="py-2.5 font-bold">{renderSafeText(item.name || item.title, "Product")}</td>
+                        <td className="py-2.5 text-gray-500">{renderSafeText(item.category, "General")}</td>
                         <td className="py-2.5 text-red-600 font-black">{item.stock || item.quantity || 0}</td>
                         <td className="py-2.5">
                           <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded-full text-[9px] font-bold">
