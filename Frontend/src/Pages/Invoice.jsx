@@ -295,7 +295,6 @@ function ReceiptLetterModal({ invoice, onClose }) {
     <div className="min-h-screen w-full bg-white flex flex-col items-center justify-center p-3 sm:p-6 overflow-y-auto">
       <div className="w-full max-w-xl bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-200 text-gray-800 my-auto" id="receipt-letter-card">
         
-        {/* Header */}
         <div className="flex justify-between items-start border-b-2 border-gray-900 pb-4 mb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pink-100 text-pink-600 font-bold text-2xl shadow-sm">
@@ -313,7 +312,6 @@ function ReceiptLetterModal({ invoice, onClose }) {
           </div>
         </div>
 
-        {/* Customer Info */}
         <div className="mb-4">
           <p className="text-xs font-bold text-gray-800 uppercase tracking-wider border-b border-gray-300 pb-1 mb-2">Customer Information</p>
           <div className="grid grid-cols-2 gap-y-1.5 text-xs">
@@ -324,7 +322,6 @@ function ReceiptLetterModal({ invoice, onClose }) {
           </div>
         </div>
 
-        {/* Payment Details Table */}
         <div className="mb-6">
           <p className="text-xs font-bold text-gray-800 uppercase tracking-wider border-b border-gray-300 pb-1 mb-2">Payment Details</p>
           <table className="w-full text-xs border border-gray-300 rounded-lg overflow-hidden">
@@ -355,7 +352,6 @@ function ReceiptLetterModal({ invoice, onClose }) {
           </table>
         </div>
 
-        {/* Signatures */}
         <div className="grid grid-cols-2 gap-8 pt-6 text-center text-xs mb-2">
           <div>
             <div className="border-t border-gray-400 pt-1 w-32 mx-auto"></div>
@@ -368,7 +364,6 @@ function ReceiptLetterModal({ invoice, onClose }) {
         </div>
       </div>
 
-      {/* Action Buttons */}
       <div className="mt-6 flex flex-wrap gap-3 w-full max-w-xl print:hidden">
         <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-3 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">
           <Printer size={16} /> Print Receipt
@@ -439,7 +434,6 @@ export default function Invoice() {
   const totalPaid = invoices.filter(inv => inv.status === "Paid").reduce((sum, inv) => sum + inv.totalAmount, 0);
   const totalUnpaid = invoices.filter(inv => inv.status !== "Paid").reduce((sum, inv) => sum + inv.totalAmount, 0);
 
-  // Haddii uu receiptInvoice jiro, waxaa shaashadda si toos ah u qabsanaya Rasiidka Nadiifka ah oo aan lahayn background dashboard
   if (receiptInvoice) {
     return <ReceiptLetterModal invoice={receiptInvoice} onClose={clearInvoiceAfterReceipt} />;
   }
@@ -542,7 +536,7 @@ export default function Invoice() {
           </div>
 
           <footer className="py-4 text-center text-xs text-gray-400 mt-auto">
-            © 2026 COLLECTION PRO · Style · Elegance · You
+            © 2026 COLLECTION PRO · Style • Elegance • You
           </footer>
         </main>
       </div>
