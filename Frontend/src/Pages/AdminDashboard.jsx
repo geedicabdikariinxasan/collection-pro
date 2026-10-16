@@ -33,7 +33,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
     { label: "Orders", icon: ShoppingCart, path: "/orders" },
     { label: "Sales", icon: BarChart3, path: "#" },
     { label: "Invoices", icon: FileText, path: "/invoices" },
-    { label: "Inventory / Stock", icon: Boxes, path: "#" },
+    { label: "Inventory / Stock", icon: Boxes, path: "inventoryStock" },
     { label: "Reports", icon: BarChart3, path: "#" },
     { label: "Users", icon: User, path: "#" },
     { label: "Settings", icon: Settings, path: "#" },

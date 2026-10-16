@@ -6,6 +6,7 @@ import Products from "./Pages/Products";
 import Customers from "./Pages/Customers";
 import Orders from "./Pages/Orders"; 
 import Invoice from "./Pages/Invoice";
+import InventoryStock from "./Pages/InventoryStock";
 
 
 
@@ -20,6 +21,7 @@ export default function App() {
        <Route path="/customers" element={<Customers />} />
        <Route path="/orders" element={<Orders />} />
        <Route path="/invoices" element={<Invoice />} />
+       <Route path="/inventorystock" element={<InventoryStock />} />
     </Routes>
   );
 }
