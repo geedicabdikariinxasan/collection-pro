@@ -264,6 +264,7 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
           <p className="text-xl font-bold text-pink-600 mt-1">${invoice.totalAmount?.toFixed(2)}</p>
         </div>
 
+        {/* Payment Method ComboBox */}
         <div className="mb-4 text-xs">
           <label className="block font-bold text-gray-700 mb-1">Payment Method</label>
           <select 
@@ -289,18 +290,18 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
   );
 }
 
-// QAYBTA RECEIPT MODAL (Strict 80mm POS Paper Thermal Print & PDF)
+// POS Thermal Receipt Style (Gaaban oo dhuuban)
 function ReceiptLetterModal({ invoice, onClose }) {
   if (!invoice) return null;
 
   const handleDownloadPDF = () => {
     const element = document.getElementById("receipt-letter-card");
     const options = {
-      margin: [2, 2, 2, 2],
-      filename: `Receipt-${invoice.id}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: [76, 130], orientation: 'portrait' }
+      margin:       5,
+      filename:     `Receipt-${invoice.id}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: [80, 150], orientation: 'portrait' }
     };
     
     if (window.html2pdf) {
@@ -315,34 +316,12 @@ function ReceiptLetterModal({ invoice, onClose }) {
       
       <style>{`
         @media print {
-          @page {
-            size: 80mm auto !important;
-            margin: 0 !important;
-          }
-          html, body {
-            width: 80mm !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: #ffffff !important;
-          }
-          body * {
-            visibility: hidden !important;
-          }
-          #receipt-letter-card, #receipt-letter-card * {
-            visibility: visible !important;
-          }
+          body * { visibility: hidden !important; }
+          #receipt-letter-card, #receipt-letter-card * { visibility: visible !important; }
           #receipt-letter-card {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 80mm !important;
-            max-width: 80mm !important;
-            margin: 0 !important;
-            padding: 4mm !important;
-            box-shadow: none !important;
-            border: none !important;
-            background: #ffffff !important;
-            border-radius: 0 !important;
+            position: absolute !important; left: 0 !important; top: 0 !important;
+            width: 80mm !important; margin: 0 !important; padding: 10px !important;
+            box-shadow: none !important; border: none !important; background: #ffffff !important;
           }
           .no-print-area {
             display: none !important;
@@ -350,42 +329,39 @@ function ReceiptLetterModal({ invoice, onClose }) {
         }
       `}</style>
 
-      {/* POS Thermal Receipt Container (Rigid POS Width: 80mm / 280px) */}
-      <div className="w-[280px] max-w-[80mm] bg-white p-4 rounded-xl shadow-2xl border border-gray-200 font-mono text-gray-900 relative my-auto shrink-0" id="receipt-letter-card">
+      {/* POS Thermal Receipt Container (Dhuuban oo gaaban) */}
+      <div className="w-full max-w-[280px] bg-white p-4 rounded-xl shadow-2xl border border-gray-300 font-mono text-gray-900 relative my-auto text-[11px]" id="receipt-letter-card">
         
-        {/* Header Logo Collection Pro */}
-        <div className="text-center mb-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-100 text-lg shadow-xs mx-auto mb-1 border border-pink-200">
-            👗
-          </div>
-          <h2 className="font-extrabold text-xs tracking-wider uppercase">COLLECTION PRO</h2>
-          <p className="text-[8.5px] text-gray-600">Women's Fashion & Clothing</p>
-          <p className="text-[8.5px] text-gray-600">123 Main Street, City</p>
-          <p className="text-[8.5px] text-gray-600">(555) 555-5555</p>
+        {/* Header */}
+        <div className="text-center mb-2">
+          <div className="text-xl mb-0.5">👗</div>
+          <h2 className="font-bold text-xs tracking-wide">COLLECTION PRO</h2>
+          <p className="text-[9px]">Women's Fashion & Clothing</p>
+          <p className="text-[9px]">+252 61 2345678</p>
         </div>
 
-        {/* Date & Customer Info */}
-        <div className="text-center text-[8.5px] border-t border-b border-dashed border-gray-400 py-1 my-1.5">
-          <p>Date: {invoice.date} | Time: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-          <p className="font-bold mt-0.5 truncate">Customer: {invoice.customerName}</p>
+        <div className="border-t border-b border-dashed border-gray-400 py-1 my-1.5 text-[9px]">
+          <p className="flex justify-between"><span>Date: {invoice.date}</span> <span>REC-{invoice.id}</span></p>
+          <p className="truncate">Customer: {invoice.customerName}</p>
+          <p className="truncate">Payment: {invoice.paymentMethod || "Mobile Money"}</p>
         </div>
 
         {/* Items Table */}
-        <div className="space-y-1 text-[10px] my-2">
-          <div className="flex justify-between font-bold border-b border-gray-800 pb-1 text-[9.5px]">
+        <div className="space-y-1 my-2">
+          <div className="flex justify-between font-bold border-b border-gray-400 pb-0.5 text-[10px]">
             <span>Description</span>
             <span>Price</span>
           </div>
           {invoice.items?.map((item, idx) => (
-            <div key={idx} className="flex justify-between text-[9.5px]">
+            <div key={idx} className="flex justify-between text-[10px]">
               <span className="truncate max-w-[150px]">{item.name} (x{item.qty})</span>
-              <span className="font-semibold">${(item.price * item.qty).toFixed(2)}</span>
+              <span>${(item.price * item.qty).toFixed(2)}</span>
             </div>
           ))}
         </div>
 
-        {/* Subtotal, Tax & Total */}
-        <div className="border-t border-dashed border-gray-400 pt-1.5 space-y-0.5 text-[9.5px]">
+        {/* Totals */}
+        <div className="border-t border-dashed border-gray-400 pt-1 space-y-0.5 text-[11px]">
           <div className="flex justify-between">
             <span>Subtotal</span>
             <span>${invoice.totalAmount?.toFixed(2)}</span>
@@ -394,30 +370,40 @@ function ReceiptLetterModal({ invoice, onClose }) {
             <span>Tax</span>
             <span>$0.00</span>
           </div>
-          <div className="flex justify-between font-extrabold text-[11px] border-t border-gray-800 pt-1 mt-1">
+          <div className="flex justify-between font-bold text-xs border-t border-gray-400 pt-0.5">
             <span>Total</span>
             <span>${invoice.totalAmount?.toFixed(2)}</span>
           </div>
         </div>
 
-        {/* Payment & Footer */}
-        <div className="border-t border-dashed border-gray-400 mt-2 pt-1.5 text-center text-[8.5px]">
-          <div className="flex justify-between px-0.5 mb-1.5 font-medium">
-            <span>Payment</span> <span>{invoice.paymentMethod || "Mobile Money"}</span>
-          </div>
-          <p className="font-bold text-[9.5px] mt-2">Thank you for your visit.</p>
-          <p className="text-[8px] text-gray-600 mt-0.5">Take care of your health & style!</p>
+        {/* Footer */}
+        <div className="border-t border-dashed border-gray-400 mt-2 pt-1 text-center text-[9px]">
+          <p className="font-bold mt-1">Thank you for your visit!</p>
+          <p className="text-[8px]">Style • Elegance • You</p>
         </div>
 
         {/* Buttons */}
-        <div className="mt-3 flex flex-wrap gap-1.5 no-print-area border-t border-gray-200 pt-2">
-          <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1 rounded bg-black py-1.5 font-bold text-white cursor-pointer text-[10px] hover:bg-gray-800 transition">
+        <div className="mt-3 flex gap-1.5 no-print-area border-t border-gray-200 pt-2">
+          <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1 rounded bg-black py-1.5 font-bold text-white cursor-pointer text-[10px]">
             <Printer size={12} /> Print
           </button>
-          <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded bg-green-600 py-1.5 font-bold text-white cursor-pointer text-[10px] hover:bg-green-700 transition">
+          <button onClick={() => {
+            const element = document.getElementById("receipt-letter-card");
+            if (window.html2pdf) {
+              window.html2pdf().from(element).set({
+                margin: 5,
+                filename: `Receipt-${invoice.id}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: [80, 150], orientation: 'portrait' }
+              }).save();
+            } else {
+              window.print();
+            }
+          }} className="flex-1 flex items-center justify-center gap-1.5 rounded bg-green-600 py-1.5 font-bold text-white cursor-pointer text-[10px]">
             <Download size={12} /> PDF
           </button>
-          <button onClick={onClose} className="rounded border border-gray-300 px-2.5 py-1.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-[10px] bg-white">
+          <button onClick={onClose} className="rounded border border-gray-300 px-3 py-1.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-[10px] bg-white">
             Close
           </button>
         </div>
@@ -573,7 +559,7 @@ export default function Invoice() {
 
             <InvoiceDetails
               invoice={selectedInvoice}
-              onClose={() => setSelectedInvoice(null)}
+              onClose={() => setSelectedInvoice(main => null)}
               onMakePayment={(invoice) => setPaymentInvoice(invoice)}
               onReceipt={(invoice) => setReceiptInvoice(invoice)}
             />
