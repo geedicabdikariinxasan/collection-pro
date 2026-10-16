@@ -246,7 +246,6 @@ function InvoiceDetails({ invoice, onClose, onMakePayment, onReceipt }) {
   );
 }
 
-// QAYBTA PAYMENT MODAL (Wuxuu wataa ComboBox-ka Payment Method)
 function PaymentModal({ invoice, onClose, onConfirm }) {
   const [paymentMethod, setPaymentMethod] = useState("Mobile Money");
 
@@ -265,7 +264,6 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
           <p className="text-xl font-bold text-pink-600 mt-1">${invoice.totalAmount?.toFixed(2)}</p>
         </div>
 
-        {/* Payment Method ComboBox (Codsigaaga) */}
         <div className="mb-4 text-xs">
           <label className="block font-bold text-gray-700 mb-1">Payment Method</label>
           <select 
@@ -291,16 +289,15 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
   );
 }
 
-// QAYBTA RECEIPT MODAL (Thermal POS Receipt Style - Sida sawirka 2aad)
 function ReceiptLetterModal({ invoice, onClose }) {
   if (!invoice) return null;
 
   const handleDownloadPDF = () => {
     const element = document.getElementById("receipt-letter-card");
     const options = {
-      margin:       5,
-      filename:     `Receipt-${invoice.id}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
+      margin:      5,
+      filename:    `Receipt-${invoice.id}.pdf`,
+      image:       { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true },
       jsPDF:        { unit: 'mm', format: [80, 160], orientation: 'portrait' }
     };
@@ -340,10 +337,8 @@ function ReceiptLetterModal({ invoice, onClose }) {
         }
       `}</style>
 
-      {/* POS Thermal Receipt Container (Dhuuban oo dheer) */}
       <div className="w-full max-w-[280px] bg-white p-4 rounded-xl shadow-2xl border border-gray-300 font-mono text-gray-900 relative my-auto" id="receipt-letter-card">
         
-        {/* Header */}
         <div className="text-center mb-2">
           <div className="text-xl mb-0.5">➕</div>
           <h2 className="font-bold text-xs tracking-wide">COLLECTION PRO</h2>
@@ -356,7 +351,6 @@ function ReceiptLetterModal({ invoice, onClose }) {
           <p className="font-bold mt-0.5">Customer: {invoice.customerName}</p>
         </div>
 
-        {/* Items Table */}
         <div className="space-y-1 text-[11px] my-2">
           <div className="flex justify-between font-bold border-b border-gray-400 pb-1">
             <span>Description</span>
@@ -370,7 +364,6 @@ function ReceiptLetterModal({ invoice, onClose }) {
           ))}
         </div>
 
-        {/* Totals */}
         <div className="border-t border-dashed border-gray-400 pt-1.5 space-y-0.5 text-xs">
           <div className="flex justify-between">
             <span>Subtotal</span>
@@ -386,7 +379,6 @@ function ReceiptLetterModal({ invoice, onClose }) {
           </div>
         </div>
 
-        {/* Payment & Footer */}
         <div className="border-t border-dashed border-gray-400 mt-2 pt-1.5 text-center text-[10px]">
           <div className="flex justify-between px-1 mb-2">
             <span>Payment</span> <span>{invoice.paymentMethod || "Credit Card"}</span>
@@ -395,7 +387,6 @@ function ReceiptLetterModal({ invoice, onClose }) {
           <p className="text-[9px]">Take care of your health & style!</p>
         </div>
 
-        {/* Buttons */}
         <div className="mt-4 flex flex-wrap gap-1.5 no-print-area border-t border-gray-200 pt-2">
           <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1 rounded bg-black py-1.5 font-bold text-white cursor-pointer text-[10px]">
             <Printer size={12} /> Print
@@ -546,7 +537,7 @@ export default function Invoice() {
                     ) : (
                       <tr>
                         <td colSpan="7" className="py-14 text-center text-gray-400">
-                          <FileFileText size={38} className="mx-auto mb-2 text-gray-300" />
+                          <FileText size={38} className="mx-auto mb-2 text-gray-300" />
                           <p className="text-sm font-semibold">No invoices found</p>
                           <p className="text-xs text-gray-400 mt-0.5">Orders made in Orders page will show up here instantly.</p>
                         </td>
