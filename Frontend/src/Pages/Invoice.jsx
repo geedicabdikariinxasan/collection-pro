@@ -246,8 +246,12 @@ function InvoiceDetails({ invoice, onClose, onMakePayment, onReceipt }) {
   );
 }
 
+// QAYBTA PAYMENT MODAL (Wuxuu wataa ComboBox-ka Payment Method)
 function PaymentModal({ invoice, onClose, onConfirm }) {
+  const [paymentMethod, setPaymentMethod] = useState("Mobile Money");
+
   if (!invoice) return null;
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs print:hidden">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
@@ -255,13 +259,29 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
           <h2 className="text-base font-bold">Make Payment</h2>
           <button onClick={onClose} className="rounded-lg p-2 hover:bg-gray-100 cursor-pointer"><X size={18} /></button>
         </div>
-        <div className="mb-4 rounded-xl bg-pink-50 p-3 text-xs">
+        <div className="mb-4 rounded-xl bg-pink-50 p-3 text-xs space-y-1">
           <p className="text-gray-500">Invoice: <strong className="text-gray-800">{invoice.id}</strong></p>
-          <p className="text-gray-500 mt-1">Customer: <strong className="text-gray-800">{invoice.customerName}</strong></p>
-          <p className="mt-2 text-xl font-bold text-pink-600">${invoice.totalAmount?.toFixed(2)}</p>
+          <p className="text-gray-500">Customer: <strong className="text-gray-800">{invoice.customerName}</strong></p>
+          <p className="text-xl font-bold text-pink-600 mt-1">${invoice.totalAmount?.toFixed(2)}</p>
         </div>
+
+        {/* Payment Method ComboBox (Codsigaaga) */}
+        <div className="mb-4 text-xs">
+          <label className="block font-bold text-gray-700 mb-1">Payment Method</label>
+          <select 
+            value={paymentMethod} 
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            className="w-full rounded-lg border border-gray-200 bg-white p-2.5 outline-none focus:border-pink-400 cursor-pointer text-xs font-semibold"
+          >
+            <option value="Mobile Money">Mobile Money (Zaad / E-Dahab)</option>
+            <option value="Cash">Cash</option>
+            <option value="Credit Card">Credit Card</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+          </select>
+        </div>
+
         <button 
-          onClick={() => onConfirm(invoice)} 
+          onClick={() => onConfirm(invoice, paymentMethod)} 
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-pink-600 py-3 font-bold text-white hover:bg-pink-700 cursor-pointer text-xs shadow-md"
         >
           <CheckCircle size={16} /> Payment Paid Successfully! ✅
@@ -271,7 +291,7 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
   );
 }
 
-// Sida sawirka 2aad: Thermal POS Receipt Style (Narrow receipt layout)
+// QAYBTA RECEIPT MODAL (Thermal POS Receipt Style - Sida sawirka 2aad)
 function ReceiptLetterModal({ invoice, onClose }) {
   if (!invoice) return null;
 
@@ -282,7 +302,7 @@ function ReceiptLetterModal({ invoice, onClose }) {
       filename:     `Receipt-${invoice.id}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: [80, 150], orientation: 'portrait' }
+      jsPDF:        { unit: 'mm', format: [80, 160], orientation: 'portrait' }
     };
     
     if (window.html2pdf) {
@@ -320,67 +340,70 @@ function ReceiptLetterModal({ invoice, onClose }) {
         }
       `}</style>
 
-      {/* POS Thermal Receipt Container */}
-      <div className="w-full max-w-[320px] bg-white p-5 rounded-xl shadow-2xl border border-gray-300 font-mono text-gray-900 relative my-auto" id="receipt-letter-card">
+      {/* POS Thermal Receipt Container (Dhuuban oo dheer) */}
+      <div className="w-full max-w-[280px] bg-white p-4 rounded-xl shadow-2xl border border-gray-300 font-mono text-gray-900 relative my-auto" id="receipt-letter-card">
         
         {/* Header */}
-        <div className="text-center mb-3">
-          <div className="text-2xl mb-1">➕</div>
-          <h2 className="font-bold text-sm tracking-wide">COLLECTION PRO</h2>
-          <p className="text-[10px]">Women's Fashion & Clothing</p>
-          <p className="text-[10px]">+252 61 2345678</p>
+        <div className="text-center mb-2">
+          <div className="text-xl mb-0.5">➕</div>
+          <h2 className="font-bold text-xs tracking-wide">COLLECTION PRO</h2>
+          <p className="text-[9px]">123 Main Street, City</p>
+          <p className="text-[9px]">(555) 555-5555</p>
         </div>
 
-        <div className="border-t border-b border-dashed border-gray-400 py-1.5 my-2 text-[10px]">
-          <p className="flex justify-between"><span>Date: {invoice.date}</span> <span>Receipt: REC-{invoice.id}</span></p>
-          <p>Customer: {invoice.customerName}</p>
+        <div className="text-center text-[9px] border-t border-b border-dashed border-gray-400 py-1 my-1.5">
+          <p>Date: {invoice.date} | Time: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+          <p className="font-bold mt-0.5">Customer: {invoice.customerName}</p>
         </div>
 
         {/* Items Table */}
-        <div className="space-y-1 text-xs my-2">
-          <div className="flex justify-between font-bold border-b border-gray-300 pb-1 text-[11px]">
+        <div className="space-y-1 text-[11px] my-2">
+          <div className="flex justify-between font-bold border-b border-gray-400 pb-1">
             <span>Description</span>
             <span>Price</span>
           </div>
           {invoice.items?.map((item, idx) => (
             <div key={idx} className="flex justify-between text-[11px]">
-              <span className="truncate max-w-[180px]">{item.name} (x{item.qty})</span>
+              <span className="truncate max-w-[150px]">{item.name} (x{item.qty})</span>
               <span>${(item.price * item.qty).toFixed(2)}</span>
             </div>
           ))}
         </div>
 
         {/* Totals */}
-        <div className="border-t border-dashed border-gray-400 pt-2 space-y-1 text-xs">
-          <div className="flex justify-between font-semibold">
+        <div className="border-t border-dashed border-gray-400 pt-1.5 space-y-0.5 text-xs">
+          <div className="flex justify-between">
             <span>Subtotal</span>
             <span>${invoice.totalAmount?.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between font-semibold">
+          <div className="flex justify-between">
             <span>Tax</span>
             <span>$0.00</span>
           </div>
-          <div className="flex justify-between font-bold text-sm border-t border-gray-300 pt-1">
+          <div className="flex justify-between font-bold text-sm border-t border-gray-400 pt-1">
             <span>Total</span>
             <span>${invoice.totalAmount?.toFixed(2)}</span>
           </div>
         </div>
 
-        <div className="border-t border-dashed border-gray-400 mt-3 pt-2 text-center text-[11px]">
-          <p className="flex justify-between mb-2"><span>Payment</span> <span>Mobile Money</span></p>
-          <p className="font-bold mt-2">Thank you for your visit!</p>
-          <p className="text-[10px]">Take care of your health & style!</p>
+        {/* Payment & Footer */}
+        <div className="border-t border-dashed border-gray-400 mt-2 pt-1.5 text-center text-[10px]">
+          <div className="flex justify-between px-1 mb-2">
+            <span>Payment</span> <span>{invoice.paymentMethod || "Credit Card"}</span>
+          </div>
+          <p className="font-bold mt-2">Thank you for your visit.</p>
+          <p className="text-[9px]">Take care of your health & style!</p>
         </div>
 
         {/* Buttons */}
-        <div className="mt-4 flex flex-wrap gap-2 no-print-area border-t border-gray-100 pt-3">
-          <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-black py-2 font-bold text-white shadow hover:bg-gray-800 cursor-pointer text-[11px]">
-            <Printer size={13} /> Print
+        <div className="mt-4 flex flex-wrap gap-1.5 no-print-area border-t border-gray-200 pt-2">
+          <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1 rounded bg-black py-1.5 font-bold text-white cursor-pointer text-[10px]">
+            <Printer size={12} /> Print
           </button>
-          <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-green-600 py-2 font-bold text-white shadow hover:bg-green-700 cursor-pointer text-[11px]">
-            <Download size={13} /> PDF
+          <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded bg-green-600 py-1.5 font-bold text-white cursor-pointer text-[10px]">
+            <Download size={12} /> PDF
           </button>
-          <button onClick={onClose} className="rounded-lg border border-gray-300 px-3 py-2 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-[11px] bg-white">
+          <button onClick={onClose} className="rounded border border-gray-300 px-3 py-1.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-[10px] bg-white">
             Close
           </button>
         </div>
@@ -414,8 +437,8 @@ export default function Invoice() {
     setInvoices(formattedInvoices);
   };
 
-  const confirmPayment = (invoiceToPay) => {
-    const updatedInvoice = { ...invoiceToPay, status: "Paid" };
+  const confirmPayment = (invoiceToPay, method) => {
+    const updatedInvoice = { ...invoiceToPay, status: "Paid", paymentMethod: method };
     setPaymentInvoice(null);
     setReceiptInvoice(updatedInvoice);
   };
@@ -523,7 +546,7 @@ export default function Invoice() {
                     ) : (
                       <tr>
                         <td colSpan="7" className="py-14 text-center text-gray-400">
-                          <FileText size={38} className="mx-auto mb-2 text-gray-300" />
+                          <FileFileText size={38} className="mx-auto mb-2 text-gray-300" />
                           <p className="text-sm font-semibold">No invoices found</p>
                           <p className="text-xs text-gray-400 mt-0.5">Orders made in Orders page will show up here instantly.</p>
                         </td>
