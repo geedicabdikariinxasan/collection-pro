@@ -289,18 +289,18 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
   );
 }
 
-// QAYBTA RECEIPT MODAL (POS Thermal Style Exact Like Image 2)
+// QAYBTA RECEIPT MODAL (Strict 80mm POS Paper Thermal Print)
 function ReceiptLetterModal({ invoice, onClose }) {
   if (!invoice) return null;
 
   const handleDownloadPDF = () => {
     const element = document.getElementById("receipt-letter-card");
     const options = {
-      margin:      0,
-      filename:    `Receipt-${invoice.id}.pdf`,
-      image:       { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: [80, 150], orientation: 'portrait' }
+      margin: 0,
+      filename: `Receipt-${invoice.id}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: [80, 160], orientation: 'portrait' }
     };
     
     if (window.html2pdf) {
@@ -316,13 +316,14 @@ function ReceiptLetterModal({ invoice, onClose }) {
       <style>{`
         @media print {
           @page {
-            size: 80mm auto;
-            margin: 0;
+            size: 80mm auto !important;
+            margin: 0 !important;
           }
-          body {
-            background: #ffffff !important;
+          html, body {
+            width: 80mm !important;
             margin: 0 !important;
             padding: 0 !important;
+            background: #ffffff !important;
           }
           body * {
             visibility: hidden !important;
@@ -335,8 +336,9 @@ function ReceiptLetterModal({ invoice, onClose }) {
             left: 0 !important;
             top: 0 !important;
             width: 80mm !important;
+            max-width: 80mm !important;
             margin: 0 !important;
-            padding: 8mm 5mm !important;
+            padding: 5mm !important;
             box-shadow: none !important;
             border: none !important;
             background: #ffffff !important;
@@ -348,34 +350,34 @@ function ReceiptLetterModal({ invoice, onClose }) {
         }
       `}</style>
 
-      {/* POS Thermal Receipt Container */}
-      <div className="w-[320px] bg-white p-5 rounded-xl shadow-2xl border border-gray-200 font-mono text-gray-900 relative my-auto" id="receipt-letter-card">
+      {/* POS Thermal Receipt Container (Rigid POS Width: 80mm / 300px) */}
+      <div className="w-[300px] max-w-[80mm] bg-white p-4 rounded-xl shadow-2xl border border-gray-200 font-mono text-gray-900 relative my-auto shrink-0" id="receipt-letter-card">
         
         {/* Header Logo Collection Pro */}
         <div className="text-center mb-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-pink-100 text-2xl shadow-sm mx-auto mb-1.5 border border-pink-200">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-pink-100 text-xl shadow-xs mx-auto mb-1 border border-pink-200">
             👗
           </div>
-          <h2 className="font-extrabold text-sm tracking-wider uppercase">COLLECTION PRO</h2>
-          <p className="text-[10px] text-gray-600">Women's Fashion & Clothing</p>
-          <p className="text-[10px] text-gray-600">123 Main Street, City</p>
-          <p className="text-[10px] text-gray-600">(555) 555-5555</p>
+          <h2 className="font-extrabold text-xs tracking-wider uppercase">COLLECTION PRO</h2>
+          <p className="text-[9px] text-gray-600">Women's Fashion & Clothing</p>
+          <p className="text-[9px] text-gray-600">123 Main Street, City</p>
+          <p className="text-[9px] text-gray-600">(555) 555-5555</p>
         </div>
 
         {/* Date & Customer Info */}
-        <div className="text-center text-[10px] border-t border-b border-dashed border-gray-400 py-1.5 my-2">
+        <div className="text-center text-[9px] border-t border-b border-dashed border-gray-400 py-1 my-1.5">
           <p>Date: {invoice.date} | Time: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-          <p className="font-bold mt-0.5">Customer: {invoice.customerName}</p>
+          <p className="font-bold mt-0.5 truncate">Customer: {invoice.customerName}</p>
         </div>
 
         {/* Items Table */}
-        <div className="space-y-1.5 text-xs my-2.5">
-          <div className="flex justify-between font-bold border-b border-gray-800 pb-1 text-[11px]">
+        <div className="space-y-1 text-[11px] my-2">
+          <div className="flex justify-between font-bold border-b border-gray-800 pb-1 text-[10px]">
             <span>Description</span>
             <span>Price</span>
           </div>
           {invoice.items?.map((item, idx) => (
-            <div key={idx} className="flex justify-between text-[11px]">
+            <div key={idx} className="flex justify-between text-[10px]">
               <span className="truncate max-w-[170px]">{item.name} (x{item.qty})</span>
               <span className="font-semibold">${(item.price * item.qty).toFixed(2)}</span>
             </div>
@@ -383,39 +385,39 @@ function ReceiptLetterModal({ invoice, onClose }) {
         </div>
 
         {/* Subtotal, Tax & Total */}
-        <div className="border-t border-dashed border-gray-400 pt-2 space-y-1 text-xs">
-          <div className="flex justify-between text-[11px]">
+        <div className="border-t border-dashed border-gray-400 pt-1.5 space-y-0.5 text-[10px]">
+          <div className="flex justify-between">
             <span>Subtotal</span>
             <span>${invoice.totalAmount?.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-[11px]">
+          <div className="flex justify-between">
             <span>Tax</span>
             <span>$0.00</span>
           </div>
-          <div className="flex justify-between font-extrabold text-sm border-t border-gray-800 pt-1 mt-1">
+          <div className="flex justify-between font-extrabold text-xs border-t border-gray-800 pt-1 mt-1">
             <span>Total</span>
             <span>${invoice.totalAmount?.toFixed(2)}</span>
           </div>
         </div>
 
         {/* Payment & Footer */}
-        <div className="border-t border-dashed border-gray-400 mt-2.5 pt-2 text-center text-[10px]">
-          <div className="flex justify-between px-0.5 mb-2 font-medium">
+        <div className="border-t border-dashed border-gray-400 mt-2 pt-1.5 text-center text-[9px]">
+          <div className="flex justify-between px-0.5 mb-1.5 font-medium">
             <span>Payment</span> <span>{invoice.paymentMethod || "Mobile Money"}</span>
           </div>
-          <p className="font-bold text-[11px] mt-3">Thank you for your visit.</p>
-          <p className="text-[9.5px] text-gray-600 mt-0.5">Take care of your health & style!</p>
+          <p className="font-bold text-[10px] mt-2">Thank you for your visit.</p>
+          <p className="text-[8.5px] text-gray-600 mt-0.5">Take care of your health & style!</p>
         </div>
 
         {/* Buttons */}
-        <div className="mt-4 flex flex-wrap gap-1.5 no-print-area border-t border-gray-200 pt-2.5">
-          <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1 rounded bg-black py-2 font-bold text-white cursor-pointer text-[11px] hover:bg-gray-800 transition">
-            <Printer size={13} /> Print
+        <div className="mt-3 flex flex-wrap gap-1.5 no-print-area border-t border-gray-200 pt-2">
+          <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1 rounded bg-black py-1.5 font-bold text-white cursor-pointer text-[10px] hover:bg-gray-800 transition">
+            <Printer size={12} /> Print
           </button>
-          <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded bg-green-600 py-2 font-bold text-white cursor-pointer text-[11px] hover:bg-green-700 transition">
-            <Download size={13} /> PDF
+          <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded bg-green-600 py-1.5 font-bold text-white cursor-pointer text-[10px] hover:bg-green-700 transition">
+            <Download size={12} /> PDF
           </button>
-          <button onClick={onClose} className="rounded border border-gray-300 px-3 py-2 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-[11px] bg-white">
+          <button onClick={onClose} className="rounded border border-gray-300 px-2.5 py-1.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-[10px] bg-white">
             Close
           </button>
         </div>
