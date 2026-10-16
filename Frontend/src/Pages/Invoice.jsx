@@ -290,64 +290,62 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
   );
 }
 
+
 function ReceiptLetterModal({ invoice, onClose }) {
   if (!invoice) return null;
 
-  const handleDownloadPDF = () => {
-    const element = document.getElementById("pos-receipt-ticket");
-    const options = {
-      margin:       2,
-      filename:     `Receipt-${invoice.id}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: [80, 140], orientation: 'portrait' }
-    };
-    
-    if (window.html2pdf) {
-      window.html2pdf().from(element).set(options).save();
-    } else {
-      window.print();
-    }
-  };
-
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs overflow-y-auto">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs overflow-y-auto print:bg-white print:p-0">
       
-      {/* CSS-ka gaarka u ah Print-ka si uu u daabaco warqadda dhuuban oo keliya */}
+      {/* CSS-ka gaarka u ah Print-ka si uu rasiidhka u keeno Center oo uu u qariyo wixii kale */}
       <style>{`
         @media print {
-          body * { visibility: hidden !important; }
-          #pos-receipt-ticket, #pos-receipt-ticket * { visibility: visible !important; }
-          #pos-receipt-ticket {
-            position: absolute !important; left: 0 !important; top: 0 !important;
-            width: 80mm !important; margin: 0 !important; padding: 5px !important;
-            box-shadow: none !important; border: none !important; background: #ffffff !important;
+          body * {
+            visibility: hidden !important;
           }
-          .no-print-area { display: none !important; }
+          #pos-receipt-container, #pos-receipt-container * {
+            visibility: visible !important;
+          }
+          #pos-receipt-container {
+            position: fixed !important;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 80mm !important;
+            margin: 0 !important;
+            padding: 10px !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: #ffffff !important;
+          }
+          .no-print-area {
+            display: none !important;
+          }
         }
       `}</style>
 
-      {/* Rasiidhka dhuuban ee POS-ka */}
-      <div className="bg-white p-6 rounded-2xl shadow-2xl border border-gray-300 relative my-auto flex flex-col items-center">
+      {/* Container-ka guud oo xarun ah (Center) iyo rasiidhka dhuuban */}
+      <div className="flex flex-col items-center justify-center w-full max-w-sm my-auto">
         
-        <div className="w-[260px] bg-white font-mono text-gray-900 text-[11px] p-2" id="pos-receipt-ticket">
+        {/* POS Thermal Receipt Container */}
+        <div className="w-[280px] bg-white p-5 rounded-2xl shadow-2xl border border-gray-300 font-mono text-gray-900 relative text-[11px]" id="pos-receipt-container">
           
           {/* Header */}
-          <div className="text-center mb-2">
+          <div className="text-center mb-2.5">
             <div className="text-xl mb-0.5">👗</div>
-            <h2 className="font-bold text-xs tracking-wide">COLLECTION PRO</h2>
-            <p className="text-[9px]">Women's Fashion & Clothing</p>
-            <p className="text-[9px]">+252 61 2345678</p>
+            <h2 className="font-bold text-xs tracking-wider">COLLECTION PRO</h2>
+            <p className="text-[9px] text-gray-600">Women's Fashion & Clothing</p>
+            <p className="text-[9px] text-gray-600">+252 61 2345678</p>
           </div>
 
-          <div className="border-t border-b border-dashed border-gray-400 py-1 my-1.5 text-[9px]">
+          <div className="border-t border-b border-dashed border-gray-400 py-1.5 my-2 text-[9px]">
             <p className="flex justify-between"><span>Date: {invoice.date}</span> <span>REC-{invoice.id}</span></p>
-            <p className="truncate">Customer: {invoice.customerName}</p>
+            <p className="truncate font-semibold mt-0.5">Customer: {invoice.customerName}</p>
           </div>
 
           {/* Items Table */}
           <div className="space-y-1 my-2">
-            <div className="flex justify-between font-bold border-b border-gray-400 pb-0.5 text-[10px]">
+            <div className="flex justify-between font-bold border-b border-gray-800 pb-0.5 text-[10px]">
               <span>Description</span>
               <span>Price</span>
             </div>
@@ -360,7 +358,7 @@ function ReceiptLetterModal({ invoice, onClose }) {
           </div>
 
           {/* Totals */}
-          <div className="border-t border-dashed border-gray-400 pt-1 space-y-0.5 text-[11px]">
+          <div className="border-t border-dashed border-gray-400 pt-1.5 space-y-0.5 text-[11px]">
             <div className="flex justify-between">
               <span>Subtotal</span>
               <span>${invoice.totalAmount?.toFixed(2)}</span>
@@ -369,39 +367,36 @@ function ReceiptLetterModal({ invoice, onClose }) {
               <span>Tax</span>
               <span>$0.00</span>
             </div>
-            <div className="flex justify-between font-bold text-xs border-t border-gray-400 pt-0.5">
+            <div className="flex justify-between font-bold text-xs border-t border-gray-800 pt-1">
               <span>Total</span>
-              <span>${invoice.totalAmount?.toFixed(2)}</span>
+              <span className="text-pink-600">${invoice.totalAmount?.toFixed(2)}</span>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="border-t border-dashed border-gray-400 mt-2 pt-1 text-center text-[9px]">
-            <p className="flex justify-between mb-1"><span>Payment</span> <span>{invoice.paymentMethod || "Mobile Money"}</span></p>
-            <p className="font-bold mt-1">Thank you for your visit!</p>
-            <p className="text-[8px]">Style • Elegance • You</p>
+          <div className="border-t border-dashed border-gray-400 mt-3 pt-1.5 text-center text-[9px]">
+            <p className="flex justify-between mb-1.5 font-medium"><span>Payment</span> <span>{invoice.paymentMethod || "Mobile Money"}</span></p>
+            <p className="font-bold text-[10px] mt-1">Thank you for your visit!</p>
+            <p className="text-[8px] text-gray-500 mt-0.5">Style • Elegance • You</p>
           </div>
 
-        </div>
+          {/* Buttons (Print & Close) */}
+          <div className="mt-4 flex gap-2 no-print-area border-t border-gray-200 pt-3">
+            <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-black py-2 font-bold text-white cursor-pointer text-[11px] hover:bg-gray-800 transition">
+              <Printer size={13} /> Print
+            </button>
+            <button onClick={onClose} className="rounded-xl border border-gray-300 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-[11px] bg-white shadow-xs">
+              Close
+            </button>
+          </div>
 
-        {/* Buttons (Print, PDF, Close) */}
-        <div className="mt-5 flex gap-2 no-print-area w-full max-w-[260px] pt-2 border-t border-gray-100">
-          <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1 rounded bg-black py-2 font-bold text-white cursor-pointer text-[10px] hover:bg-gray-800 transition">
-            <Printer size={12} /> Print
-          </button>
-          <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1 rounded bg-green-600 py-2 font-bold text-white cursor-pointer text-[10px] hover:bg-green-700 transition">
-            <Download size={12} /> PDF
-          </button>
-          <button onClick={onClose} className="rounded border border-gray-300 px-3 py-2 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-[10px] bg-white">
-            Close
-          </button>
         </div>
 
       </div>
     </div>
   );
 }
-  
+
 export default function Invoice() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [invoices, setInvoices] = useState([]);
