@@ -296,11 +296,11 @@ function ReceiptLetterModal({ invoice, onClose }) {
   const handleDownloadPDF = () => {
     const element = document.getElementById("receipt-letter-card");
     const options = {
-      margin: 0,
+      margin: [2, 2, 2, 2],
       filename: `Receipt-${invoice.id}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: [80, 140], orientation: 'portrait' }
+      jsPDF: { unit: 'mm', format: [76, 130], orientation: 'portrait' }
     };
     
     if (window.html2pdf) {
@@ -332,7 +332,7 @@ function ReceiptLetterModal({ invoice, onClose }) {
             visibility: visible !important;
           }
           #receipt-letter-card {
-            position: fixed !important;
+            position: absolute !important;
             left: 0 !important;
             top: 0 !important;
             width: 80mm !important;
@@ -350,7 +350,7 @@ function ReceiptLetterModal({ invoice, onClose }) {
         }
       `}</style>
 
-      {/* POS Thermal Receipt Container (80mm / 280px) */}
+      {/* POS Thermal Receipt Container (Rigid POS Width: 80mm / 280px) */}
       <div className="w-[280px] max-w-[80mm] bg-white p-4 rounded-xl shadow-2xl border border-gray-200 font-mono text-gray-900 relative my-auto shrink-0" id="receipt-letter-card">
         
         {/* Header Logo Collection Pro */}
