@@ -289,7 +289,7 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
   );
 }
 
-// QAYBTA RECEIPT MODAL (Strict 80mm POS Paper Thermal Print)
+// QAYBTA RECEIPT MODAL (Strict 80mm POS Paper Thermal Print & PDF)
 function ReceiptLetterModal({ invoice, onClose }) {
   if (!invoice) return null;
 
@@ -300,7 +300,7 @@ function ReceiptLetterModal({ invoice, onClose }) {
       filename: `Receipt-${invoice.id}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: [80, 160], orientation: 'portrait' }
+      jsPDF: { unit: 'mm', format: [80, 140], orientation: 'portrait' }
     };
     
     if (window.html2pdf) {
@@ -332,13 +332,13 @@ function ReceiptLetterModal({ invoice, onClose }) {
             visibility: visible !important;
           }
           #receipt-letter-card {
-            position: absolute !important;
+            position: fixed !important;
             left: 0 !important;
             top: 0 !important;
             width: 80mm !important;
             max-width: 80mm !important;
             margin: 0 !important;
-            padding: 5mm !important;
+            padding: 4mm !important;
             box-shadow: none !important;
             border: none !important;
             background: #ffffff !important;
@@ -350,42 +350,42 @@ function ReceiptLetterModal({ invoice, onClose }) {
         }
       `}</style>
 
-      {/* POS Thermal Receipt Container (Rigid POS Width: 80mm / 300px) */}
-      <div className="w-[300px] max-w-[80mm] bg-white p-4 rounded-xl shadow-2xl border border-gray-200 font-mono text-gray-900 relative my-auto shrink-0" id="receipt-letter-card">
+      {/* POS Thermal Receipt Container (80mm / 280px) */}
+      <div className="w-[280px] max-w-[80mm] bg-white p-4 rounded-xl shadow-2xl border border-gray-200 font-mono text-gray-900 relative my-auto shrink-0" id="receipt-letter-card">
         
         {/* Header Logo Collection Pro */}
-        <div className="text-center mb-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-pink-100 text-xl shadow-xs mx-auto mb-1 border border-pink-200">
+        <div className="text-center mb-2.5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-100 text-lg shadow-xs mx-auto mb-1 border border-pink-200">
             👗
           </div>
           <h2 className="font-extrabold text-xs tracking-wider uppercase">COLLECTION PRO</h2>
-          <p className="text-[9px] text-gray-600">Women's Fashion & Clothing</p>
-          <p className="text-[9px] text-gray-600">123 Main Street, City</p>
-          <p className="text-[9px] text-gray-600">(555) 555-5555</p>
+          <p className="text-[8.5px] text-gray-600">Women's Fashion & Clothing</p>
+          <p className="text-[8.5px] text-gray-600">123 Main Street, City</p>
+          <p className="text-[8.5px] text-gray-600">(555) 555-5555</p>
         </div>
 
         {/* Date & Customer Info */}
-        <div className="text-center text-[9px] border-t border-b border-dashed border-gray-400 py-1 my-1.5">
+        <div className="text-center text-[8.5px] border-t border-b border-dashed border-gray-400 py-1 my-1.5">
           <p>Date: {invoice.date} | Time: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
           <p className="font-bold mt-0.5 truncate">Customer: {invoice.customerName}</p>
         </div>
 
         {/* Items Table */}
-        <div className="space-y-1 text-[11px] my-2">
-          <div className="flex justify-between font-bold border-b border-gray-800 pb-1 text-[10px]">
+        <div className="space-y-1 text-[10px] my-2">
+          <div className="flex justify-between font-bold border-b border-gray-800 pb-1 text-[9.5px]">
             <span>Description</span>
             <span>Price</span>
           </div>
           {invoice.items?.map((item, idx) => (
-            <div key={idx} className="flex justify-between text-[10px]">
-              <span className="truncate max-w-[170px]">{item.name} (x{item.qty})</span>
+            <div key={idx} className="flex justify-between text-[9.5px]">
+              <span className="truncate max-w-[150px]">{item.name} (x{item.qty})</span>
               <span className="font-semibold">${(item.price * item.qty).toFixed(2)}</span>
             </div>
           ))}
         </div>
 
         {/* Subtotal, Tax & Total */}
-        <div className="border-t border-dashed border-gray-400 pt-1.5 space-y-0.5 text-[10px]">
+        <div className="border-t border-dashed border-gray-400 pt-1.5 space-y-0.5 text-[9.5px]">
           <div className="flex justify-between">
             <span>Subtotal</span>
             <span>${invoice.totalAmount?.toFixed(2)}</span>
@@ -394,19 +394,19 @@ function ReceiptLetterModal({ invoice, onClose }) {
             <span>Tax</span>
             <span>$0.00</span>
           </div>
-          <div className="flex justify-between font-extrabold text-xs border-t border-gray-800 pt-1 mt-1">
+          <div className="flex justify-between font-extrabold text-[11px] border-t border-gray-800 pt-1 mt-1">
             <span>Total</span>
             <span>${invoice.totalAmount?.toFixed(2)}</span>
           </div>
         </div>
 
         {/* Payment & Footer */}
-        <div className="border-t border-dashed border-gray-400 mt-2 pt-1.5 text-center text-[9px]">
+        <div className="border-t border-dashed border-gray-400 mt-2 pt-1.5 text-center text-[8.5px]">
           <div className="flex justify-between px-0.5 mb-1.5 font-medium">
             <span>Payment</span> <span>{invoice.paymentMethod || "Mobile Money"}</span>
           </div>
-          <p className="font-bold text-[10px] mt-2">Thank you for your visit.</p>
-          <p className="text-[8.5px] text-gray-600 mt-0.5">Take care of your health & style!</p>
+          <p className="font-bold text-[9.5px] mt-2">Thank you for your visit.</p>
+          <p className="text-[8px] text-gray-600 mt-0.5">Take care of your health & style!</p>
         </div>
 
         {/* Buttons */}
