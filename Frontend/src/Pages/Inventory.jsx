@@ -7,20 +7,21 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-// FIIRO GAAR AH: Haddii aad online isticmaalayso, halkan ku beddel URL-ka Render-kaaga
-const API_URL = "http://localhost:5000/api";
+// KANI WAA XALKA ERROR-KA LOCALHOST (Waxaan ku xirnay Server-kaaga dhabta ah)
+const API_URL = "https://collection-pro-backend.onrender.com/api";
 const LOW_STOCK_LIMIT = 5;
 
 function Sidebar({ mobileOpen, setMobileOpen }) {
   const navigate = useNavigate();
-  const links = [
+  // KANI WAA XALKA ERROR-KA JAALAHA AH (Dhammaan waxay leeyihiin "/")
+  const menu = [
     { label: "Dashboard", icon: LayoutDashboard, path: "/admin-dashboard" },
     { label: "Products", icon: Package, path: "/products" },
     { label: "Customers", icon: Users, path: "/customers" },
     { label: "Orders", icon: ShoppingCart, path: "/orders" },
     { label: "Sales", icon: BarChart3, path: "#" },
     { label: "Invoices", icon: FileText, path: "/invoices" },
-    { label: "Inventory / Stock", icon: Boxes, path: "/inventory", active: true }, // <-- Halkan waa la saxay
+    { label: "Inventory", icon: Boxes, path: "/inventory", active: true },
     { label: "Reports", icon: BarChart3, path: "#" },
     { label: "Users", icon: User, path: "#" },
     { label: "Settings", icon: Settings, path: "#" },
@@ -40,7 +41,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
             </div>
             <nav className="px-3 py-3 space-y-1">
               <p className="mb-1 px-3 text-[8px] font-semibold uppercase tracking-[2px] text-pink-200">Main Menu</p>
-              {links.map(({ label, icon: Icon, path, active }) => (
+              {menu.map(({ label, icon: Icon, path, active }) => (
                 <button
                   key={label}
                   onClick={() => {
@@ -144,6 +145,7 @@ function SummaryCard({ title, value, subtitle, icon: Icon, color }) {
 export default function Inventory() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
@@ -159,12 +161,12 @@ export default function Inventory() {
 
   async function loadProducts() {
     setLoading(true);
+    setError("");
     try {
-      // Xogta waxay si toos ah uga timaadaa Products API (Xiriirka 2aad ee dalabkaaga)
       const response = await axios.get(`${API_URL}/products`);
       setProducts(response.data);
     } catch (err) {
-      console.error("Error loading inventory:", err);
+      setError("Inventory lama soo qaadi karin. Hubi in backend-ku shaqaynayo.");
     } finally {
       setLoading(false);
     }
@@ -177,7 +179,8 @@ export default function Inventory() {
     const inStock = products.filter(p => Number(p.stock) > LOW_STOCK_LIMIT).length;
     const lowStock = products.filter(p => Number(p.stock) > 0 && Number(p.stock) <= LOW_STOCK_LIMIT).length;
     const outOfStock = products.filter(p => Number(p.stock) <= 0).length;
-    return { total, inStock, lowStock, outOfStock };
+    const totalUnits = products.reduce((sum, p) => sum + Number(p.stock || 0), 0);
+    return { total, inStock, lowStock, outOfStock, totalUnits };
   }, [products]);
 
   const filteredProducts = useMemo(() => {
@@ -201,7 +204,7 @@ export default function Inventory() {
 
     setSaving(true);
     try {
-      await axios.put(`${API_URL}/products/${selectedProduct._id}`, { ...selectedProduct, stock: quantity });
+      await axios.put(`${API_URL}/products/${selectedProduct._id}`, { stock: quantity });
       loadProducts();
       setSelectedProduct(null);
     } catch (err) {
@@ -231,12 +234,11 @@ export default function Inventory() {
               </div>
             </div>
 
-            <button onClick={loadProducts} className="inline-flex items-center gap-1.5 rounded-xl border border-pink-200 bg-white px-4 py-2.5 text-xs font-semibold text-pink-700 shadow-xs hover:bg-pink-50 cursor-pointer">
-              <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh Data
+            <button onClick={loadProducts} className="inline-flex items-center gap-1.5 rounded-xl border border-pink-200 bg-white px-3.5 py-2 text-xs font-semibold text-pink-700 shadow-xs hover:bg-pink-50 cursor-pointer">
+              <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
             </button>
           </div>
 
-          {/* Summary Cards */}
           <section className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <SummaryCard title="Total Products" value={loading ? "—" : summary.total} subtitle="Registered items" icon={Package} color="pink" />
             <SummaryCard title="In Stock" value={loading ? "—" : summary.inStock} subtitle="Sufficient stock" icon={PackageCheck} color="green" />
@@ -244,7 +246,6 @@ export default function Inventory() {
             <SummaryCard title="Out of Stock" value={loading ? "—" : summary.outOfStock} subtitle="Needs restocking" icon={PackageX} color="red" />
           </section>
 
-          {/* Filters & Search */}
           <div className="mb-4 rounded-xl border border-gray-100 bg-white p-3 shadow-xs">
             <div className="grid grid-cols-1 gap-2.5 md:grid-cols-3">
               <div className="relative">
@@ -257,34 +258,27 @@ export default function Inventory() {
                 />
               </div>
 
-              <div className="relative">
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-full appearance-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 outline-none focus:border-pink-400 cursor-pointer"
-                >
-                  {categories.map(c => <option key={c}>{c}</option>)}
-                </select>
-                <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              </div>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 outline-none cursor-pointer"
+              >
+                {categories.map(c => <option key={c}>{c}</option>)}
+              </select>
 
-              <div className="relative">
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full appearance-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 outline-none focus:border-pink-400 cursor-pointer"
-                >
-                  <option>All Statuses</option>
-                  <option>In Stock</option>
-                  <option>Low Stock</option>
-                  <option>Out of Stock</option>
-                </select>
-                <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              </div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 outline-none cursor-pointer"
+              >
+                <option>All Statuses</option>
+                <option>In Stock</option>
+                <option>Low Stock</option>
+                <option>Out of Stock</option>
+              </select>
             </div>
           </div>
 
-          {/* Table */}
           <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-xs min-w-[700px]">
@@ -345,9 +339,8 @@ export default function Inventory() {
         </main>
       </div>
 
-      {/* Update Stock Modal */}
       {selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl text-xs">
             <div className="mb-3 flex items-center justify-between border-b border-gray-100 pb-3">
               <h3 className="font-bold text-sm text-gray-900">Update Stock</h3>
