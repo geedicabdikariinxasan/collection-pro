@@ -294,15 +294,14 @@ function PaymentModal({ invoice, onClose, onConfirm }) {
 function ReceiptLetterModal({ invoice, onClose }) {
   if (!invoice) return null;
 
-  // Batoonka PDF-ka oo si toos ah u soo dejiya rasiidhka dhuuban
   const handleDownloadPDF = () => {
     const element = document.getElementById("pos-receipt-ticket");
     const options = {
-      margin:       2,
+      margin:       0,
       filename:     `Receipt-${invoice.id}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: [80, 150], orientation: 'portrait' }
+      html2canvas:  { scale: 3, useCORS: true },
+      jsPDF:        { unit: 'mm', format: [80, 130], orientation: 'portrait' }
     };
     
     if (window.html2pdf) {
@@ -313,11 +312,22 @@ function ReceiptLetterModal({ invoice, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs overflow-y-auto">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm overflow-y-auto">
       
-      {/* CSS gaar ah oo Print-ka ka dhigaya inuu soo saaro rasiidhka POS-ka oo kaliya (Bilaa warqad weyn) */}
+      {/* CSS-ka gaarka u ah Print-ka si uu uga saaro A4-ta weyn oo uu u daabaco rasiidhka dhuuban oo keliya */}
       <style>{`
         @media print {
+          @page {
+            size: 80mm 130mm;
+            margin: 0;
+          }
+          body, html {
+            width: 80mm;
+            height: 100%;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+          }
           body * {
             visibility: hidden !important;
           }
@@ -330,7 +340,7 @@ function ReceiptLetterModal({ invoice, onClose }) {
             top: 0 !important;
             width: 80mm !important;
             margin: 0 !important;
-            padding: 5px !important;
+            padding: 8px !important;
             box-shadow: none !important;
             border: none !important;
             background: #ffffff !important;
@@ -341,10 +351,9 @@ function ReceiptLetterModal({ invoice, onClose }) {
         }
       `}</style>
 
-      {/* POS Receipt Container */}
-      <div className="bg-white p-6 rounded-2xl shadow-2xl border border-gray-300 relative my-auto flex flex-col items-center">
-        
-        <div className="w-[280px] bg-white p-4 rounded-xl font-mono text-gray-900 text-[11px]" id="pos-receipt-ticket">
+      {/* Modal-ka Dhexdiisa (Screen View): Wuxuu rasiidhka ka dhigayaa mid dhexda (Center) kaga yaal shaashadda */}
+      <div className="flex flex-col items-center justify-center my-auto">
+        <div className="w-[280px] bg-white p-5 rounded-2xl shadow-2xl border border-gray-300 font-mono text-gray-900 relative text-[11px]" id="pos-receipt-ticket">
           
           {/* Header */}
           <div className="text-center mb-2">
@@ -389,13 +398,12 @@ function ReceiptLetterModal({ invoice, onClose }) {
             </div>
           </div>
 
-          {/* Footer & Barcode Simulation */}
+          {/* Footer & Barcode */}
           <div className="border-t border-dashed border-gray-400 mt-2 pt-1 text-center text-[9px]">
             <p className="flex justify-between mb-1"><span>Payment</span> <span>{invoice.paymentMethod || "Mobile Money"}</span></p>
             <p className="font-bold mt-1">Thank you for your visit!</p>
             <p className="text-[8px] mb-2">Take care of your health & style!</p>
             
-            {/* Barcode siday ku taal sawirka 2aad */}
             <div className="tracking-widest font-bold text-[14px] text-black mt-2 select-none">
               ||||| | |||| ||| || |||||
             </div>
@@ -405,14 +413,14 @@ function ReceiptLetterModal({ invoice, onClose }) {
         </div>
 
         {/* Buttons (Print, PDF, Close) */}
-        <div className="mt-5 flex gap-2 no-print-area w-full max-w-[280px] pt-3 border-t border-gray-200">
-          <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1 rounded bg-black py-2 font-bold text-white cursor-pointer text-[10px] hover:bg-gray-800 transition">
-            <Printer size={12} /> Print
+        <div className="mt-4 flex gap-2 no-print-area w-full max-w-[280px]">
+          <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs transition">
+            <Printer size={14} /> Print
           </button>
-          <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded bg-green-600 py-2 font-bold text-white cursor-pointer text-[10px] hover:bg-green-700 transition">
-            <Download size={12} /> PDF
+          <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 font-bold text-white shadow-md hover:bg-green-700 cursor-pointer text-xs transition">
+            <Download size={14} /> PDF
           </button>
-          <button onClick={onClose} className="rounded border border-gray-300 px-3 py-2 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-[10px] bg-white">
+          <button onClick={onClose} className="rounded-xl border border-gray-300 px-4 py-2.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-xs bg-white shadow-sm">
             Close
           </button>
         </div>
