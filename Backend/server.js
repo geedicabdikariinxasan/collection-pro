@@ -6,43 +6,34 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 
-dotenv.config();
-const app = express();
-
-// Middleware & CORS oo si sax ah u oggolaanaya Vercel iyo Localhost
-app.use(cors({
-  origin: "*", // Waxaad u bedeli kartaa link-gaaga Vercel hadhow haddii loo baahdo
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  credentials: true
-}));
-
-app.use(express.json());
-
-// Routes Imports (Magacyada faylashaadu siday u kala qoran yihiin ayay u qoran yihiin halkan)
+// Import-yada oo dhan
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/ProductRoutes');
 const customerRoutes = require('./routes/customerRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const salesRoutes = require('./routes/salesRoutes');
-const userRoutes = require('./routes/userRoutes');
+const userRoutes = require('./routes/userRoutes'); 
 
-// Routes Setup
+dotenv.config();
+const app = express();
+
+app.use(express.json());
+app.use(cors());
+
+// Routes Setup - Midkasta hal mar ayaa loo yeeray
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/sales', salesRoutes);
+app.use('/api/users', userRoutes); 
 
-// Kudar khadkan muhiimka ah:
-const userRoutes = require('./routes/userRoutes'); 
-app.use('/api/users', userRoutes); // API-ga users halkan ayuu ka shaqaynayaa
-
-// Kudar kan si aad 404 u baabi'iso
+// Kahortagga Error 404 ee Invoices-ka
 app.get('/api/invoices', (req, res) => {
     res.status(200).json([]);
 });
 
-// Database Connection & Server Running
+// Database Connection
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 
