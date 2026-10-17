@@ -36,7 +36,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
     { name: "Orders", icon: ShoppingCart, path: "/orders" },
     { name: "Sales", icon: BarChart3, path: "#" },
     { name: "Invoices", icon: FileText, path: "/invoices" },
-    { name: "Inventory", icon: Boxes, path: "inventory" },
+    { name: "Inventory", icon: Boxes, path: "/inventory" },
     { name: "Users", icon: Users, path: "#" },
     { name: "Settings", icon: Settings, path: "#" },
   ];

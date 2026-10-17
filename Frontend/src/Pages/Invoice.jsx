@@ -46,7 +46,7 @@ function Sidebar() {
     { label: "Orders", icon: ShoppingCart, path: "/orders" },
     { label: "Sales", icon: BarChart3, path: "Sales" },
     { label: "Invoices", icon: FileText, path: "/invoices", active: true },
-    { label: "Inventory", icon: Boxes, path: "inventory" },
+    { label: "Inventory", icon: Boxes, path: "/inventory" },
     { label: "Users", icon: User, path: "#" },
     { label: "Settings", icon: Settings, path: "#" },
   ];
