@@ -322,7 +322,7 @@ function ReceiptLetterModal({ invoice, onClose }) {
             margin: 0;
           }
           body, html {
-            width: 80mm;
+            width: 60mm;
             height: 100%;
             margin: 0 !important;
             padding: 0 !important;
