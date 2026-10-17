@@ -133,7 +133,8 @@ export default function Sales() {
         status: "Paid"
       }));
       
-      setSalesData(formattedInvoices);
+      // HALKAN AYAA LA SAXAY: Waxay ahayd formattedInvoices, waxaana laga dhigay formattedSales
+      setSalesData(formattedSales);
     };
     fetchSales();
   }, []);
