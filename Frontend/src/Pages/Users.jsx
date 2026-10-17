@@ -1,8 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search,
   Bell,
-  ChevronDown,
   FileText,
   LayoutDashboard,
   Package,
@@ -20,13 +19,12 @@ import {
   Menu,
   UploadCloud,
   CheckCircle,
-  Plus // <-- Hubi in kan uu ku jiro
+  Plus
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-/* =========================
-   SIDEBAR & HEADER
-========================= */
+const API_URL = "https://collection-pro-backend.onrender.com/api"; // Ama http://localhost:5000/api haddii aad tijaabineyso Local
 
 function Sidebar({ mobileOpen, setMobileOpen }) {
   const navigate = useNavigate();
@@ -37,59 +35,51 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
     { label: "Orders", icon: ShoppingCart, path: "/orders" },
     { label: "Sales", icon: BarChart3, path: "/sales" },
     { label: "Invoices", icon: FileText, path: "/invoices" },
-    { label: "Inventory", icon: Boxes, path: "/inventory" },
-    { label: "Users", icon: User, path: "/users", active: true }, // Users Active
+    { label: "Inventory / Stock", icon: Boxes, path: "/inventory" },
+    { label: "Reports", icon: BarChart3, path: "#" },
+    { label: "Users", icon: User, path: "/users", active: true },
     { label: "Settings", icon: Settings, path: "#" },
   ];
 
   return (
     <>
       {mobileOpen && (
-        <div 
-          onClick={() => setMobileOpen(false)} 
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden print:hidden"
-        />
+        <div onClick={() => setMobileOpen(false)} className="fixed inset-0 z-40 bg-black/50 lg:hidden print:hidden" />
       )}
-
-      <aside className={`fixed left-0 top-0 h-screen w-[250px] overflow-hidden bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 print:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex flex-col h-full overflow-y-auto custom-scrollbar">
-          <div className="border-b border-white/10 px-5 py-4 text-center flex flex-col items-center justify-center relative">
-            <button onClick={() => setMobileOpen(false)} className="absolute right-3 top-3 lg:hidden p-1">
-              <X size={18} />
-            </button>
-            <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-2xl shadow-md">👗</div>
-            <h1 className="font-serif text-lg font-bold tracking-wider whitespace-nowrap">COLLECTION PRO</h1>
-            <p className="text-[7px] tracking-[2px] text-pink-100 uppercase">WOMEN'S FASHION & CLOTHING</p>
-          </div>
-
-          <nav className="flex-1 px-3 py-2 space-y-1 overflow-hidden">
-            <p className="mb-1 px-3 text-[8px] font-semibold uppercase tracking-[2px] text-pink-200">Main Menu</p>
-            {links.map(({ label, icon: Icon, path, active }) => (
-              <button
-                key={label}
-                onClick={() => {
-                  if (path !== "#") navigate(path);
-                  else alert(`Bogga "${label}" dhawaan ayaa la dhisayaa!`);
-                }}
-                className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium transition cursor-pointer ${
-                  active ? "bg-pink-500 font-semibold shadow-md text-white" : "hover:bg-white/10 text-pink-50"
-                }`}
-              >
-                <Icon size={16} />
-                <span>{label}</span>
-              </button>
-            ))}
-          </nav>
-
-          <div className="px-4 py-2.5 text-center border-t border-white/10 bg-black/10 flex flex-col gap-1.5">
-            <button onClick={() => navigate("/")} className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 py-1.5 text-xs font-semibold text-white hover:bg-red-600 transition cursor-pointer">
-              <LogOut size={15} />
-              <span>Logout</span>
-            </button>
-            <div>
-              <p className="font-serif text-[10px] italic text-pink-100">Style • Elegance • You</p>
-              <p className="text-[7px] text-pink-300">© 2026 COLLECTION PRO</p>
+      <aside className={`fixed left-0 top-0 h-screen w-[250px] bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 print:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="flex flex-col h-full overflow-y-auto custom-scrollbar relative justify-between">
+          <div>
+            <button onClick={() => setMobileOpen(false)} className="absolute right-3 top-3 text-white lg:hidden p-1 cursor-pointer z-10"><X size={20} /></button>
+            <div className="border-b border-white/10 px-5 py-4 text-center flex flex-col items-center justify-center">
+              <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-2xl shadow-md">👗</div>
+              <h1 className="font-serif text-lg font-bold tracking-wider whitespace-nowrap">COLLECTION PRO</h1>
+              <p className="text-[7px] tracking-[2px] text-pink-100 uppercase">WOMEN'S FASHION & CLOTHING</p>
             </div>
+            <nav className="px-3 py-3 space-y-1">
+              <p className="mb-1 px-3 text-[8px] font-semibold uppercase tracking-[2px] text-pink-200">Main Menu</p>
+              {links.map(({ label, icon: Icon, path, active }) => (
+                <button
+                  key={label}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    if (path !== "#") navigate(path);
+                    else alert(`Bogga "${label}" dhawaan ayaa la dhisayaa!`);
+                  }}
+                  className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium transition cursor-pointer ${
+                    active ? "bg-pink-500 font-semibold shadow-md text-white" : "hover:bg-white/10 text-pink-50"
+                  }`}
+                >
+                  <Icon size={16} /><span>{label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+          <div className="p-4 text-center border-t border-white/10 bg-black/10 shrink-0 mt-auto">
+            <button onClick={() => navigate("/")} className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 py-1.5 text-xs font-semibold text-white hover:bg-red-600 transition cursor-pointer mb-2">
+              <LogOut size={15} /> <span>Logout</span>
+            </button>
+            <p className="font-serif text-[10px] italic text-pink-100">Style • Elegance • You</p>
+            <p className="text-[7px] text-pink-300">© 2026 COLLECTION PRO</p>
           </div>
         </div>
       </aside>
@@ -99,17 +89,14 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
 
 function Header({ setMobileOpen }) {
   return (
-    <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-6 backdrop-blur shadow-xs print:hidden">
+    <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-6 backdrop-blur shadow-xs">
       <div className="flex items-center gap-2.5 w-full max-w-[350px]">
-        <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-xl cursor-pointer">
-          <Menu size={22} />
-        </button>
-        <div className="relative w-full hidden sm:block">
+        <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-xl cursor-pointer"><Menu size={22} /></button>
+        <div className="relative w-full">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input placeholder="Search users..." className="w-full rounded-xl bg-gray-50 py-2 pl-10 pr-3 text-xs outline-none focus:ring-2 focus:ring-pink-200" />
+          <input placeholder="Search users..." className="w-full rounded-xl bg-gray-50 py-2 pl-10 pr-3 text-xs outline-none" />
         </div>
       </div>
-
       <div className="ml-4 flex items-center gap-3">
         <button className="relative rounded-full p-2 text-gray-500 hover:bg-pink-50 cursor-pointer hidden sm:block">
           <Bell size={18} />
@@ -118,193 +105,115 @@ function Header({ setMobileOpen }) {
         <div className="h-6 w-px bg-gray-200 hidden sm:block" />
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-100 text-pink-600 font-bold text-xs">A</div>
-          <div className="hidden md:block text-left">
+          <div>
             <p className="text-xs font-bold text-gray-800">Admin</p>
             <p className="text-[9px] text-gray-400">Administrator</p>
           </div>
-          <ChevronDown size={14} className="text-gray-400 hidden sm:block" />
         </div>
       </div>
     </header>
   );
 }
 
-/* =========================
-   MAIN USERS PAGE
-========================= */
-
-// Xogta bilowga ah (Kaliya Admin-ka ayaa ku jira sida aad codsatay)
-const initialUsers = [
-  {
-    id: 1,
-    name: "Haji Hassan",
-    email: "admin@collectionpro.com",
-    phone: "+252 61 2345678",
-    role: "Administrator",
-    status: "Active",
-    joined: new Date().toISOString().split('T')[0],
-    initials: "HH",
-    image: "https://i.pravatar.cc/150?img=47" // Sawir default ah ee admin-ka
-  }
-];
-
 const roleStyles = {
   Administrator: "bg-purple-100 text-purple-700",
   Cashier: "bg-pink-100 text-pink-700",
   Customer: "bg-blue-100 text-blue-700",
+  ADMIN: "bg-purple-100 text-purple-700",
+  CASHIER: "bg-pink-100 text-pink-700",
+  CUSTOMER: "bg-blue-100 text-blue-700",
 };
 
 const emptyForm = {
-  name: "",
-  email: "",
-  phone: "",
-  role: "Customer",
-  status: "Active",
-  image: "" // Sawirka lagu daray
+  name: "", email: "", phone: "", role: "Customer", status: "Active", image: ""
 };
 
 export default function Users() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [users, setUsers] = useState(initialUsers);
-  
-  // Filters
+  const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("All Roles");
   const [statusFilter, setStatusFilter] = useState("All Status");
   
-  // Modals state
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [form, setForm] = useState(emptyForm);
-  const [formError, setFormError] = useState("");
 
-  const filteredUsers = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return users.filter((user) => {
-      const matchesSearch = [user.name, user.email, user.phone, user.role].some((value) => value.toLowerCase().includes(query));
-      const matchesRole = roleFilter === "All Roles" || user.role === roleFilter;
-      const matchesStatus = statusFilter === "All Status" || user.status === statusFilter;
-      return matchesSearch && matchesRole && matchesStatus;
-    });
-  }, [users, search, roleFilter, statusFilter]);
+  useEffect(() => {
+    fetchUsers();
+  }, [search, roleFilter, statusFilter]);
 
-  // Statistics
-  const activeUsers = users.filter((u) => u.status === "Active").length;
-  const adminCount = users.filter((u) => u.role === "Administrator").length;
-  const cashierCount = users.filter((u) => u.role === "Cashier").length;
-  const customerCount = users.filter((u) => u.role === "Customer").length;
+  const fetchUsers = async () => {
+    try {
+      let url = `${API_URL}/users?search=${search}&role=${roleFilter}&status=${statusFilter}`;
+      const res = await axios.get(url);
+      setUsers(res.data);
+    } catch (err) {
+      console.error("Error fetching users from DB:", err);
+    }
+  };
 
-  function openAddModal() {
-    setEditingUser(null);
-    setForm(emptyForm);
-    setFormError("");
-    setShowModal(true);
-  }
-
-  function openEditModal(user) {
-    setEditingUser(user);
-    setForm({
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      status: user.status,
-      image: user.image || ""
-    });
-    setFormError("");
-    setShowModal(true);
-  }
-
-  // Sawirka Processing (Drag & Drop)
   const processImageFile = (file) => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 200;
-        const MAX_HEIGHT = 200;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-        } else {
-          if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = 150; canvas.height = 150;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-        setForm(prev => ({ ...prev, image: dataUrl }));
+        ctx.drawImage(img, 0, 0, 150, 150);
+        setForm(prev => ({ ...prev, image: canvas.toDataURL('image/jpeg', 0.8) }));
       };
       img.src = event.target.result;
     };
     reader.readAsDataURL(file);
   };
 
-  function saveUser(event) {
-    event.preventDefault();
-    setFormError("");
-
-    const name = form.name.trim();
-    const email = form.email.trim().toLowerCase();
-    const phone = form.phone.trim();
-
-    if (!name || !email || !phone) {
-      setFormError("Fadlan buuxi dhammaan meelaha loo baahan yahay.");
-      return;
+  const saveUser = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingUser) {
+        // Update user ee ku jira database-ka
+        await axios.put(`${API_URL}/users/${editingUser._id}`, form);
+      } else {
+        // Save user cusub oo ku dhacaya database-ka
+        await axios.post(`${API_URL}/users`, form);
+      }
+      fetchUsers();
+      setShowModal(false);
+      setEditingUser(null);
+      setForm(emptyForm);
+    } catch (err) {
+      alert(err.response?.data?.message || "Qalad ayaa dhacay intii la keydinayay!");
     }
+  };
 
-    const duplicateEmail = users.some(
-      (user) => user.email.toLowerCase() === email && user.id !== editingUser?.id
-    );
-
-    if (duplicateEmail) {
-      setFormError("Email-kan hore ayaa loo isticmaalay.");
-      return;
+  const deleteUser = async (id) => {
+    if (window.confirm("Ma hubtaa inaad tirtirayso user-kan database-ka?")) {
+      try {
+        await axios.delete(`${API_URL}/users/${id}`);
+        fetchUsers();
+        if (selectedUser?._id === id) setSelectedUser(null);
+      } catch (err) {
+        console.error("Error deleting user:", err);
+      }
     }
+  };
 
-    const initials = name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase();
-
-    if (editingUser) {
-      setUsers((previous) =>
-        previous.map((user) =>
-          user.id === editingUser.id ? { ...user, ...form, name, email, phone, initials } : user
-        )
-      );
-    } else {
-      const newUser = {
-        id: Date.now(),
-        ...form,
-        name,
-        email,
-        phone,
-        joined: new Date().toISOString().slice(0, 10),
-        initials,
-      };
-      setUsers((previous) => [newUser, ...previous]);
+  const toggleStatus = async (user) => {
+    try {
+      await axios.patch(`${API_URL}/users/${user._id}/status`);
+      fetchUsers();
+    } catch (err) {
+      console.error("Error toggling status:", err);
     }
+  };
 
-    setShowModal(false);
-    setEditingUser(null);
-    setForm(emptyForm);
-  }
-
-  function deleteUser(user) {
-    if (user.role === "Administrator" && adminCount <= 1) {
-      alert("Ma tirtiri kartid Admin-ka keliya ee nidaamka ku jira!");
-      return;
-    }
-    const confirmed = window.confirm(`Ma hubtaa inaad tirtirayso user-ka ${user.name}?`);
-    if (!confirmed) return;
-    setUsers((previous) => previous.filter((item) => item.id !== user.id));
-    if (selectedUser?.id === user.id) setSelectedUser(null);
-  }
+  const activeUsers = users.filter(u => u.status === "Active").length;
+  const adminCount = users.filter(u => u.role?.toLowerCase().includes("admin")).length;
+  const cashierCount = users.filter(u => u.role?.toLowerCase().includes("cashier")).length;
+  const customerCount = users.filter(u => u.role?.toLowerCase().includes("customer")).length;
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#fffafd] flex">
@@ -313,68 +222,63 @@ export default function Users() {
       <div className="flex-1 flex flex-col h-screen overflow-hidden lg:ml-[250px]">
         <Header setMobileOpen={setMobileOpen} />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
+        <main className="flex-1 overflow-y-auto p-5 custom-scrollbar">
           
-          {/* PAGE TITLE */}
-          <div className="mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="mb-5 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-600 text-white shadow-md">
-                <UsersIcon size={24} />
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-pink-600 text-white shadow-md">
+                <UsersIcon size={22} />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Users Management</h1>
-                <p className="text-xs text-gray-500">Manage system users, images and roles.</p>
+                <p className="text-xs text-gray-500">Live database synchronized users & roles.</p>
               </div>
             </div>
-
-            <button
-              onClick={openAddModal}
-              className="flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md transition hover:bg-pink-700 cursor-pointer"
+            <button 
+              type="button"
+              onClick={() => { setEditingUser(null); setForm(emptyForm); setShowModal(true); }} 
+              className="flex items-center gap-1.5 rounded-xl bg-pink-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-pink-700 cursor-pointer"
             >
               <Plus size={16} /> Add User
             </button>
           </div>
 
-          {/* STATISTICS */}
           <section className="mb-5 grid grid-cols-2 gap-3 xl:grid-cols-4">
-            {[
-              { title: "Total Users", value: users.length, icon: UsersIcon, color: "text-pink-600", bg: "bg-pink-100" },
-              { title: "Active Users", value: activeUsers, icon: CheckCircle, color: "text-green-600", bg: "bg-green-100" },
-              { title: "Administrators", value: adminCount, icon: User, color: "text-purple-600", bg: "bg-purple-100" },
-              { title: "Cashiers", value: cashierCount, icon: ShoppingCart, color: "text-blue-600", bg: "bg-blue-100" },
-            ].map((stat) => {
-              const Icon = stat.icon;
-              return (
-                <div key={stat.title} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-xs flex items-center gap-3">
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${stat.bg} ${stat.color}`}>
-                    <Icon size={18} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-500 font-medium">{stat.title}</p>
-                    <h2 className="text-xl font-bold text-gray-900">{stat.value}</h2>
-                  </div>
-                </div>
-              );
-            })}
+            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-xs flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-100 text-pink-600"><UsersIcon size={18}/></div>
+              <div><p className="text-[10px] text-gray-500 font-medium">Total Users</p><h2 className="text-xl font-bold text-gray-900">{users.length}</h2></div>
+            </div>
+            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-xs flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 text-green-600"><CheckCircle size={18}/></div>
+              <div><p className="text-[10px] text-gray-500 font-medium">Active Users</p><h2 className="text-xl font-bold text-gray-900">{activeUsers}</h2></div>
+            </div>
+            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-xs flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-600"><User size={18}/></div>
+              <div><p className="text-[10px] text-gray-500 font-medium">Administrators</p><h2 className="text-xl font-bold text-gray-900">{adminCount}</h2></div>
+            </div>
+            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-xs flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600"><ShoppingCart size={18}/></div>
+              <div><p className="text-[10px] text-gray-500 font-medium">Cashiers</p><h2 className="text-xl font-bold text-gray-900">{cashierCount}</h2></div>
+            </div>
           </section>
 
-          {/* FILTERS */}
           <div className="mb-4 rounded-xl border border-gray-100 bg-white p-3 shadow-xs">
             <div className="grid grid-cols-1 gap-2.5 md:grid-cols-3">
               <div className="relative">
-                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search users by name, email, phone..."
-                  className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-xs outline-none focus:border-pink-400"
+                  type="text"
+                  placeholder="Search users by name, phone..."
+                  className="w-full rounded-lg border border-gray-200 py-2 pl-10 pr-3 text-xs outline-none focus:border-pink-400"
                 />
               </div>
 
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 outline-none cursor-pointer"
+                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 outline-none focus:border-pink-400 cursor-pointer"
               >
                 <option>All Roles</option>
                 <option>Administrator</option>
@@ -385,7 +289,7 @@ export default function Users() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 outline-none cursor-pointer"
+                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 outline-none focus:border-pink-400 cursor-pointer"
               >
                 <option>All Status</option>
                 <option>Active</option>
@@ -394,11 +298,10 @@ export default function Users() {
             </div>
           </div>
 
-          {/* USER TABLE */}
-          <section className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xs">
+          <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xs">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[850px] text-left text-xs">
-                <thead className="bg-pink-50/60 text-gray-500 border-b border-gray-100">
+              <table className="w-full text-xs min-w-[700px]">
+                <thead className="bg-pink-50/60 text-left text-gray-500 border-b border-pink-100">
                   <tr>
                     <th className="px-4 py-3 font-semibold">#</th>
                     <th className="px-4 py-3 font-semibold">Profile</th>
@@ -411,169 +314,129 @@ export default function Users() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filteredUsers.map((user, index) => (
-                    <tr key={user.id} className="hover:bg-pink-50/30 transition">
-                      <td className="px-4 py-2.5 text-gray-500">{index + 1}</td>
-                      
-                      {/* Qodobka: Sawirka Qofka (Image) ayaa halkan ka muuqanaya */}
-                      <td className="px-4 py-2.5">
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-pink-200 bg-gradient-to-br from-pink-100 to-pink-200 font-bold text-pink-700 overflow-hidden">
-                            {user.image ? (
-                              <img src={user.image} alt={user.name} className="h-full w-full object-cover" />
-                            ) : (
-                              user.initials
-                            )}
-                          </div>
-                          <span className="font-bold text-gray-800">{user.name}</span>
-                        </div>
-                      </td>
-
-                      <td className="px-4 py-2.5 text-gray-600">{user.email}</td>
-                      <td className="px-4 py-2.5 text-gray-600">{user.phone}</td>
-                      
-                      <td className="px-4 py-2.5">
-                        <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold ${roleStyles[user.role]}`}>
-                          {user.role}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-2.5">
-                        <button
-                          onClick={() => toggleStatus(user)}
-                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold cursor-pointer transition ${
-                            user.status === "Active" ? "bg-green-50 text-green-700 hover:bg-green-100" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                          }`}
-                        >
-                          <span className={`h-1.5 w-1.5 rounded-full ${user.status === "Active" ? "bg-green-500" : "bg-gray-400"}`} />
-                          {user.status}
-                        </button>
-                      </td>
-
-                      <td className="px-4 py-2.5 text-gray-600">{user.joined}</td>
-
-                      <td className="px-4 py-2.5 text-right space-x-1.5">
-                        <button onClick={() => setSelectedUser(user)} className="p-1.5 border border-pink-300 text-pink-600 rounded-md hover:bg-pink-50 cursor-pointer inline-flex items-center gap-1 font-semibold text-[10px]"><Eye size={12}/> View</button>
-                        <button onClick={() => openEditModal(user)} className="p-1.5 border border-pink-300 text-pink-600 rounded-md hover:bg-pink-50 cursor-pointer"><Pencil size={12}/></button>
-                        <button onClick={() => deleteUser(user)} className="p-1.5 border border-pink-300 text-pink-600 rounded-md hover:bg-pink-50 cursor-pointer"><Trash2 size={12}/></button>
-                      </td>
-                    </tr>
-                  ))}
-
-                  {filteredUsers.length === 0 && (
+                  {users.length > 0 ? (
+                    users.map((user, index) => (
+                      <tr key={user._id} className="hover:bg-pink-50/20">
+                        <td className="px-4 py-2.5 text-gray-600">{index + 1}</td>
+                        <td className="px-4 py-2.5 flex items-center gap-2.5 font-bold text-gray-800">
+                          <img 
+                            src={user.image} 
+                            alt="" 
+                            className="h-8 w-8 rounded-full object-cover ring-1 ring-gray-200"
+                            onError={(e) => { e.target.src = "https://i.pravatar.cc/150?img=47"; }}
+                          />
+                          <span>{user.name}</span>
+                        </td>
+                        <td className="px-4 py-2.5 text-gray-600">{user.email}</td>
+                        <td className="px-4 py-2.5 text-gray-600">{user.phone}</td>
+                        <td className="px-4 py-2.5"><span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${roleStyles[user.role] || "bg-gray-100 text-gray-700"}`}>{user.role}</span></td>
+                        <td className="px-4 py-2.5">
+                          <button onClick={() => toggleStatus(user)} className={`px-2 py-0.5 rounded-full font-bold text-[10px] cursor-pointer ${user.status === "Active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
+                            {user.status}
+                          </button>
+                        </td>
+                        <td className="px-4 py-2.5 text-gray-600">{user.joined}</td>
+                        <td className="px-4 py-2.5 text-right space-x-1.5">
+                          <button onClick={() => setSelectedUser(user)} className="p-1.5 border border-pink-300 text-pink-600 rounded-md hover:bg-pink-50 cursor-pointer font-semibold inline-flex items-center gap-1 text-[10px]"><Eye size={12}/> View</button>
+                          <button onClick={() => { setEditingUser(user); setForm({ name: user.name, email: user.email, phone: user.phone, role: user.role, status: user.status, image: user.image }); setShowModal(true); }} className="p-1.5 border border-pink-300 text-pink-600 rounded-md hover:bg-pink-50 cursor-pointer"><Pencil size={12}/></button>
+                          <button onClick={() => deleteUser(user._id)} className="p-1.5 border border-pink-300 text-pink-600 rounded-md hover:bg-pink-50 cursor-pointer"><Trash2 size={12}/></button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
                     <tr>
-                      <td colSpan="8" className="px-4 py-12 text-center text-gray-400">
+                      <td colSpan="8" className="py-14 text-center text-gray-400">
                         <UsersIcon size={38} className="mx-auto mb-2 text-gray-300" />
-                        <p className="font-semibold text-sm">No users found</p>
-                        <p className="mt-0.5 text-[10px]">Try changing your search or filters.</p>
+                        <p className="text-sm font-semibold">No users found in database.</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Click "Add User" to add your first user.</p>
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
-            
-            <div className="px-4 py-3 border-t border-gray-100 text-[11px] text-gray-500 bg-gray-50 flex justify-between">
-              <span>Showing {filteredUsers.length} of {users.length} users</span>
-            </div>
-          </section>
+          </div>
 
-          <footer className="py-4 text-center text-[10px] text-gray-400 mt-auto">
-            © 2026 COLLECTION PRO • Style • Elegance • You
+          <footer className="py-4 text-center mt-auto">
+            <p className="text-[10px] text-gray-400">© 2026 COLLECTION PRO • Style • Elegance • You</p>
           </footer>
         </main>
       </div>
 
-      {/* ADD / EDIT USER MODAL (Qodobka 3: Sawir gelinta) */}
+      {/* Add / Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
-              <div>
-                <h2 className="text-base font-bold text-gray-900">{editingUser ? "Edit User" : "Add New User"}</h2>
-                <p className="text-[10px] text-gray-500">Manage account information and profile picture.</p>
-              </div>
-              <button onClick={() => setShowModal(false)} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 cursor-pointer"><X size={18} /></button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl text-xs">
+            <div className="mb-3 flex items-center justify-between border-b border-gray-100 pb-3">
+              <h3 className="font-bold text-sm text-gray-900">{editingUser ? "Edit User" : "Add New User"}</h3>
+              <button onClick={() => setShowModal(false)} className="cursor-pointer text-gray-400 hover:text-gray-700"><X size={17}/></button>
             </div>
-
-            <form onSubmit={saveUser} className="space-y-3 text-xs">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            
+            <form onSubmit={saveUser} className="space-y-3">
+              <div>
+                <label className="block mb-0.5 font-medium text-gray-700">Full Name</label>
+                <input required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} placeholder="Amina Ali" className="w-full rounded-lg border border-gray-200 px-3 py-2 outline-none focus:border-pink-400 text-xs" />
+              </div>
+              <div>
+                <label className="block mb-0.5 block font-medium text-gray-700">Email Address</label>
+                <input type="email" required value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} placeholder="user@gmail.com" className="w-full rounded-lg border border-gray-200 px-3 py-2 outline-none focus:border-pink-400 text-xs" />
+              </div>
+              <div>
+                <label className="block mb-0.5 block font-medium text-gray-700">Phone</label>
+                <input required value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} placeholder="+252 61..." className="w-full rounded-lg border border-gray-200 px-3 py-2 outline-none focus:border-pink-400 text-xs" />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block mb-1 font-semibold text-gray-700">Full Name *</label>
-                  <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="E.g. Amina Ali" className="w-full rounded-lg border border-gray-200 px-3 py-2 outline-none focus:border-pink-400" />
+                  <label className="block mb-0.5 block font-medium text-gray-700">Role</label>
+                  <select value={form.role} onChange={(e) => setForm({...form, role: e.target.value})} className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 outline-none focus:border-pink-400 cursor-pointer text-xs">
+                    <option value="Administrator">Administrator</option>
+                    <option value="Cashier">Cashier</option>
+                    <option value="Customer">Customer</option>
+                  </select>
                 </div>
                 <div>
-                  <label className="block mb-1 font-semibold text-gray-700">Email Address *</label>
-                  <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="user@example.com" className="w-full rounded-lg border border-gray-200 px-3 py-2 outline-none focus:border-pink-400" />
-                </div>
-                <div>
-                  <label className="block mb-1 font-semibold text-gray-700">Phone Number *</label>
-                  <input type="tel" required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+252 61..." className="w-full rounded-lg border border-gray-200 px-3 py-2 outline-none focus:border-pink-400" />
-                </div>
-                <div>
-                  <label className="block mb-1 font-semibold text-gray-700">Role *</label>
-                  <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 outline-none focus:border-pink-400 cursor-pointer">
-                    <option>Administrator</option>
-                    <option>Cashier</option>
-                    <option>Customer</option>
+                  <label className="block mb-0.5 block font-medium text-gray-700">Status</label>
+                  <select value={form.status} onChange={(e) => setForm({...form, status: e.target.value})} className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 outline-none focus:border-pink-400 cursor-pointer text-xs">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
                   </select>
                 </div>
               </div>
-
-              {/* Upload Image Section */}
-              <div className="pt-2">
-                <label className="block mb-1 font-semibold text-gray-700">Profile Picture</label>
-                <div 
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => { e.preventDefault(); if(e.dataTransfer.files[0]) processImageFile(e.dataTransfer.files[0]); }}
-                  className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-pink-200 bg-pink-50/40 p-4 text-center cursor-pointer hover:bg-pink-50 transition"
-                >
-                  {form.image ? (
-                    <img src={form.image} alt="Preview" className="h-12 w-12 rounded-full object-cover mb-2 ring-2 ring-pink-300" />
-                  ) : (
-                    <UploadCloud size={24} className="text-pink-500 mb-2" />
-                  )}
-                  <p className="text-[11px] text-gray-600 font-medium">Drag & drop image here, or <label className="text-pink-600 underline cursor-pointer">browse<input type="file" accept="image/*" onChange={(e) => { if (e.target.files[0]) processImageFile(e.target.files[0]); }} className="hidden" /></label></p>
+              <div>
+                <label className="block mb-0.5 block font-medium text-gray-700">Profile Picture</label>
+                <div className="flex items-center gap-3 p-2 border-2 border-dashed border-pink-200 rounded-xl bg-pink-50/40 text-center cursor-pointer">
+                  {form.image ? <img src={form.image} alt="" className="h-8 w-8 rounded-full object-cover" /> : <UploadCloud size={18} className="text-pink-500 mx-auto"/>}
+                  <input type="file" accept="image/*" onChange={(e) => {
+                    const file = e.target.files[0];
+                    if(file) processImageFile(file);
+                  }} className="text-[10px]" />
                 </div>
               </div>
 
-              {formError && <p className="rounded-lg bg-red-50 p-2 text-[11px] font-bold text-red-600 text-center">{formError}</p>}
-
-              <div className="flex gap-2 pt-3 border-t border-gray-100 mt-2">
-                <button type="button" onClick={() => setShowModal(false)} className="flex-1 rounded-xl border border-gray-200 py-2.5 font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer">Cancel</button>
-                <button type="submit" className="flex-1 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer">
-                  {editingUser ? "Update User" : "Save User"}
-                </button>
+              <div className="flex gap-2 pt-2 border-t border-gray-100 mt-2">
+                <button type="button" onClick={() => setShowModal(false)} className="flex-1 border py-2.5 rounded-xl font-semibold text-gray-600 cursor-pointer hover:bg-gray-50 text-xs">Cancel</button>
+                <button type="submit" className="flex-1 bg-pink-600 text-white py-2.5 rounded-xl font-bold shadow-md hover:bg-pink-700 cursor-pointer text-xs">{editingUser ? "Update User" : "Save User"}</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* VIEW USER MODAL */}
+      {/* View User Modal */}
       {selectedUser && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs" onClick={() => setSelectedUser(null)}>
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setSelectedUser(null)} className="absolute right-4 top-4 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 cursor-pointer"><X size={18} /></button>
-            
-            <div className="text-center mt-2">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border-4 border-pink-50 bg-gradient-to-br from-pink-100 to-pink-200 text-2xl font-bold text-pink-700 shadow-sm overflow-hidden mb-3">
-                {selectedUser.image ? (
-                  <img src={selectedUser.image} alt={selectedUser.name} className="h-full w-full object-cover" />
-                ) : (
-                  selectedUser.initials
-                )}
-              </div>
-              <h2 className="text-lg font-bold text-gray-900">{selectedUser.name}</h2>
-              <p className="text-xs text-gray-500 mt-0.5">{selectedUser.email}</p>
-              <span className={`mt-2 inline-block rounded-full px-3 py-1 text-[10px] font-bold ${roleStyles[selectedUser.role]}`}>{selectedUser.role}</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setSelectedUser(null)}>
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl text-center relative text-xs" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setSelectedUser(null)} className="absolute right-4 top-4 text-gray-400 hover:text-gray-700 cursor-pointer"><X size={17}/></button>
+            <img src={selectedUser.image} alt="" className="h-16 w-16 rounded-full object-cover mx-auto ring-2 ring-pink-300 mb-3" />
+            <h3 className="font-bold text-sm text-gray-900">{selectedUser.name}</h3>
+            <p className="text-gray-500 mb-3">{selectedUser.email}</p>
+            <div className="bg-gray-50 p-3 rounded-xl text-left space-y-1.5 mb-4">
+              <p><strong>Phone:</strong> {selectedUser.phone}</p>
+              <p><strong>Role:</strong> {selectedUser.role}</p>
+              <p><strong>Status:</strong> {selectedUser.status}</p>
+              <p><strong>Joined:</strong> {selectedUser.joined}</p>
             </div>
-
-            <div className="mt-5 space-y-3 bg-gray-50 p-4 rounded-xl text-xs">
-              <div className="flex justify-between border-b border-gray-200 pb-2"><span className="text-gray-500">Phone Number</span><span className="font-bold text-gray-800">{selectedUser.phone}</span></div>
-              <div className="flex justify-between border-b border-gray-200 pb-2"><span className="text-gray-500">Joined Date</span><span className="font-bold text-gray-800">{selectedUser.joined}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Account Status</span><span className={`font-bold ${selectedUser.status === "Active" ? "text-green-600" : "text-red-500"}`}>{selectedUser.status}</span></div>
-            </div>
+            <button onClick={() => setSelectedUser(null)} className="w-full bg-pink-600 text-white py-2 rounded-xl font-bold cursor-pointer">Close</button>
           </div>
         </div>
       )}
