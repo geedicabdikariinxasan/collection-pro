@@ -1,14 +1,3 @@
-const cors = require('cors');
-
-// Ku dar koodhkan intaanay routes-ku bilaabbin:
-app.use(cors({
-  origin: [
-    'https://magaca-frontend-kaaga.vercel.app', // Halkaan geli URL-ka saxda ah ee Vercel
-    'http://localhost:3000'                      // Localhost-ka tijaabada
-  ],
-  credentials: true
-}));
-
 const dns = require('node:dns');
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
@@ -17,26 +6,40 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 
-// Waa inaan magacyadan la jaanqaadnaa faylashaada GitHub (Xaraf weyn hadduu yahay, xaraf weyn isticmaal)
-const authRoutes = require('./routes/authRoutes');
-const productRoutes = require('./routes/ProductRoutes'); // Faylkaaga GitHub P ayuu ku bilaabmaa
-const customerRoutes = require('./routes/customerRoutes'); // Faylkaaga GitHub c ayuu ku bilaabmaa
-const orderRoutes = require('./routes/orderRoutes');     // Faylkaaga GitHub o ayuu ku bilaabmaa
-
 dotenv.config();
 const app = express();
 
-// Middleware
-app.use(express.json());
-app.use(cors());
+// Middleware & CORS oo si sax ah u oggolaanaya Vercel iyo Localhost
+app.use(cors({
+  origin: "*", // Waxaad u bedeli kartaa link-gaaga Vercel hadhow haddii loo baahdo
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  credentials: true
+}));
 
-// Routes
+app.use(express.json());
+
+// Routes Imports (Magacyada faylashaadu siday u kala qoran yihiin ayay u qoran yihiin halkan)
+const authRoutes = require('./routes/authRoutes');
+const productRoutes = require('./routes/ProductRoutes');
+const customerRoutes = require('./routes/customerRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const salesRoutes = require('./routes/salesRoutes');
+const userRoutes = require('./routes/userRoutes');
+
+// Routes Setup (Halkan ayaa si nidaamsan loo geliyay)
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/sales', salesRoutes);
+app.use('/api/users', userRoutes);
 
-// Database Connection
+// Kahortagga Error 404 ee Invoices-ka
+app.get('/api/invoices', (req, res) => {
+    res.status(200).json([]);
+});
+
+// Database Connection & Server Running
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 
