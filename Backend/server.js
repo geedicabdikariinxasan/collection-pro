@@ -26,15 +26,18 @@ const orderRoutes = require('./routes/orderRoutes');
 const salesRoutes = require('./routes/salesRoutes');
 const userRoutes = require('./routes/userRoutes');
 
-// Routes Setup (Halkan ayaa si nidaamsan loo geliyay)
+// Routes Setup
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/sales', salesRoutes);
-app.use('/api/users', userRoutes);
 
-// Kahortagga Error 404 ee Invoices-ka
+// Kudar khadkan muhiimka ah:
+const userRoutes = require('./routes/userRoutes'); 
+app.use('/api/users', userRoutes); // API-ga users halkan ayuu ka shaqaynayaa
+
+// Kudar kan si aad 404 u baabi'iso
 app.get('/api/invoices', (req, res) => {
     res.status(200).json([]);
 });
