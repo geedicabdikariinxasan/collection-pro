@@ -299,9 +299,9 @@ function ReceiptLetterModal({ invoice, onClose }) {
     const options = {
       margin:       0,
       filename:     `Receipt-${invoice.id}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
+      image:        { type: 'jpeg', quality: 1 },
       html2canvas:  { scale: 3, useCORS: true },
-      jsPDF:        { unit: 'mm', format: [80, 130], orientation: 'portrait' }
+      jsPDF:        { unit: 'mm', format: [80, 140], orientation: 'portrait' }
     };
     
     if (window.html2pdf) {
@@ -312,25 +312,25 @@ function ReceiptLetterModal({ invoice, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 z-[200] flex items-start justify-center bg-black/80 p-4 backdrop-blur-sm overflow-y-auto pt-10">
       
-      {/* CSS-ka gaarka u ah Print-ka si uu uga saaro A4-ta weyn oo uu u daabaco rasiidhka dhuuban oo keliya */}
+      {/* CSS-ka Print-ka ee dhabta ah si looga hortago A4 oo loo isticmaalo POS 80mm Roll */}
       <style>{`
         @media print {
           @page {
-            size: 80mm 130mm;
-            margin: 0;
+            size: 80mm auto; /* Waxay ku qasbaysaa browser-ka inuu isticmaalo warqad 80mm ah oo dhuuban */
+            margin: 0;       /* Eber margin ah si uusan A4 u sameyn */
           }
           body, html {
-            width: 60mm;
-            height: 100%;
+            background-color: white !important;
             margin: 0 !important;
             padding: 0 !important;
-            background: #ffffff !important;
           }
+          /* Qari wax walba oo ku yaal shaashadda... */
           body * {
             visibility: hidden !important;
           }
+          /* ...Marka laga reebo rasiidhka iyo waxa ku dhex jira */
           #pos-receipt-ticket, #pos-receipt-ticket * {
             visibility: visible !important;
           }
@@ -339,43 +339,47 @@ function ReceiptLetterModal({ invoice, onClose }) {
             left: 0 !important;
             top: 0 !important;
             width: 80mm !important;
+            max-width: 80mm !important;
             margin: 0 !important;
             padding: 8px !important;
             box-shadow: none !important;
             border: none !important;
-            background: #ffffff !important;
+            background: white !important;
           }
+          /* Qari badhamada marka la daabacayo */
           .no-print-area {
             display: none !important;
           }
         }
       `}</style>
 
-      {/* Modal-ka Dhexdiisa (Screen View): Wuxuu rasiidhka ka dhigayaa mid dhexda (Center) kaga yaal shaashadda */}
-      <div className="flex flex-col items-center justify-center my-auto">
-        <div className="w-[280px] bg-white p-5 rounded-2xl shadow-2xl border border-gray-300 font-mono text-gray-900 relative text-[11px]" id="pos-receipt-ticket">
+      {/* Rasiidhka POS-ka ee Shaashadda ku muuqda (Wuxuu u eg yahay sawirka 2aad) */}
+      <div className="flex flex-col items-center">
+        
+        {/* Rasiidhka Laftiisa */}
+        <div className="w-[280px] bg-white p-5 rounded-2xl shadow-2xl border border-gray-300 font-mono text-gray-900 text-[11px]" id="pos-receipt-ticket">
           
           {/* Header */}
           <div className="text-center mb-2">
-            <div className="text-xl mb-0.5">👗</div>
+            <div className="text-2xl mb-0.5">👗</div>
             <h2 className="font-bold text-xs tracking-wide">COLLECTION PRO</h2>
             <p className="text-[9px]">Women's Fashion & Clothing</p>
             <p className="text-[9px]">+252 61 2345678</p>
           </div>
 
-          <div className="border-t border-b border-dashed border-gray-400 py-1 my-1.5 text-[9px]">
+          <div className="border-t border-b border-dashed border-gray-400 py-1.5 my-2 text-[9px]">
             <p className="flex justify-between"><span>Date: {invoice.date}</span> <span>REC-{invoice.id}</span></p>
-            <p className="truncate">Customer: {invoice.customerName}</p>
+            <p className="truncate font-semibold mt-0.5">Customer: {invoice.customerName}</p>
           </div>
 
           {/* Items Table */}
           <div className="space-y-1 my-2">
-            <div className="flex justify-between font-bold border-b border-gray-400 pb-0.5 text-[10px]">
+            <div className="flex justify-between font-bold border-b border-gray-800 pb-0.5 text-[10px]">
               <span>Description</span>
               <span>Price</span>
             </div>
             {invoice.items?.map((item, idx) => (
-              <div key={idx} className="flex justify-between text-[10px]">
+              <div key={idx} className="flex justify-between text-[10px] py-0.5">
                 <span className="truncate max-w-[150px]">{item.name} (x{item.qty})</span>
                 <span>${(item.price * item.qty).toFixed(2)}</span>
               </div>
@@ -383,7 +387,7 @@ function ReceiptLetterModal({ invoice, onClose }) {
           </div>
 
           {/* Totals */}
-          <div className="border-t border-dashed border-gray-400 pt-1 space-y-0.5 text-[11px]">
+          <div className="border-t border-dashed border-gray-400 pt-1.5 space-y-0.5 text-[11px]">
             <div className="flex justify-between">
               <span>Subtotal</span>
               <span>${invoice.totalAmount?.toFixed(2)}</span>
@@ -392,19 +396,19 @@ function ReceiptLetterModal({ invoice, onClose }) {
               <span>Tax</span>
               <span>$0.00</span>
             </div>
-            <div className="flex justify-between font-bold text-xs border-t border-gray-400 pt-0.5">
+            <div className="flex justify-between font-bold text-xs border-t border-gray-800 pt-1">
               <span>Total</span>
-              <span>${invoice.totalAmount?.toFixed(2)}</span>
+              <span className="text-pink-600">${invoice.totalAmount?.toFixed(2)}</span>
             </div>
           </div>
 
           {/* Footer & Barcode */}
-          <div className="border-t border-dashed border-gray-400 mt-2 pt-1 text-center text-[9px]">
-            <p className="flex justify-between mb-1"><span>Payment</span> <span>{invoice.paymentMethod || "Mobile Money"}</span></p>
-            <p className="font-bold mt-1">Thank you for your visit!</p>
-            <p className="text-[8px] mb-2">Take care of your health & style!</p>
+          <div className="border-t border-dashed border-gray-400 mt-3 pt-1.5 text-center text-[9px]">
+            <p className="flex justify-between mb-1.5 font-medium"><span>Payment</span> <span>{invoice.paymentMethod || "Mobile Money"}</span></p>
+            <p className="font-bold mt-2 text-[10px]">Thank you for your visit!</p>
+            <p className="text-[8px] text-gray-500 mt-0.5">Style • Elegance • You</p>
             
-            <div className="tracking-widest font-bold text-[14px] text-black mt-2 select-none">
+            <div className="tracking-widest font-bold text-[14px] text-black mt-3 select-none">
               ||||| | |||| ||| || |||||
             </div>
             <p className="text-[8px] text-gray-500 mt-0.5">5312797420721443</p>
@@ -412,15 +416,15 @@ function ReceiptLetterModal({ invoice, onClose }) {
 
         </div>
 
-        {/* Buttons (Print, PDF, Close) */}
+        {/* Buttons (Screen view only) */}
         <div className="mt-4 flex gap-2 no-print-area w-full max-w-[280px]">
-          <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs transition">
-            <Printer size={14} /> Print
+          <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-black py-2.5 font-bold text-white shadow-md hover:bg-gray-800 transition cursor-pointer text-xs">
+            <Printer size={13} /> Print
           </button>
-          <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 font-bold text-white shadow-md hover:bg-green-700 cursor-pointer text-xs transition">
-            <Download size={14} /> PDF
+          <button onClick={handleDownloadPDF} className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-green-600 py-2.5 font-bold text-white shadow-md hover:bg-green-700 transition cursor-pointer text-xs">
+            <Download size={13} /> PDF
           </button>
-          <button onClick={onClose} className="rounded-xl border border-gray-300 px-4 py-2.5 font-semibold text-gray-700 hover:bg-gray-100 cursor-pointer text-xs bg-white shadow-sm">
+          <button onClick={onClose} className="rounded-xl border border-gray-300 px-4 py-2.5 font-semibold text-gray-700 hover:bg-gray-100 transition cursor-pointer text-xs bg-white shadow-sm">
             Close
           </button>
         </div>
