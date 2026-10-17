@@ -22,7 +22,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
     { label: "Sales", icon: BarChart3, path: "/sales", active: true },
     { label: "Invoices", icon: FileText, path: "/invoices" },
     { label: "Inventory", icon: Boxes, path: "/inventory" },
-    { label: "Users", icon: User, path: "#" },
+    { label: "Users", icon: User, path: "/Users" },
     { label: "Settings", icon: Settings, path: "#" },
   ];
 
