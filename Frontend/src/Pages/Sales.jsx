@@ -2,10 +2,11 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   Search, Bell, ChevronDown, ChevronLeft, ChevronRight, FileText,
   LayoutDashboard, Package, Users, ShoppingCart, BarChart3, Boxes,
-  Settings, User, Eye, X, Printer, Download, LogOut, Menu,
-  TrendingUp, CreditCard, DollarSign
+  Settings, User, Eye, X, Printer, Download, LogOut, Menu, Filter,
+  TrendingUp, CreditCard, DollarSign, Calendar, FileSpreadsheet
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 /* =========================
    SIDEBAR & HEADER
@@ -20,8 +21,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
     { label: "Orders", icon: ShoppingCart, path: "/orders" },
     { label: "Sales", icon: BarChart3, path: "/sales", active: true },
     { label: "Invoices", icon: FileText, path: "/invoices" },
-    { label: "Inventory / Stock", icon: Boxes, path: "/inventory" },
-    { label: "Reports", icon: BarChart3, path: "#" },
+    { label: "Inventory", icon: Boxes, path: "/inventory" },
     { label: "Users", icon: User, path: "#" },
     { label: "Settings", icon: Settings, path: "#" },
   ];
@@ -141,7 +141,6 @@ export default function Sales() {
     fetchSales();
   }, []);
 
-  // Filter Logic oo badbaado leh (Crash-proof)
   const filteredSales = useMemo(() => {
     return salesData.filter((sale) => {
       const safeId = sale.id || "";
@@ -170,7 +169,7 @@ export default function Sales() {
     { name: "Mobile Money", color: "#fbcfe8" },
     { name: "Credit Card", color: "#f472b6" },
   ].map((methodObj) => {
-    const keyword = methodObj.name.split(" ")[0]; // "Cash", "Mobile", "Credit"
+    const keyword = methodObj.name.split(" ")[0]; 
     const total = filteredSales.filter(s => (s.method || "").includes(keyword)).reduce((sum, s) => sum + (s.amount || 0), 0);
     return { ...methodObj, total };
   });
@@ -206,14 +205,38 @@ export default function Sales() {
   const totalPages = Math.max(1, Math.ceil(filteredSales.length / rowsPerPage));
   const visibleSales = filteredSales.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
+  // QODOBKA 1: Export CSV (Excel format)
+  const handleExportCSV = () => {
+    const headers = ["Date", "Order ID", "Customer", "Items", "Total Amount", "Payment Method"];
+    const rows = filteredSales.map(sale => [
+      sale.date,
+      sale.id,
+      `"${sale.customer}"`,
+      sale.productsCount,
+      sale.amount.toFixed(2),
+      sale.method
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `Sales-Report-${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // QODOBKA 2: Clean PDF Report (Table Excel oo kale ah)
   const handleExportPDF = () => {
-    const element = document.getElementById("sales-report-content");
+    const element = document.getElementById("clean-printable-report");
     const options = {
       margin: 10,
       filename: `Sales-Report-${new Date().toISOString().split('T')[0]}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     if (window.html2pdf) {
       window.html2pdf().from(element).set(options).save();
@@ -226,10 +249,71 @@ export default function Sales() {
     <div className="h-screen w-screen overflow-hidden bg-[#fffafd] flex">
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-      <div className="flex-1 flex flex-col h-screen overflow-hidden lg:ml-[250px] print:ml-0">
+      {/* QODOBKA 2: CSS si warqad nadiif ah (Table ah) loo daabaco marka la Print-garaynayo */}
+      <style>{`
+        @media print {
+          body * { visibility: hidden !important; }
+          #clean-printable-report, #clean-printable-report * { visibility: visible !important; }
+          #clean-printable-report {
+            position: absolute !important;
+            left: 0 !important; top: 0 !important;
+            width: 100% !important; margin: 0 !important; padding: 20px !important;
+            background: white !important; display: block !important;
+          }
+          .print-hidden { display: none !important; }
+        }
+      `}</style>
+
+      {/* WARQADDA EXCEL EE QARSOON EE LOOGU TALAGALAY PRINT / PDF KELIYA */}
+      <div id="clean-printable-report" className="hidden print:block absolute top-0 left-0 w-full bg-white z-[999] text-gray-900 font-sans">
+        <div className="border-b-2 border-gray-800 pb-4 mb-6 flex justify-between items-end">
+          <div>
+            <h1 className="text-2xl font-black tracking-widest uppercase">COLLECTION PRO</h1>
+            <p className="text-sm font-semibold text-gray-500">SALES REPORT (EXCEL FORMAT)</p>
+          </div>
+          <div className="text-right text-sm">
+            <p><strong>Date Generated:</strong> {new Date().toLocaleDateString()}</p>
+            <p><strong>Total Revenue:</strong> ${totalSalesAmount.toFixed(2)}</p>
+          </div>
+        </div>
+
+        <table className="w-full border-collapse border border-gray-400 text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="border border-gray-400 p-2 text-left">Date</th>
+              <th className="border border-gray-400 p-2 text-left">Order ID</th>
+              <th className="border border-gray-400 p-2 text-left">Customer Name</th>
+              <th className="border border-gray-400 p-2 text-center">Items</th>
+              <th className="border border-gray-400 p-2 text-left">Payment Method</th>
+              <th className="border border-gray-400 p-2 text-right">Total Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredSales.map(sale => (
+              <tr key={sale.id}>
+                <td className="border border-gray-400 p-2">{sale.date}</td>
+                <td className="border border-gray-400 p-2 font-bold">{sale.id}</td>
+                <td className="border border-gray-400 p-2">{sale.customer}</td>
+                <td className="border border-gray-400 p-2 text-center">{sale.productsCount}</td>
+                <td className="border border-gray-400 p-2">{sale.method}</td>
+                <td className="border border-gray-400 p-2 text-right font-bold">${sale.amount.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="bg-gray-50">
+              <td colSpan="5" className="border border-gray-400 p-2 text-right font-black uppercase">Grand Total:</td>
+              <td className="border border-gray-400 p-2 text-right font-black text-lg">${totalSalesAmount.toFixed(2)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      {/* DASHBOARD-KA CAADIGA AH */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden lg:ml-[250px] print:hidden">
         <Header setMobileOpen={setMobileOpen} />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar" id="sales-report-content">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
           
           <div className="mb-5 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -241,12 +325,14 @@ export default function Sales() {
                 <p className="text-xs text-gray-500">Track your sales performance and revenue.</p>
               </div>
             </div>
-            <div className="flex gap-2 print:hidden">
-              <button onClick={() => window.print()} className="flex items-center gap-1.5 rounded-lg border border-pink-200 px-3 py-2 text-xs font-semibold text-pink-700 hover:bg-pink-50 transition cursor-pointer">
-                <Printer size={14} /> Print
+            <div className="flex gap-2">
+              {/* Batoonka Excel (CSV) */}
+              <button onClick={handleExportCSV} className="flex items-center gap-1.5 rounded-lg border border-pink-200 px-3 py-2 text-xs font-semibold text-pink-700 hover:bg-pink-50 transition cursor-pointer">
+                <FileSpreadsheet size={14} /> Export CSV (Excel)
               </button>
+              {/* Batoonka PDF / Print */}
               <button onClick={handleExportPDF} className="flex items-center gap-1.5 rounded-lg bg-pink-600 px-3 py-2 text-xs font-semibold text-white shadow-md hover:bg-pink-700 transition cursor-pointer">
-                <Download size={14} /> Export PDF
+                <Printer size={14} /> Print Report
               </button>
             </div>
           </div>
@@ -258,7 +344,7 @@ export default function Sales() {
             <StatCard title="Total Customers" value={uniqueCustomersCount} icon={<Users size={20}/>} color="bg-purple-100 text-purple-600" />
           </section>
 
-          <div className="mb-5 rounded-xl border border-gray-100 bg-white p-3 shadow-xs print:hidden">
+          <div className="mb-5 rounded-xl border border-gray-100 bg-white p-3 shadow-xs">
             <div className="flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-[200px]">
                 <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -300,10 +386,10 @@ export default function Sales() {
 
                  {chartData.length > 0 ? chartData.map((item, idx) => (
                     <div key={idx} className="relative z-10 flex h-full flex-1 flex-col items-center justify-end group">
-                      <span className="mb-1 text-[10px] font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition">${(item.amount || 0).toFixed(0)}</span>
+                      <span className="mb-1 text-[10px] font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition">${item.amount.toFixed(0)}</span>
                       <div
                         className="w-full max-w-[40px] rounded-t-md bg-gradient-to-t from-pink-600 to-pink-300 transition hover:from-pink-700 hover:to-pink-400 shadow-sm"
-                        style={{ height: `${((item.amount || 0) / maxSale) * 90}%`, minHeight: item.amount > 0 ? '5%' : '0' }}
+                        style={{ height: `${(item.amount / maxSale) * 90}%`, minHeight: item.amount > 0 ? '5%' : '0' }}
                       />
                       <span className="mt-2 text-[9px] text-gray-500 font-semibold">{item.label}</span>
                     </div>
@@ -357,7 +443,7 @@ export default function Sales() {
                     <th className="px-4 py-3">Total Amount</th>
                     <th className="px-4 py-3">Payment Method</th>
                     <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3 text-right print:hidden">Actions</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -366,17 +452,17 @@ export default function Sales() {
                       <tr key={sale.id} className="hover:bg-pink-50/30 transition">
                         <td className="px-4 py-2.5 text-gray-500">{(page - 1) * rowsPerPage + index + 1}</td>
                         <td className="px-4 py-2.5 font-medium">{sale.date}</td>
-                        <td className="px-4 py-2.5 font-bold text-pink-600">{sale.id}</td>
+                        <td className="px-4 py-2.5 font-bold text-pink-600">#{sale.id}</td>
                         <td className="px-4 py-2.5 font-bold text-gray-800">{sale.customer}</td>
                         <td className="px-4 py-2.5 text-center font-medium bg-gray-50 rounded-lg">{sale.productsCount} items</td>
-                        <td className="px-4 py-2.5 font-black text-gray-900">${(sale.amount || 0).toFixed(2)}</td>
+                        <td className="px-4 py-2.5 font-black text-gray-900">${sale.amount.toFixed(2)}</td>
                         <td className="px-4 py-2.5 text-gray-600">{sale.method}</td>
                         <td className="px-4 py-2.5">
                           <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">
                             <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> {sale.status}
                           </span>
                         </td>
-                        <td className="px-4 py-2.5 text-right print:hidden">
+                        <td className="px-4 py-2.5 text-right">
                           <button onClick={() => setSelectedSale(sale)} className="inline-flex items-center gap-1 rounded-lg border border-pink-200 px-2.5 py-1 text-[10px] font-bold text-pink-600 hover:bg-pink-50 cursor-pointer">
                             <Eye size={12} /> View
                           </button>
@@ -388,7 +474,6 @@ export default function Sales() {
                       <td colSpan="9" className="py-12 text-center text-gray-400">
                         <ShoppingCart size={34} className="mx-auto mb-2 text-gray-300" />
                         <p className="font-semibold text-sm">No sales found.</p>
-                        <p className="text-[10px] mt-1">Make sure you have paid invoices/orders.</p>
                       </td>
                     </tr>
                   )}
@@ -397,7 +482,7 @@ export default function Sales() {
             </div>
 
             {filteredSales.length > 0 && (
-              <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 bg-gray-50 print:hidden">
+              <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 bg-gray-50">
                 <p className="text-[11px] text-gray-500">
                   Showing {visibleSales.length} of {filteredSales.length} sales
                 </p>
@@ -416,6 +501,7 @@ export default function Sales() {
         </main>
       </div>
 
+      {/* Sale Details Modal */}
       {selectedSale && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs print:hidden">
           <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
@@ -428,25 +514,21 @@ export default function Sales() {
             </div>
 
             <div className="space-y-3 text-xs mb-5">
-              <div className="flex justify-between border-b border-gray-50 pb-2"><span className="text-gray-500">Order ID</span><span className="font-bold text-pink-600">{selectedSale.id}</span></div>
+              <div className="flex justify-between border-b border-gray-50 pb-2"><span className="text-gray-500">Order ID</span><span className="font-bold text-pink-600">#{selectedSale.id}</span></div>
               <div className="flex justify-between border-b border-gray-50 pb-2"><span className="text-gray-500">Invoice Ref</span><span className="font-semibold text-gray-800">{selectedSale.invoiceId}</span></div>
               <div className="flex justify-between border-b border-gray-50 pb-2"><span className="text-gray-500">Date</span><span className="font-semibold text-gray-800">{selectedSale.date}</span></div>
               <div className="flex justify-between border-b border-gray-50 pb-2"><span className="text-gray-500">Customer</span><span className="font-bold text-gray-900">{selectedSale.customer}</span></div>
               <div className="flex justify-between border-b border-gray-50 pb-2"><span className="text-gray-500">Items Count</span><span className="font-semibold text-gray-800">{selectedSale.productsCount} items</span></div>
               <div className="flex justify-between border-b border-gray-50 pb-2"><span className="text-gray-500">Payment Method</span><span className="font-semibold text-gray-800">{selectedSale.method}</span></div>
-              <div className="flex justify-between border-b border-gray-50 pb-2">
-                <span className="text-gray-500">Status</span>
-                <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold text-[9px]">{selectedSale.status}</span>
-              </div>
             </div>
 
             <div className="bg-pink-50 p-4 rounded-xl flex justify-between items-center mb-5">
               <span className="font-bold text-gray-800 text-sm">Total Amount</span>
-              <span className="text-xl font-black text-pink-600">${(selectedSale.amount || 0).toFixed(2)}</span>
+              <span className="text-xl font-black text-pink-600">${selectedSale.amount.toFixed(2)}</span>
             </div>
 
             <div className="flex gap-2">
-              <button onClick={() => { setSelectedSale(null); navigate("/invoices"); }} className="flex-1 rounded-xl border border-gray-300 py-2.5 font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer text-xs">Go to Invoices</button>
+              <button onClick={() => { setSelectedSale(null); navigate("/invoices"); }} className="flex-1 rounded-xl border border-gray-300 py-2.5 font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer text-xs">Go to Invoice</button>
               <button onClick={() => setSelectedSale(null)} className="flex-1 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">Close</button>
             </div>
           </div>
