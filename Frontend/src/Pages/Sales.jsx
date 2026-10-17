@@ -2,13 +2,13 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   Search, Bell, ChevronDown, ChevronLeft, ChevronRight, FileText,
   LayoutDashboard, Package, Users, ShoppingCart, BarChart3, Boxes,
-  Settings, User, Eye, X, Printer, Download, LogOut, Menu, Filter,
-  TrendingUp, CreditCard, DollarSign, Calendar
+  Settings, User, Eye, X, Printer, Download, LogOut, Menu,
+  TrendingUp, CreditCard, DollarSign
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 /* =========================
-   SIDEBAR & HEADER (Standard Collection PRO)
+   SIDEBAR & HEADER
 ========================= */
 
 function Sidebar({ mobileOpen, setMobileOpen }) {
@@ -114,56 +114,64 @@ export default function Sales() {
   const [page, setPage] = useState(1);
   const [selectedSale, setSelectedSale] = useState(null);
 
-  // Soo jiidashada xogta iibka (Live from Invoices oo la bixiyay - Paid)
   useEffect(() => {
     const fetchSales = () => {
-      const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
-      // Kaliya soo qaado kuwa lacagtooda la bixiyay (Paid)
-      const paidInvoices = rawInvoices.filter(inv => inv.status === "Paid");
-      
-      const formattedSales = paidInvoices.map(inv => ({
-        id: inv.orderId,
-        invoiceId: inv.id,
-        date: inv.date,
-        customer: inv.customerName,
-        productsCount: inv.items ? inv.items.reduce((sum, item) => sum + item.qty, 0) : 0,
-        items: inv.items || [],
-        amount: inv.totalAmount,
-        method: inv.paymentMethod || "Cash",
-        status: "Paid"
-      }));
-      
-      // HALKAN AYAA LA SAXAY: Waxay ahayd formattedInvoices, waxaana laga dhigay formattedSales
-      setSalesData(formattedSales);
+      try {
+        const rawInvoices = JSON.parse(localStorage.getItem("storeInvoices") || "[]");
+        const paidInvoices = rawInvoices.filter(inv => inv.status === "Paid");
+        
+        const formattedSales = paidInvoices.map(inv => ({
+          id: inv.orderId || `ORD-UNKNOWN`,
+          invoiceId: inv.id || `INV-UNKNOWN`,
+          date: inv.date || new Date().toISOString().split('T')[0],
+          customer: inv.customerName || "Unknown Customer",
+          productsCount: inv.items ? inv.items.reduce((sum, item) => sum + (item.qty || 0), 0) : 0,
+          items: inv.items || [],
+          amount: inv.totalAmount || 0,
+          method: inv.paymentMethod || "Cash",
+          status: "Paid"
+        }));
+        
+        setSalesData(formattedSales);
+      } catch (error) {
+        console.error("Error loading sales data:", error);
+        setSalesData([]);
+      }
     };
     fetchSales();
   }, []);
 
-  // Filter Logic
+  // Filter Logic oo badbaado leh (Crash-proof)
   const filteredSales = useMemo(() => {
     return salesData.filter((sale) => {
-      const matchesSearch = sale.id.toLowerCase().includes(search.toLowerCase()) || sale.customer.toLowerCase().includes(search.toLowerCase());
-      const matchesMethod = methodFilter === "All Payment Methods" || sale.method === methodFilter;
-      const matchesStartDate = startDate ? new Date(sale.date) >= new Date(startDate) : true;
-      const matchesEndDate = endDate ? new Date(sale.date) <= new Date(endDate) : true;
+      const safeId = sale.id || "";
+      const safeCustomer = sale.customer || "";
+      const safeMethod = sale.method || "";
+      const safeDate = sale.date || "";
+
+      const matchesSearch = safeId.toLowerCase().includes(search.toLowerCase()) || 
+                            safeCustomer.toLowerCase().includes(search.toLowerCase());
+                            
+      const matchesMethod = methodFilter === "All Payment Methods" || safeMethod === methodFilter;
+      const matchesStartDate = startDate && safeDate ? new Date(safeDate) >= new Date(startDate) : true;
+      const matchesEndDate = endDate && safeDate ? new Date(safeDate) <= new Date(endDate) : true;
 
       return matchesSearch && matchesMethod && matchesStartDate && matchesEndDate;
     });
   }, [salesData, search, methodFilter, startDate, endDate]);
 
-  // Statistics Calculations
   const totalSalesAmount = filteredSales.reduce((sum, sale) => sum + sale.amount, 0);
   const totalOrdersCount = filteredSales.length;
   const uniqueCustomersCount = new Set(filteredSales.map((sale) => sale.customer)).size;
   const avgOrderValue = totalOrdersCount > 0 ? totalSalesAmount / totalOrdersCount : 0;
 
-  // Payment Methods Donut Chart Data
   const paymentTotals = [
     { name: "Cash", color: "#db2777" },
     { name: "Mobile Money", color: "#fbcfe8" },
     { name: "Credit Card", color: "#f472b6" },
   ].map((methodObj) => {
-    const total = filteredSales.filter(s => s.method.includes(methodObj.name.split(" ")[0])).reduce((sum, s) => sum + s.amount, 0);
+    const keyword = methodObj.name.split(" ")[0]; // "Cash", "Mobile", "Credit"
+    const total = filteredSales.filter(s => (s.method || "").includes(keyword)).reduce((sum, s) => sum + (s.amount || 0), 0);
     return { ...methodObj, total };
   });
 
@@ -176,32 +184,28 @@ export default function Sales() {
     return `${item.color} ${start}% ${currentAngle}%`;
   }).join(", ")})`;
 
-  // Bar Chart Data (Group by Date)
   const salesByDate = {};
   filteredSales.forEach(sale => {
-    salesByDate[sale.date] = (salesByDate[sale.date] || 0) + sale.amount;
+    const safeDate = sale.date || "Unknown";
+    salesByDate[safeDate] = (salesByDate[safeDate] || 0) + sale.amount;
   });
   
-  // Sort dates and get the last 5 active days for the chart
   const sortedDates = Object.keys(salesByDate).sort();
   const chartData = sortedDates.slice(-5).map(date => ({
     label: date,
     amount: salesByDate[date]
   }));
   
-  // Haddii aysan jirin xog buuxda, ku buuxi meelo banaan si chartku u qurux badnaado
   while (chartData.length > 0 && chartData.length < 5) {
     chartData.unshift({ label: "--", amount: 0 });
   }
 
   const maxSale = chartData.length > 0 ? Math.max(...chartData.map(item => item.amount), 1) : 1;
 
-  // Pagination
   const rowsPerPage = 7;
   const totalPages = Math.max(1, Math.ceil(filteredSales.length / rowsPerPage));
   const visibleSales = filteredSales.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
-  // Download PDF Report
   const handleExportPDF = () => {
     const element = document.getElementById("sales-report-content");
     const options = {
@@ -227,7 +231,6 @@ export default function Sales() {
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar" id="sales-report-content">
           
-          {/* Header Title */}
           <div className="mb-5 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-pink-600 text-white shadow-md">
@@ -248,7 +251,6 @@ export default function Sales() {
             </div>
           </div>
 
-          {/* Stat Cards */}
           <section className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard title="Total Sales" value={`$${totalSalesAmount.toFixed(2)}`} icon={<DollarSign size={20}/>} color="bg-pink-100 text-pink-600" />
             <StatCard title="Total Orders" value={totalOrdersCount} icon={<ShoppingCart size={20}/>} color="bg-fuchsia-100 text-fuchsia-600" />
@@ -256,7 +258,6 @@ export default function Sales() {
             <StatCard title="Total Customers" value={uniqueCustomersCount} icon={<Users size={20}/>} color="bg-purple-100 text-purple-600" />
           </section>
 
-          {/* Filters */}
           <div className="mb-5 rounded-xl border border-gray-100 bg-white p-3 shadow-xs print:hidden">
             <div className="flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-[200px]">
@@ -286,14 +287,10 @@ export default function Sales() {
             </div>
           </div>
 
-          {/* Charts Section */}
           <section className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-[2fr_1fr]">
-            
-            {/* Sales Overview Bar Chart */}
             <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-xs">
               <h2 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2"><BarChart3 size={16} className="text-pink-600"/> Sales Overview (Last 5 Active Days)</h2>
               <div className="flex h-48 items-end gap-2 border-b border-l border-gray-200 pl-2 pb-1 relative">
-                 {/* Grid lines horizontal */}
                  <div className="absolute w-full h-full flex flex-col justify-between pointer-events-none opacity-20">
                    <div className="border-t border-gray-400 w-full"></div>
                    <div className="border-t border-gray-400 w-full"></div>
@@ -303,10 +300,10 @@ export default function Sales() {
 
                  {chartData.length > 0 ? chartData.map((item, idx) => (
                     <div key={idx} className="relative z-10 flex h-full flex-1 flex-col items-center justify-end group">
-                      <span className="mb-1 text-[10px] font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition">${item.amount.toFixed(0)}</span>
+                      <span className="mb-1 text-[10px] font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition">${(item.amount || 0).toFixed(0)}</span>
                       <div
                         className="w-full max-w-[40px] rounded-t-md bg-gradient-to-t from-pink-600 to-pink-300 transition hover:from-pink-700 hover:to-pink-400 shadow-sm"
-                        style={{ height: `${(item.amount / maxSale) * 90}%`, minHeight: item.amount > 0 ? '5%' : '0' }}
+                        style={{ height: `${((item.amount || 0) / maxSale) * 90}%`, minHeight: item.amount > 0 ? '5%' : '0' }}
                       />
                       <span className="mt-2 text-[9px] text-gray-500 font-semibold">{item.label}</span>
                     </div>
@@ -316,7 +313,6 @@ export default function Sales() {
               </div>
             </div>
 
-            {/* Payment Methods Donut Chart */}
             <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-xs">
               <h2 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2"><CreditCard size={16} className="text-pink-600"/> Payment Methods</h2>
               <div className="flex flex-col sm:flex-row xl:flex-col items-center justify-center gap-5">
@@ -342,10 +338,8 @@ export default function Sales() {
                 </div>
               </div>
             </div>
-
           </section>
 
-          {/* Sales Details Table */}
           <section className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xs">
             <div className="border-b border-gray-100 p-3 bg-pink-50/50">
               <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2"><FileText size={16} className="text-pink-600"/> Sales Details</h2>
@@ -372,10 +366,10 @@ export default function Sales() {
                       <tr key={sale.id} className="hover:bg-pink-50/30 transition">
                         <td className="px-4 py-2.5 text-gray-500">{(page - 1) * rowsPerPage + index + 1}</td>
                         <td className="px-4 py-2.5 font-medium">{sale.date}</td>
-                        <td className="px-4 py-2.5 font-bold text-pink-600">#{sale.id}</td>
+                        <td className="px-4 py-2.5 font-bold text-pink-600">{sale.id}</td>
                         <td className="px-4 py-2.5 font-bold text-gray-800">{sale.customer}</td>
                         <td className="px-4 py-2.5 text-center font-medium bg-gray-50 rounded-lg">{sale.productsCount} items</td>
-                        <td className="px-4 py-2.5 font-black text-gray-900">${sale.amount.toFixed(2)}</td>
+                        <td className="px-4 py-2.5 font-black text-gray-900">${(sale.amount || 0).toFixed(2)}</td>
                         <td className="px-4 py-2.5 text-gray-600">{sale.method}</td>
                         <td className="px-4 py-2.5">
                           <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">
@@ -422,7 +416,6 @@ export default function Sales() {
         </main>
       </div>
 
-      {/* Sale Details Modal */}
       {selectedSale && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs print:hidden">
           <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
@@ -435,7 +428,7 @@ export default function Sales() {
             </div>
 
             <div className="space-y-3 text-xs mb-5">
-              <div className="flex justify-between border-b border-gray-50 pb-2"><span className="text-gray-500">Order ID</span><span className="font-bold text-pink-600">#{selectedSale.id}</span></div>
+              <div className="flex justify-between border-b border-gray-50 pb-2"><span className="text-gray-500">Order ID</span><span className="font-bold text-pink-600">{selectedSale.id}</span></div>
               <div className="flex justify-between border-b border-gray-50 pb-2"><span className="text-gray-500">Invoice Ref</span><span className="font-semibold text-gray-800">{selectedSale.invoiceId}</span></div>
               <div className="flex justify-between border-b border-gray-50 pb-2"><span className="text-gray-500">Date</span><span className="font-semibold text-gray-800">{selectedSale.date}</span></div>
               <div className="flex justify-between border-b border-gray-50 pb-2"><span className="text-gray-500">Customer</span><span className="font-bold text-gray-900">{selectedSale.customer}</span></div>
@@ -449,11 +442,11 @@ export default function Sales() {
 
             <div className="bg-pink-50 p-4 rounded-xl flex justify-between items-center mb-5">
               <span className="font-bold text-gray-800 text-sm">Total Amount</span>
-              <span className="text-xl font-black text-pink-600">${selectedSale.amount.toFixed(2)}</span>
+              <span className="text-xl font-black text-pink-600">${(selectedSale.amount || 0).toFixed(2)}</span>
             </div>
 
             <div className="flex gap-2">
-              <button onClick={() => { setSelectedSale(null); navigate("/invoices"); }} className="flex-1 rounded-xl border border-gray-300 py-2.5 font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer text-xs">Go to Invoice</button>
+              <button onClick={() => { setSelectedSale(null); navigate("/invoices"); }} className="flex-1 rounded-xl border border-gray-300 py-2.5 font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer text-xs">Go to Invoices</button>
               <button onClick={() => setSelectedSale(null)} className="flex-1 rounded-xl bg-pink-600 py-2.5 font-bold text-white shadow-md hover:bg-pink-700 cursor-pointer text-xs">Close</button>
             </div>
           </div>
@@ -463,7 +456,7 @@ export default function Sales() {
   );
 }
 
-function StatCard({ icon, title, value, change, color }) {
+function StatCard({ icon, title, value, color }) {
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-xs flex items-center gap-3">
       <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${color}`}>
