@@ -24,7 +24,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const API_URL = "https://collection-pro-backend.onrender.com/api"; // Ama http://localhost:5000/api haddii aad tijaabineyso Local
+// Beddel tan:
+// const API_URL = "http://localhost:5000/api";
+
+// Ka dhig tan (U beddel link-gaaga Render haddii uu ka duwan yahay):
+const API_URL = "https://collection-pro-backend.onrender.com/api";
 
 function Sidebar({ mobileOpen, setMobileOpen }) {
   const navigate = useNavigate();
