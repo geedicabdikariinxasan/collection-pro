@@ -199,4 +199,105 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// ==========================================
+// C. USERS MANAGEMENT API (Add, Update, Delete)
+// ==========================================
+
+// 1. GET USERS
+router.get('/', async (req, res) => {
+    try {
+        const users = await User.find().sort({ createdAt: -1 });
+        const formattedUsers = users.map(u => ({
+            _id: u._id,
+            id: u._id,
+            name: u.fullName,
+            email: u.email,
+            phone: u.phone || "+252 61 0000000",
+            role: u.role || "Customer",
+            status: u.status || "Active",
+            joined: u.joinDate || u.createdAt.toISOString().split('T')[0],
+            image: u.image || "https://i.pravatar.cc/150?img=47",
+            initials: u.fullName ? u.fullName.split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase() : "US"
+        }));
+        res.status(200).json(formattedUsers);
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error: ' + error.message });
+    }
+});
+
+// 2. ADD USER (Save)
+router.post('/', async (req, res) => {
+    try {
+        const { name, email, phone, role, status, image, joinDate } = req.body;
+
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email-kan hore ayuu diiwaangashan yahay!' });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash("123456", salt);
+
+        const newUser = new User({
+            fullName: name,
+            email,
+            phone: phone || "+252 61 0000000",
+            password: hashedPassword,
+            role: role || 'Customer',
+            status: status || 'Active',
+            image: image || "https://i.pravatar.cc/150?img=47",
+            joinDate: joinDate || new Date().toISOString().split('T')[0]
+        });
+
+        const savedUser = await newUser.save();
+        res.status(201).json(savedUser);
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error: ' + error.message });
+    }
+});
+
+// 3. UPDATE USER (Edit)
+router.put('/:id', async (req, res) => {
+    try {
+        const { name, email, phone, role, status, image, joinDate } = req.body;
+        
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id,
+            { fullName: name, email, phone, role, status, image, joinDate },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User-kan lama helin!' });
+        }
+
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error: ' + error.message });
+    }
+});
+
+// 4. TOGGLE STATUS
+router.patch('/:id/status', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: 'User lama helin' });
+
+        user.status = user.status === 'Active' ? 'Inactive' : 'Active';
+        await user.save();
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error: ' + error.message });
+    }
+});
+
+// 5. DELETE USER
+router.delete('/:id', async (req, res) => {
+    try {
+        await User.findByIdAndDelete(req.params.id);
+        res.status(200).json({ message: 'User-ka waa la tirtiray' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error: ' + error.message });
+    }
+});
 module.exports = router;
