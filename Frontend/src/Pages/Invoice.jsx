@@ -290,11 +290,11 @@ function ReceiptLetterModal({ invoice, onClose }) {
   const handleDownloadPDF = () => {
     const element = document.getElementById("pos-receipt-ticket");
     const options = {
-      margin:       0,
-      filename:     `Receipt-${invoice.id}.pdf`,
-      image:        { type: 'jpeg', quality: 1 },
+      margin:      0,
+      filename:    `Receipt-${invoice.id}.pdf`,
+      image:       { type: 'jpeg', quality: 1 },
       html2canvas:  { scale: 3, useCORS: true },
-      jsPDF:        { unit: 'mm', format: [80, 140], orientation: 'portrait' }
+      jsPDF:       { unit: 'mm', format: [80, 140], orientation: 'portrait' }
     };
     
     if (window.html2pdf) {
