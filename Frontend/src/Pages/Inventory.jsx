@@ -1,47 +1,26 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Search,
-  Bell,
-  ChevronDown,
-  LayoutDashboard,
-  Package,
-  Users,
-  ShoppingCart,
-  BarChart3,
-  FileText,
-  Boxes,
-  Settings,
-  User,
-  Menu,
-  X,
-  AlertTriangle,
-  PackageCheck,
-  PackageX,
-  RefreshCw,
-  Pencil,
-  Save,
-  Plus,
-  Minus,
-  Filter,
-  LoaderCircle,
-  LogOut,
+  Search, Bell, ChevronDown, LayoutDashboard, Package, Users, ShoppingCart, 
+  BarChart3, FileText, Boxes, Settings, User, Menu, X, AlertTriangle, 
+  PackageCheck, PackageX, RefreshCw, Pencil, Save, Plus, Minus, Filter, LoaderCircle, LogOut
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// FIIRO GAAR AH: Haddii aad online isticmaalayso, halkan ku beddel URL-ka Render-kaaga
 const API_URL = "http://localhost:5000/api";
 const LOW_STOCK_LIMIT = 5;
 
 function Sidebar({ mobileOpen, setMobileOpen }) {
   const navigate = useNavigate();
-  const menu = [
+  const links = [
     { label: "Dashboard", icon: LayoutDashboard, path: "/admin-dashboard" },
     { label: "Products", icon: Package, path: "/products" },
     { label: "Customers", icon: Users, path: "/customers" },
     { label: "Orders", icon: ShoppingCart, path: "/orders" },
     { label: "Sales", icon: BarChart3, path: "#" },
     { label: "Invoices", icon: FileText, path: "/invoices" },
-    { label: "Inventory / Stock", icon: Boxes, path: "/inventory", active: true },
+    { label: "Inventory / Stock", icon: Boxes, path: "/inventory", active: true }, // <-- Halkan waa la saxay
     { label: "Reports", icon: BarChart3, path: "#" },
     { label: "Users", icon: User, path: "#" },
     { label: "Settings", icon: Settings, path: "#" },
@@ -49,26 +28,19 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
 
   return (
     <>
-      {mobileOpen && (
-        <div onClick={() => setMobileOpen(false)} className="fixed inset-0 z-40 bg-black/50 lg:hidden print:hidden" />
-      )}
-
+      {mobileOpen && <div onClick={() => setMobileOpen(false)} className="fixed inset-0 z-40 bg-black/50 lg:hidden print:hidden" />}
       <aside className={`fixed left-0 top-0 h-screen w-[250px] bg-gradient-to-b from-[#b00057] to-[#780039] text-white z-50 flex flex-col justify-between shadow-xl transition-transform duration-300 lg:translate-x-0 print:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex flex-col h-full overflow-y-auto custom-scrollbar relative justify-between">
           <div>
-            <button onClick={() => setMobileOpen(false)} className="absolute right-3 top-3 text-white lg:hidden p-1 cursor-pointer z-10">
-              <X size={20} />
-            </button>
-
+            <button onClick={() => setMobileOpen(false)} className="absolute right-3 top-3 text-white lg:hidden p-1 cursor-pointer z-10"><X size={20} /></button>
             <div className="border-b border-white/10 px-5 py-4 text-center flex flex-col items-center justify-center">
               <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-white text-2xl shadow-md">👗</div>
               <h1 className="font-serif text-lg font-bold tracking-wider whitespace-nowrap">COLLECTION PRO</h1>
               <p className="text-[7px] tracking-[2px] text-pink-100 uppercase">WOMEN'S FASHION & CLOTHING</p>
             </div>
-
             <nav className="px-3 py-3 space-y-1">
               <p className="mb-1 px-3 text-[8px] font-semibold uppercase tracking-[2px] text-pink-200">Main Menu</p>
-              {menu.map(({ label, icon: Icon, path, active }) => (
+              {links.map(({ label, icon: Icon, path, active }) => (
                 <button
                   key={label}
                   onClick={() => {
@@ -80,13 +52,11 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
                     active ? "bg-pink-500 font-semibold shadow-md text-white" : "hover:bg-white/10 text-pink-50"
                   }`}
                 >
-                  <Icon size={16} />
-                  <span>{label}</span>
+                  <Icon size={16} /><span>{label}</span>
                 </button>
               ))}
             </nav>
           </div>
-
           <div className="p-4 text-center border-t border-white/10 bg-black/10 shrink-0 mt-auto">
             <button onClick={() => navigate("/")} className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 py-1.5 text-xs font-semibold text-white hover:bg-red-600 transition cursor-pointer mb-2">
               <LogOut size={15} /> <span>Logout</span>
@@ -102,14 +72,12 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
 
 function Header({ setMobileOpen }) {
   return (
-    <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-6 backdrop-blur shadow-xs">
+    <header className="sticky top-0 z-30 flex h-[70px] items-center justify-between border-b border-gray-100 bg-white/95 px-6 backdrop-blur shadow-xs print:hidden">
       <div className="flex items-center gap-2.5 w-full max-w-[350px]">
-        <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-xl cursor-pointer">
-          <Menu size={22} />
-        </button>
+        <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-xl cursor-pointer"><Menu size={22} /></button>
         <div className="relative w-full">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input placeholder="Search inventory..." className="w-full rounded-xl bg-gray-50 py-2 pl-10 pr-3 text-xs outline-none" />
+          <input placeholder="Search inventory..." className="w-full rounded-xl bg-gray-50 py-2 pl-10 pr-3 text-xs outline-none focus:ring-2 focus:ring-pink-200" />
         </div>
       </div>
       <div className="ml-4 flex items-center gap-3">
@@ -120,7 +88,7 @@ function Header({ setMobileOpen }) {
         <div className="h-6 w-px bg-gray-200 hidden sm:block" />
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-100 text-pink-600 font-bold text-xs">A</div>
-          <div>
+          <div className="hidden md:block text-left">
             <p className="text-xs font-bold text-gray-800">Admin</p>
             <p className="text-[9px] text-gray-400">Administrator</p>
           </div>
@@ -133,18 +101,18 @@ function Header({ setMobileOpen }) {
 function StockBadge({ quantity }) {
   const stock = Number(quantity ?? 0);
   let status = "In Stock";
-  let style = "bg-emerald-50 text-emerald-700 ring-emerald-200";
+  let style = "bg-emerald-50 text-emerald-700 border-emerald-200";
 
   if (stock <= 0) {
     status = "Out of Stock";
-    style = "bg-red-50 text-red-700 ring-red-200";
+    style = "bg-red-50 text-red-700 border-red-200";
   } else if (stock <= LOW_STOCK_LIMIT) {
     status = "Low Stock";
-    style = "bg-amber-50 text-amber-700 ring-amber-200";
+    style = "bg-amber-50 text-amber-700 border-amber-200";
   }
 
   return (
-    <span className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ${style}`}>
+    <span className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-bold border ${style}`}>
       <span className="mr-1">●</span> {status}
     </span>
   );
@@ -157,14 +125,13 @@ function SummaryCard({ title, value, subtitle, icon: Icon, color }) {
     amber: "bg-amber-100 text-amber-600",
     red: "bg-red-100 text-red-600",
   };
-
   return (
     <div className="rounded-2xl border border-pink-100 bg-white p-5 shadow-xs transition hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-medium text-gray-500">{title}</p>
           <h3 className="mt-2 text-2xl font-bold tracking-tight text-gray-900">{value}</h3>
-          <p className="mt-1 text-[10px] text-gray-400">{subtitle}</p>
+          <p className="mt-1 text-[9px] text-gray-400">{subtitle}</p>
         </div>
         <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconStyles[color]}`}>
           <Icon size={20} />
@@ -177,7 +144,6 @@ function SummaryCard({ title, value, subtitle, icon: Icon, color }) {
 export default function Inventory() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
@@ -193,12 +159,12 @@ export default function Inventory() {
 
   async function loadProducts() {
     setLoading(true);
-    setError("");
     try {
+      // Xogta waxay si toos ah uga timaadaa Products API (Xiriirka 2aad ee dalabkaaga)
       const response = await axios.get(`${API_URL}/products`);
       setProducts(response.data);
     } catch (err) {
-      setError("Inventory lama soo qaadi karin. Hubi in backend-ku shaqaynayo.");
+      console.error("Error loading inventory:", err);
     } finally {
       setLoading(false);
     }
@@ -211,8 +177,7 @@ export default function Inventory() {
     const inStock = products.filter(p => Number(p.stock) > LOW_STOCK_LIMIT).length;
     const lowStock = products.filter(p => Number(p.stock) > 0 && Number(p.stock) <= LOW_STOCK_LIMIT).length;
     const outOfStock = products.filter(p => Number(p.stock) <= 0).length;
-    const totalUnits = products.reduce((sum, p) => sum + Number(p.stock || 0), 0);
-    return { total, inStock, lowStock, outOfStock, totalUnits };
+    return { total, inStock, lowStock, outOfStock };
   }, [products]);
 
   const filteredProducts = useMemo(() => {
@@ -236,7 +201,7 @@ export default function Inventory() {
 
     setSaving(true);
     try {
-      await axios.put(`${API_URL}/products/${selectedProduct._id}`, { stock: quantity });
+      await axios.put(`${API_URL}/products/${selectedProduct._id}`, { ...selectedProduct, stock: quantity });
       loadProducts();
       setSelectedProduct(null);
     } catch (err) {
@@ -266,8 +231,8 @@ export default function Inventory() {
               </div>
             </div>
 
-            <button onClick={loadProducts} className="inline-flex items-center gap-1.5 rounded-xl border border-pink-200 bg-white px-3.5 py-2 text-xs font-semibold text-pink-700 shadow-xs hover:bg-pink-50 cursor-pointer">
-              <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
+            <button onClick={loadProducts} className="inline-flex items-center gap-1.5 rounded-xl border border-pink-200 bg-white px-4 py-2.5 text-xs font-semibold text-pink-700 shadow-xs hover:bg-pink-50 cursor-pointer">
+              <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh Data
             </button>
           </div>
 
@@ -275,7 +240,7 @@ export default function Inventory() {
           <section className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <SummaryCard title="Total Products" value={loading ? "—" : summary.total} subtitle="Registered items" icon={Package} color="pink" />
             <SummaryCard title="In Stock" value={loading ? "—" : summary.inStock} subtitle="Sufficient stock" icon={PackageCheck} color="green" />
-            <SummaryCard title="Low Stock" value={loading ? "—" : summary.lowStock} subtitle="1–5 units left" icon={AlertTriangle} color="amber" />
+            <SummaryCard title="Low Stock" value={loading ? "—" : summary.lowStock} subtitle={`1–${LOW_STOCK_LIMIT} units left`} icon={AlertTriangle} color="amber" />
             <SummaryCard title="Out of Stock" value={loading ? "—" : summary.outOfStock} subtitle="Needs restocking" icon={PackageX} color="red" />
           </section>
 
@@ -292,24 +257,30 @@ export default function Inventory() {
                 />
               </div>
 
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 outline-none cursor-pointer"
-              >
-                {categories.map(c => <option key={c}>{c}</option>)}
-              </select>
+              <div className="relative">
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="w-full appearance-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 outline-none focus:border-pink-400 cursor-pointer"
+                >
+                  {categories.map(c => <option key={c}>{c}</option>)}
+                </select>
+                <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              </div>
 
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 outline-none cursor-pointer"
-              >
-                <option>All Statuses</option>
-                <option>In Stock</option>
-                <option>Low Stock</option>
-                <option>Out of Stock</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full appearance-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 outline-none focus:border-pink-400 cursor-pointer"
+                >
+                  <option>All Statuses</option>
+                  <option>In Stock</option>
+                  <option>Low Stock</option>
+                  <option>Out of Stock</option>
+                </select>
+                <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              </div>
             </div>
           </div>
 
@@ -317,32 +288,39 @@ export default function Inventory() {
           <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-xs min-w-[700px]">
-                <thead className="bg-pink-50/60 text-left text-gray-500">
+                <thead className="bg-pink-50/60 text-left text-gray-500 border-b border-pink-100">
                   <tr>
-                    <th className="px-4 py-3">Product</th>
-                    <th className="px-4 py-3">Category</th>
-                    <th className="px-4 py-3">Size / Color</th>
-                    <th className="px-4 py-3">Quantity</th>
-                    <th className="px-4 py-3">Price</th>
-                    <th className="px-4 py-3">Stock Status</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
+                    <th className="px-4 py-3 font-semibold">Product</th>
+                    <th className="px-4 py-3 font-semibold">Category</th>
+                    <th className="px-4 py-3 font-semibold">Size / Color</th>
+                    <th className="px-4 py-3 font-semibold">Quantity</th>
+                    <th className="px-4 py-3 font-semibold">Price</th>
+                    <th className="px-4 py-3 font-semibold">Stock Status</th>
+                    <th className="px-4 py-3 text-right font-semibold">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredProducts.length > 0 ? (
+                <tbody className="divide-y divide-gray-50">
+                  {loading ? (
+                    <tr>
+                      <td colSpan="7" className="py-14 text-center text-gray-400">
+                        <LoaderCircle size={28} className="mx-auto mb-2 animate-spin text-pink-500" />
+                        <p>Loading inventory...</p>
+                      </td>
+                    </tr>
+                  ) : filteredProducts.length > 0 ? (
                     filteredProducts.map((prod) => (
-                      <tr key={prod._id} className="hover:bg-pink-50/20">
+                      <tr key={prod._id} className="hover:bg-pink-50/30 transition">
                         <td className="px-4 py-2.5 flex items-center gap-2.5 font-bold text-gray-800">
-                          <img src={prod.image} alt="" className="h-8 w-8 rounded-lg object-cover" onError={(e)=>{e.target.src="https://images.unsplash.com/photo-1595777457583-95e059d581b8"}} />
-                          {prod.name}
+                          <img src={prod.image} alt="" className="h-9 w-9 rounded-lg object-cover ring-1 ring-gray-200" onError={(e)=>{e.target.src="https://images.unsplash.com/photo-1595777457583-95e059d581b8"}} />
+                          <span className="truncate max-w-[150px]">{prod.name}</span>
                         </td>
                         <td className="px-4 py-2.5 text-gray-600">{prod.category}</td>
                         <td className="px-4 py-2.5 text-gray-600">{prod.size} / {prod.color}</td>
-                        <td className="px-4 py-2.5 font-bold text-gray-800">{prod.stock}</td>
-                        <td className="px-4 py-2.5 font-bold text-pink-600">${prod.price}</td>
+                        <td className="px-4 py-2.5 font-extrabold text-gray-900 text-sm">{prod.stock}</td>
+                        <td className="px-4 py-2.5 font-bold text-pink-600">${Number(prod.price).toFixed(2)}</td>
                         <td className="px-4 py-2.5"><StockBadge quantity={prod.stock} /></td>
                         <td className="px-4 py-2.5 text-right">
-                          <button onClick={() => { setSelectedProduct(prod); setNewQuantity(String(prod.stock)); }} className="p-1.5 border border-pink-300 text-pink-600 rounded-md hover:bg-pink-50 cursor-pointer font-semibold inline-flex items-center gap-1">
+                          <button onClick={() => { setSelectedProduct(prod); setNewQuantity(String(prod.stock)); }} className="px-3 py-1.5 border border-pink-300 text-pink-600 rounded-lg hover:bg-pink-50 cursor-pointer font-semibold inline-flex items-center gap-1.5 transition">
                             <Pencil size={12}/> Update Stock
                           </button>
                         </td>
@@ -369,30 +347,42 @@ export default function Inventory() {
 
       {/* Update Stock Modal */}
       {selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
           <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl text-xs">
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="font-bold text-sm">Update Stock for {selectedProduct.name}</h3>
+            <div className="mb-3 flex items-center justify-between border-b border-gray-100 pb-3">
+              <h3 className="font-bold text-sm text-gray-900">Update Stock</h3>
               <button onClick={() => setSelectedProduct(null)} className="cursor-pointer text-gray-400 hover:text-gray-700"><X size={17}/></button>
             </div>
             
-            <form onSubmit={updateStock} className="space-y-3">
-              <div>
-                <label className="block mb-1 font-medium text-gray-600">New Quantity</label>
-                <input 
-                  type="number" 
-                  min="0" 
-                  value={newQuantity} 
-                  onChange={(e) => setNewQuantity(e.target.value)} 
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 outline-none focus:border-pink-400 font-bold text-sm"
-                  required 
-                />
+            <form onSubmit={updateStock} className="space-y-4">
+              <div className="bg-pink-50/50 p-3 rounded-xl border border-pink-100 flex gap-3 items-center">
+                 <img src={selectedProduct.image} alt="" className="h-10 w-10 rounded-lg object-cover" onError={(e)=>{e.target.src="https://images.unsplash.com/photo-1595777457583-95e059d581b8"}} />
+                 <div>
+                    <p className="font-bold text-gray-800">{selectedProduct.name}</p>
+                    <p className="text-[10px] text-gray-500">Current Stock: <span className="font-bold text-pink-600">{selectedProduct.stock}</span></p>
+                 </div>
               </div>
 
-              <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setSelectedProduct(null)} className="flex-1 border py-2 rounded-xl font-semibold text-gray-600 cursor-pointer">Cancel</button>
-                <button type="submit" disabled={saving} className="flex-1 bg-pink-600 text-white py-2 rounded-xl font-semibold shadow-md hover:bg-pink-700 cursor-pointer disabled:opacity-50">
-                  {saving ? "Saving..." : "Save Stock"}
+              <div>
+                <label className="block mb-1.5 font-bold text-gray-700 text-[11px]">Set New Quantity</label>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setNewQuantity(v => String(Math.max(0, Number(v||0)-1)))} className="p-2.5 rounded-lg border border-gray-200 text-pink-600 hover:bg-pink-50 cursor-pointer"><Minus size={14}/></button>
+                  <input 
+                    type="number" 
+                    min="0" 
+                    value={newQuantity} 
+                    onChange={(e) => setNewQuantity(e.target.value)} 
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 outline-none focus:border-pink-400 font-bold text-sm text-center"
+                    required 
+                  />
+                  <button type="button" onClick={() => setNewQuantity(v => String(Number(v||0)+1))} className="p-2.5 rounded-lg border border-gray-200 text-pink-600 hover:bg-pink-50 cursor-pointer"><Plus size={14}/></button>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2 border-t border-gray-100 mt-2">
+                <button type="button" onClick={() => setSelectedProduct(null)} className="flex-1 border py-2.5 rounded-xl font-semibold text-gray-600 cursor-pointer hover:bg-gray-50">Cancel</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-pink-600 text-white py-2.5 rounded-xl font-bold shadow-md hover:bg-pink-700 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5">
+                  {saving ? <LoaderCircle size={14} className="animate-spin" /> : <Save size={14} />} {saving ? "Saving..." : "Save Stock"}
                 </button>
               </div>
             </form>

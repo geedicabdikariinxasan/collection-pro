@@ -21,7 +21,7 @@ export default function App() {
        <Route path="/customers" element={<Customers />} />
        <Route path="/orders" element={<Orders />} />
        <Route path="/invoices" element={<Invoice />} />
-       <Route path="/inventorystock" element={<InventoryStock />} />
+       <Route path="/inventory" element={<Inventory />} />
     </Routes>
   );
 }
