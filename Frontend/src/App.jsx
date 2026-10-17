@@ -4,11 +4,9 @@ import Register from "./Pages/Register";
 import AdminDashboard from "./Pages/AdminDashboard";
 import Products from "./Pages/Products";
 import Customers from "./Pages/Customers";
-import Orders from "./Pages/Orders"; 
+import Orders from "./Pages/Orders";
 import Invoice from "./Pages/Invoice";
-import InventoryStock from "./Pages/InventoryStock";
-
-
+import Inventory from "./Pages/Inventory";
 
 export default function App() {
   return (
@@ -16,12 +14,15 @@ export default function App() {
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/admin-dashboard" element={<AdminDashboard />} />
-       <Route path="/products" element={<Products />} />
-       <Route path="/customers" element={<Customers />} />
-       <Route path="/customers" element={<Customers />} />
-       <Route path="/orders" element={<Orders />} />
-       <Route path="/invoices" element={<Invoice />} />
-       <Route path="/inventory" element={<Inventory />} />
+      <Route path="/products" element={<Products />} />
+      <Route path="/customers" element={<Customers />} />
+      <Route path="/orders" element={<Orders />} />
+      <Route path="/invoices" element={<Invoice />} />
+      
+      {/* Route-ka Inventory-ga */}
+      <Route path="/inventory" element={<Inventory />} />
+      {/* Halkan waxaan ku darnay link-ga khaldamay si uu isna toos ugu furo Inventory-ga */}
+      <Route path="/Admin-Dashboard/inventory" element={<Inventory />} />
     </Routes>
   );
 }

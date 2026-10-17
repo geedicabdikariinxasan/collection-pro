@@ -34,7 +34,6 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
     { label: "Sales", icon: BarChart3, path: "#" },
     { label: "Invoices", icon: FileText, path: "/invoices" },
     { label: "Inventory ", icon: Boxes, path: "inventory" },
-    { label: "Reports", icon: BarChart3, path: "#" },
     { label: "Users", icon: User, path: "#" },
     { label: "Settings", icon: Settings, path: "#" },
     { label: "Logout", icon: LogOut, path: "/", isLogout: true },
