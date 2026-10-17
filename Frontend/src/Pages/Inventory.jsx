@@ -19,7 +19,7 @@ function Sidebar({ mobileOpen, setMobileOpen }) {
     { label: "Products", icon: Package, path: "/products" },
     { label: "Customers", icon: Users, path: "/customers" },
     { label: "Orders", icon: ShoppingCart, path: "/orders" },
-    { label: "Sales", icon: BarChart3, path: "#" },
+    { label: "Sales", icon: BarChart3, path: "/Sales" },
     { label: "Invoices", icon: FileText, path: "/invoices" },
     { label: "Inventory", icon: Boxes, path: "/inventory", active: true },
     { label: "Users", icon: User, path: "#" },

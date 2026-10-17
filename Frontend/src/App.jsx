@@ -7,6 +7,7 @@ import Customers from "./Pages/Customers";
 import Orders from "./Pages/Orders";
 import Invoice from "./Pages/Invoice";
 import Inventory from "./Pages/Inventory";
+import Sales from "./Pages/Sales"; // <-- Kudar kan
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
       <Route path="/inventory" element={<Inventory />} />
       {/* Halkan waxaan ku darnay link-ga khaldamay si uu isna toos ugu furo Inventory-ga */}
       <Route path="/Admin-Dashboard/inventory" element={<Inventory />} />
+      <Route path="/sales" element={<Sales />} /> {/* <-- Iyo kudar kan */}
     </Routes>
   );
 }
