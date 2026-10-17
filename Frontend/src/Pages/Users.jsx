@@ -3,8 +3,6 @@ import {
   Search,
   Bell,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   FileText,
   LayoutDashboard,
   Package,
@@ -19,8 +17,10 @@ import {
   Pencil,
   Trash2,
   LogOut,
-  UploadCloud,
   Menu,
+  UploadCloud,
+  CheckCircle,
+  Plus // <-- Hubi in kan uu ku jiro
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
